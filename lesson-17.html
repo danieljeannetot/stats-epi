@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Standardized morbidity ratios and the small-numbers problem, funnel plots, spatial autocorrelation and Moran’s I, ecological bias, and smoothing area estimates.">
+
+<title>Lesson 17 · Spatial data and spatial autocorrelation – Statistics for epidemiology</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-18.html" rel="next">
+<link href="./lesson-16.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ec014dda407d74dcf7cceb6e5cf46d3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-057e7596b9a0f9d5a0687abd3f8ff44f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ec014dda407d74dcf7cceb6e5cf46d3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-9720d28c34b556a5626c65cb089a59a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-0bde3d10eb1978ca27b664fc71250111.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-9720d28c34b556a5626c65cb089a59a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="assets/course.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics for epidemiology</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./glossary.html"> 
+<span class="menu-text">Glossary</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./course-plan.html"> 
+<span class="menu-text">Course plan</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-15.html">Part IV · Time, space and clustering</a></li><li class="breadcrumb-item"><a href="./lesson-17.html">Lesson 17 · Spatial data and spatial autocorrelation</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part I · Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-00.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 0 · Welcome: the city, the data and how to use the course</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 1 · Describing data and epidemiological measures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 2 · Probability and conditional probability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 3 · Random variables and probability distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 4 · Sampling, sampling distributions and the central limit theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 5 · Likelihood and estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 6 · Confidence intervals and hypothesis tests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part II · Frequentist regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 7 · Linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 8 · Generalized linear models: logistic and Poisson regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 9 · Confounding, effect modification and interaction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 10 · Model checking, comparison and selection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 11 · Nonlinear effects: categories, polynomials, splines and GAMs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part III · Causal inference, measurement and burden</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 12 · Causal inference: from association to effect</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 13 · Measurement error and misclassification</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 14 · Measuring disease burden</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part IV · Time, space and clustering</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 15 · Time-series regression for health data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-16.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 16 · Distributed lag and distributed lag non-linear models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-17.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Lesson 17 · Spatial data and spatial autocorrelation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-18.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 18 · Clustered data and mixed-effects models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part V · Bayesian modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-19.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 19 · Bayesian thinking: from Bayes’ rule to a model equation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-20.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 20 · Priors: what they say and how much they matter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-21.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 21 · Computing the posterior: Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-22.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 22 · Bayesian regression and GLMs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">In this lesson</h2>
+   
+  <ul class="collapse">
+  <li><a href="#s1" id="toc-s1" class="nav-link active" data-scroll-target="#s1">17.1 Standardized morbidity ratios and the small-numbers problem</a></li>
+  <li><a href="#s2" id="toc-s2" class="nav-link" data-scroll-target="#s2">17.2 Spatial autocorrelation and Moran’s I</a></li>
+  <li><a href="#s3" id="toc-s3" class="nav-link" data-scroll-target="#s3">17.3 Ecological associations and the ecological fallacy</a></li>
+  <li><a href="#s4" id="toc-s4" class="nav-link" data-scroll-target="#s4">17.4 Smoothing small-area estimates</a></li>
+  <li><a href="#quiz" id="toc-quiz" class="nav-link" data-scroll-target="#quiz">Check your understanding</a></li>
+  <li><a href="#take" id="toc-take" class="nav-link" data-scroll-target="#take">Key takeaways</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-15.html">Part IV · Time, space and clustering</a></li><li class="breadcrumb-item"><a href="./lesson-17.html">Lesson 17 · Spatial data and spatial autocorrelation</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Lesson 17 · Spatial data and spatial autocorrelation</h1>
+<p class="subtitle lead">Part IV · Time, space and clustering</p>
+</div>
+
+<div>
+  <div class="description">
+    Standardized morbidity ratios and the small-numbers problem, funnel plots, spatial autocorrelation and Moran’s I, ecological bias, and smoothing area estimates.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="meta-pills">
+<p><span>About 3 hours</span> <span>Before this: Lessons 1, 8 and 10</span> <span>Threads: shrinkage · bias</span></p>
+</div>
+<div class="objectives">
+<p>By the end of this lesson you will be able to</p>
+<ul>
+<li>compute standardized morbidity ratios by indirect standardization, and map them;</li>
+<li>explain why the most extreme values on a map are often just the smallest areas, and use a funnel plot;</li>
+<li>measure spatial autocorrelation with Moran’s I and test it by permutation;</li>
+<li>explain the ecological fallacy, and why area-level associations can differ from individual-level ones;</li>
+<li>describe how smoothing toward an overall or local mean makes small-area maps more reliable.</li>
+</ul>
+</div>
+<div class="why">
+<p><strong>Why it matters.</strong> Maps of disease rates drive decisions about where to act. Yet a map of raw rates for small areas is mostly a map of noise, and the districts that look worst are often simply the ones with the fewest people. Neighboring districts also resemble each other, which breaks the independence assumption of standard models. This lesson shows the problems; Lesson 25 brings the Bayesian solution.</p>
+</div>
+<section id="s1" class="level2">
+<h2 class="anchored" data-anchor-id="s1">17.1 Standardized morbidity ratios and the small-numbers problem</h2>
+<p>An <strong>SMR</strong> compares the number of visits a district actually had with the number <strong>expected</strong> if each age group had the city-wide rate (indirect standardization, Lesson 1). An SMR of 1.2 means 20% more visits than expected for its age structure. Shorten the period, and the counts, and watch how noisy the map becomes. The <strong>funnel plot</strong> shows why: the range of SMRs expected by chance alone is much wider for small expected counts.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="mP">Period</label><select id="mP"><option value="all">2020–2024 (five years)</option><option value="y">2023</option><option value="m">July 2023</option><option value="w" selected="">1–7 July 2023</option><option value="d">3 July 2023 (one day)</option></select></div>
+  <div class="ctrl"><label for="mA">Age group</label><select id="mA"><option value="all">all ages</option><option value="0" selected="">0–14</option><option value="2">65+</option></select></div>
+  <svg id="mMap" viewbox="0 0 520 340" role="img" aria-label="Map of SMRs"></svg>
+</div>
+<div class="cpanel"><svg id="mFun" viewbox="0 0 520 280" role="img" aria-label="Funnel plot of SMRs"></svg><div class="now" id="mNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[E_j = \sum_k r_k\, PT_{jk}, \qquad SMR_j = \frac{O_j}{E_j}\]</span> <span class="math display">\[O_j \sim \mathrm{Poisson}(E_j\,\theta_j) \ \Rightarrow\ \mathrm{SE}(SMR_j) \approx \frac{\sqrt{O_j}}{E_j}\]</span></p>
+<div class="note">
+<p><span class="math inline">\(r_k\)</span> = city-wide rate in age group <span class="math inline">\(k\)</span>; <span class="math inline">\(\theta_j\)</span> = the district’s true relative risk.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>rates <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span> <span class="fu">group_by</span>(age_group) <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">r =</span> <span class="fu">sum</span>(visits) <span class="sc">/</span> <span class="fu">sum</span>(population))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>visits <span class="sc">|&gt;</span> <span class="fu">left_join</span>(rates, <span class="at">by =</span> <span class="st">"age_group"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(district) <span class="sc">|&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">O =</span> <span class="fu">sum</span>(visits),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">E =</span> <span class="fu">sum</span>(r <span class="sc">*</span> population),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">smr =</span> O <span class="sc">/</span> E)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="mReport"></span></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Common pitfall">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Common pitfall
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Ranking areas by their raw SMRs, or labeling the most extreme as “hot spots”, without considering their expected counts. On a funnel plot, a small district outside the 95% limits may still be within the range expected by chance once you allow for 12 comparisons.</p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="spiegelhalter2005funnel">Spiegelhalter (<a href="#ref-spiegelhalter2005funnel" role="doc-biblioref">2005</a>)</span> introduced funnel plots for comparing institutions; <span class="citation" data-cites="elliott2004spatial">Elliott and Wartenberg (<a href="#ref-elliott2004spatial" role="doc-biblioref">2004</a>)</span> review spatial epidemiology; <span class="citation" data-cites="waller2004applied">Waller and Gotway (<a href="#ref-waller2004applied" role="doc-biblioref">2004</a>)</span> on SMRs and indirect standardization for small areas.</p>
+</div>
+</section>
+<section id="s2" class="level2">
+<h2 class="anchored" data-anchor-id="s2">17.2 Spatial autocorrelation and Moran’s I</h2>
+<p>Neighboring districts share air, housing and populations, so their values tend to be similar. <strong>Moran’s I</strong> measures this: it is positive when neighbors resemble each other, near zero when they don’t. Its significance is tested by <strong>permutation</strong>: shuffle the values among districts many times, and see how often chance alone gives an I as large as the observed one.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="iV">Variable</label><select id="iV"><option value="dep">deprivation</option><option value="traffic">traffic</option><option value="smr">SMR, all ages, five years</option><option value="res">SMR after adjusting for deprivation</option><option value="noise">random noise</option></select></div>
+  <svg id="iMap" viewbox="0 0 520 340" role="img" aria-label="Map of the selected variable"></svg>
+</div>
+<div class="cpanel"><svg id="iPerm" viewbox="0 0 520 220" role="img" aria-label="Permutation distribution of Moran's I"></svg><div class="statgrid" id="iStats"></div><div class="now" id="iNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[I = \frac{n}{\sum_{ij} w_{ij}}\;\frac{\sum_i\sum_j w_{ij}(x_i - \bar x)(x_j - \bar x)}{\sum_i (x_i - \bar x)^2}\]</span></p>
+<div class="note">
+<p><span class="math inline">\(w_{ij} = 1\)</span> if districts <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are neighbors (here: share a border or a corner), row-standardized. Under no autocorrelation, <span class="math inline">\(E[I] = -1/(n-1)\)</span>.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nb <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">strsplit</span>(districts<span class="sc">$</span>neighbors, <span class="st">" "</span>),</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>             as.integer)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(nb) <span class="ot">&lt;-</span> <span class="st">"nb"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>lw <span class="ot">&lt;-</span> spdep<span class="sc">::</span><span class="fu">nb2listw</span>(nb, <span class="at">style =</span> <span class="st">"W"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spdep<span class="sc">::</span><span class="fu">moran.mc</span>(districts<span class="sc">$</span>deprivation, lw,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (optional): SMRs and Moran's I with spdep">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (optional): SMRs and Moran’s I with spdep
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>rates <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span> <span class="fu">group_by</span>(age_group) <span class="sc">|&gt;</span> <span class="fu">summarise</span>(<span class="at">r =</span> <span class="fu">sum</span>(visits) <span class="sc">/</span> <span class="fu">sum</span>(population), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>smr <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">left_join</span>(rates, <span class="at">by =</span> <span class="st">"age_group"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(district_id) <span class="sc">|&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">O =</span> <span class="fu">sum</span>(visits), <span class="at">E =</span> <span class="fu">sum</span>(r <span class="sc">*</span> population), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">smr =</span> O <span class="sc">/</span> E) <span class="sc">|&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(district_id)</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>nb <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">strsplit</span>(districts<span class="sc">$</span>neighbors, <span class="st">" "</span>), as.integer)</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(nb) <span class="ot">&lt;-</span> <span class="st">"nb"</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>lw <span class="ot">&lt;-</span> spdep<span class="sc">::</span><span class="fu">nb2listw</span>(nb, <span class="at">style =</span> <span class="st">"W"</span>)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>spdep<span class="sc">::</span><span class="fu">moran.mc</span>(smr<span class="sc">$</span>smr, lw, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt;  Monte-Carlo simulation of Moran I
+#&gt; 
+#&gt; data:  smr$smr 
+#&gt; weights: lw  
+#&gt; number of simulations + 1: 1000 
+#&gt; 
+#&gt; statistic = 0.095085, observed rank = 897, p-value = 0.103
+#&gt; alternative hypothesis: greater</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>spdep<span class="sc">::</span><span class="fu">moran.mc</span>(districts<span class="sc">$</span>deprivation, lw, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; 
+#&gt;  Monte-Carlo simulation of Moran I
+#&gt; 
+#&gt; data:  districts$deprivation 
+#&gt; weights: lw  
+#&gt; number of simulations + 1: 1000 
+#&gt; 
+#&gt; statistic = -0.01325, observed rank = 722, p-value = 0.278
+#&gt; alternative hypothesis: greater</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="moran1950notes">Moran (<a href="#ref-moran1950notes" role="doc-biblioref">1950</a>)</span> introduced the statistic; <span class="citation" data-cites="bivand2013applied">Bivand et al. (<a href="#ref-bivand2013applied" role="doc-biblioref">2013</a>)</span> cover neighbor structures and Moran’s I in R; <span class="citation" data-cites="waller2004applied">Waller and Gotway (<a href="#ref-waller2004applied" role="doc-biblioref">2004</a>)</span> on testing spatial autocorrelation in health data.</p>
+</div>
+</section>
+<section id="s3" class="level2">
+<h2 class="anchored" data-anchor-id="s3">17.3 Ecological associations and the ecological fallacy</h2>
+<p>With district-level data only, the association between NO₂ and asthma has to be estimated from 12 points: district asthma risk against district mean NO₂. This <strong>ecological</strong> association need not equal the individual-level one. District-level confounding, by deprivation for example, can distort it, and with few areas it is very imprecise. Concluding from an area-level association to individuals is the <strong>ecological fallacy</strong>.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <label class="small"><input type="checkbox" id="eAdj"> adjust the ecological model for district mean SES</label>
+  <svg id="ePlot" viewbox="0 0 520 300" role="img" aria-label="District asthma risk against mean NO2"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="eStats"></div><div class="now" id="eNow"></div></div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="robinson1950ecological">Robinson (<a href="#ref-robinson1950ecological" role="doc-biblioref">1950</a>)</span> first described the ecological fallacy; <span class="citation" data-cites="greenland1989ecological">Greenland and Morgenstern (<a href="#ref-greenland1989ecological" role="doc-biblioref">1989</a>)</span> explain ecological bias, confounding and effect modification; <span class="citation" data-cites="elliott2004spatial">Elliott and Wartenberg (<a href="#ref-elliott2004spatial" role="doc-biblioref">2004</a>)</span> on when ecological designs are informative.</p>
+</div>
+</section>
+<section id="s4" class="level2">
+<h2 class="anchored" data-anchor-id="s4">17.4 Smoothing small-area estimates</h2>
+<p>With small counts, each district’s SMR is noisy. An <strong>empirical Bayes</strong> estimate pulls each SMR toward the city-wide value by an amount that depends on its own precision: districts with few expected visits move a lot, large ones hardly at all. Here the five-year SMRs serve as the “truth” against which one week’s raw and smoothed SMRs are judged.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="sP">Short period</label><select id="sP"><option value="m" selected="">July 2023</option><option value="w">1–7 July 2023</option><option value="d">3 July 2023</option></select></div>
+  <div class="ctrl"><label for="sA">Age group</label><select id="sA"><option value="0" selected="">0–14</option><option value="2">65+</option><option value="all">all ages</option></select></div>
+  <svg id="sPlot" viewbox="0 0 520 320" role="img" aria-label="Raw and smoothed SMRs against the five-year value"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="sStats"></div><div class="now" id="sNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[\hat\theta_j^{\text{EB}} = w_j\, SMR_j + (1 - w_j)\,\hat\mu, \qquad w_j = \frac{\hat\sigma^2_\theta}{\hat\sigma^2_\theta + \hat\mu / E_j}\]</span></p>
+<div class="note">
+<p><span class="math inline">\(\hat\mu\)</span> and <span class="math inline">\(\hat\sigma^2_\theta\)</span>: mean and between-district variance of the true relative risks, estimated by the method of moments (Marshall, 1991).</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mu   <span class="ot">&lt;-</span> <span class="fu">sum</span>(O) <span class="sc">/</span> <span class="fu">sum</span>(E)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>s2   <span class="ot">&lt;-</span> <span class="fu">sum</span>(E <span class="sc">*</span> (smr <span class="sc">-</span> mu)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> <span class="fu">sum</span>(E) <span class="sc">-</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        mu <span class="sc">/</span> <span class="fu">mean</span>(E)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>s2   <span class="ot">&lt;-</span> <span class="fu">max</span>(s2, <span class="dv">0</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>w    <span class="ot">&lt;-</span> s2 <span class="sc">/</span> (s2 <span class="sc">+</span> mu <span class="sc">/</span> E)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>smr_eb <span class="ot">&lt;-</span> w <span class="sc">*</span> smr <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> w) <span class="sc">*</span> mu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="sReport"></span></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Bayesian preview">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Bayesian preview
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Empirical Bayes shrinks every district toward one city-wide value. A full Bayesian disease-mapping model (BYM2, Lesson 25) shrinks each district partly toward the city mean and partly toward its <strong>neighbors</strong>, with the balance between the two estimated from the data, and with uncertainty for every district.</p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="clayton1987empirical">Clayton and Kaldor (<a href="#ref-clayton1987empirical" role="doc-biblioref">1987</a>)</span> introduced empirical Bayes estimates of relative risk for disease mapping; <span class="citation" data-cites="marshall1991mapping">Marshall (<a href="#ref-marshall1991mapping" role="doc-biblioref">1991</a>)</span> gave the method-of-moments estimator used here; <span class="citation" data-cites="efron1977stein">Efron and Morris (<a href="#ref-efron1977stein" role="doc-biblioref">1977</a>)</span> explain why shrinkage improves many estimates at once.</p>
+</div>
+</section>
+<section id="quiz" class="level2">
+<h2 class="anchored" data-anchor-id="quiz">Check your understanding</h2>
+<div class="cw" id="quizzes"></div>
+</section>
+<section id="take" class="level2">
+<h2 class="anchored" data-anchor-id="take">Key takeaways</h2>
+<ul>
+<li>SMRs compare observed with expected counts, allowing for age structure. Their precision depends on the expected count.</li>
+<li>Maps of raw SMRs for small areas or short periods mostly show noise; funnel plots put each area’s value in context.</li>
+<li>Neighboring areas tend to be similar. Moran’s I measures this, and permutation tests it.</li>
+<li>Ecological associations can differ from individual-level ones because of area-level confounding and aggregation.</li>
+<li>Shrinking noisy area estimates toward a common value, or toward neighbors, gives more accurate maps.</li>
+</ul>
+<div class="done" data-lesson="lesson-17"><button type="button"></button><span></span></div>
+<script src="assets/lesson-17.js"></script>
+
+
+</section>
+<section id="bibliography" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-bivand2013applied" class="csl-entry" role="listitem">
+Bivand, Roger S., Edzer Pebesma, and Virgilio Gómez-Rubio. 2013. <em>Applied Spatial Data Analysis with <span>R</span></em>. 2nd ed. Springer.
+</div>
+<div id="ref-clayton1987empirical" class="csl-entry" role="listitem">
+Clayton, David, and John Kaldor. 1987. <span>“Empirical <span>B</span>ayes Estimates of Age-Standardized Relative Risks for Use in Disease Mapping.”</span> <em>Biometrics</em> 43 (3): 671–81.
+</div>
+<div id="ref-efron1977stein" class="csl-entry" role="listitem">
+Efron, Bradley, and Carl Morris. 1977. <span>“Stein’s Paradox in Statistics.”</span> <em>Scientific American</em> 236 (5): 119–27.
+</div>
+<div id="ref-elliott2004spatial" class="csl-entry" role="listitem">
+Elliott, Paul, and Daniel Wartenberg. 2004. <span>“Spatial Epidemiology: Current Approaches and Future Challenges.”</span> <em>Environmental Health Perspectives</em> 112 (9): 998–1006.
+</div>
+<div id="ref-greenland1989ecological" class="csl-entry" role="listitem">
+Greenland, Sander, and Hal Morgenstern. 1989. <span>“Ecological Bias, Confounding, and Effect Modification.”</span> <em>International Journal of Epidemiology</em> 18 (1): 269–74.
+</div>
+<div id="ref-marshall1991mapping" class="csl-entry" role="listitem">
+Marshall, Roger J. 1991. <span>“Mapping Disease and Mortality Rates Using Empirical <span>B</span>ayes Estimators.”</span> <em>Journal of the Royal Statistical Society: Series C (Applied Statistics)</em> 40 (2): 283–94.
+</div>
+<div id="ref-moran1950notes" class="csl-entry" role="listitem">
+Moran, P. A. P. 1950. <span>“Notes on Continuous Stochastic Phenomena.”</span> <em>Biometrika</em> 37 (1/2): 17–23.
+</div>
+<div id="ref-robinson1950ecological" class="csl-entry" role="listitem">
+Robinson, W. S. 1950. <span>“Ecological Correlations and the Behavior of Individuals.”</span> <em>American Sociological Review</em> 15 (3): 351–57.
+</div>
+<div id="ref-spiegelhalter2005funnel" class="csl-entry" role="listitem">
+Spiegelhalter, David J. 2005. <span>“Funnel Plots for Comparing Institutional Performance.”</span> <em>Statistics in Medicine</em> 24 (8): 1185–202.
+</div>
+<div id="ref-waller2004applied" class="csl-entry" role="listitem">
+Waller, Lance A., and Carol A. Gotway. 2004. <em>Applied Spatial Statistics for Public Health Data</em>. Wiley.
+</div>
+</div></section></div></main> <!-- /main -->
+<script src="assets/course.js"></script>
+<script src="assets/glossary-data.js"></script>
+<script src="assets/glossary-ui.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/danieljeannetot\.github\.io\/stats-epi\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-16.html" class="pagination-link" aria-label="Lesson 16 · Distributed lag and distributed lag non-linear models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lesson 16 · Distributed lag and distributed lag non-linear models</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-18.html" class="pagination-link" aria-label="Lesson 18 · Clustered data and mixed-effects models">
+        <span class="nav-page-text">Lesson 18 · Clustered data and mixed-effects models</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>All data are simulated. Course text CC BY 4.0, code MIT.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

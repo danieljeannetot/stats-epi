@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Coverage of confidence intervals, p-values, errors and power, multiple testing, and evidence of absence.">
+
+<title>Lesson 6 · Confidence intervals and hypothesis tests – Statistics for epidemiology</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-07.html" rel="next">
+<link href="./lesson-05.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ec014dda407d74dcf7cceb6e5cf46d3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-057e7596b9a0f9d5a0687abd3f8ff44f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ec014dda407d74dcf7cceb6e5cf46d3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-9720d28c34b556a5626c65cb089a59a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-0bde3d10eb1978ca27b664fc71250111.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-9720d28c34b556a5626c65cb089a59a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="assets/course.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics for epidemiology</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./glossary.html"> 
+<span class="menu-text">Glossary</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./course-plan.html"> 
+<span class="menu-text">Course plan</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-00.html">Part I · Foundations</a></li><li class="breadcrumb-item"><a href="./lesson-06.html">Lesson 6 · Confidence intervals and hypothesis tests</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part I · Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-00.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 0 · Welcome: the city, the data and how to use the course</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 1 · Describing data and epidemiological measures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 2 · Probability and conditional probability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 3 · Random variables and probability distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 4 · Sampling, sampling distributions and the central limit theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 5 · Likelihood and estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-06.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Lesson 6 · Confidence intervals and hypothesis tests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part II · Frequentist regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 7 · Linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 8 · Generalized linear models: logistic and Poisson regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 9 · Confounding, effect modification and interaction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 10 · Model checking, comparison and selection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 11 · Nonlinear effects: categories, polynomials, splines and GAMs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part III · Causal inference, measurement and burden</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 12 · Causal inference: from association to effect</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 13 · Measurement error and misclassification</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 14 · Measuring disease burden</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part IV · Time, space and clustering</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 15 · Time-series regression for health data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-16.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 16 · Distributed lag and distributed lag non-linear models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-17.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 17 · Spatial data and spatial autocorrelation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-18.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 18 · Clustered data and mixed-effects models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part V · Bayesian modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-19.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 19 · Bayesian thinking: from Bayes’ rule to a model equation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-20.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 20 · Priors: what they say and how much they matter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-21.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 21 · Computing the posterior: Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-22.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 22 · Bayesian regression and GLMs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">In this lesson</h2>
+   
+  <ul class="collapse">
+  <li><a href="#s1" id="toc-s1" class="nav-link active" data-scroll-target="#s1">6.1 Confidence intervals and coverage</a></li>
+  <li><a href="#s2" id="toc-s2" class="nav-link" data-scroll-target="#s2">6.2 Hypothesis tests and p-values</a></li>
+  <li><a href="#s3" id="toc-s3" class="nav-link" data-scroll-target="#s3">6.3 Errors, power and exaggerated estimates</a></li>
+  <li><a href="#s4" id="toc-s4" class="nav-link" data-scroll-target="#s4">6.4 Multiple testing</a></li>
+  <li><a href="#s5" id="toc-s5" class="nav-link" data-scroll-target="#s5">6.5 Absence of evidence and equivalence</a></li>
+  <li><a href="#quiz" id="toc-quiz" class="nav-link" data-scroll-target="#quiz">Check your understanding</a></li>
+  <li><a href="#take" id="toc-take" class="nav-link" data-scroll-target="#take">Key takeaways</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-00.html">Part I · Foundations</a></li><li class="breadcrumb-item"><a href="./lesson-06.html">Lesson 6 · Confidence intervals and hypothesis tests</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Lesson 6 · Confidence intervals and hypothesis tests</h1>
+<p class="subtitle lead">Part I · Foundations</p>
+</div>
+
+<div>
+  <div class="description">
+    Coverage of confidence intervals, p-values, errors and power, multiple testing, and evidence of absence.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="meta-pills">
+<p><span>About 3 hours</span> <span>Before this: Lessons 4–5</span> <span>Threads: uncertainty · frequentist ↔︎ Bayesian</span></p>
+</div>
+<div class="objectives">
+<p>By the end of this lesson you will be able to</p>
+<ul>
+<li>interpret a confidence interval through its coverage across repeated studies;</li>
+<li>explain what a p-value is, and list what it is not;</li>
+<li>describe type I and type II errors and calculate power;</li>
+<li>explain why small studies that reach significance exaggerate effects;</li>
+<li>control false positives when testing many hypotheses, and know when not to;</li>
+<li>use an equivalence test to support “no meaningful effect”.</li>
+</ul>
+</div>
+<div class="why">
+<p><strong>Why it matters.</strong> Confidence intervals and p-values are reported in almost every epidemiological paper, and misread in many of them. “Not significant” read as “no effect” has buried real harms; a single p &lt; 0.05 from a small study has launched false alarms. The aim of this lesson is to make you a careful reader and writer of both.</p>
+</div>
+<section id="s1" class="level2">
+<h2 class="anchored" data-anchor-id="s1">6.1 Confidence intervals and coverage</h2>
+<p>Each simulated study draws a sample of children and computes a 95% confidence interval for the risk of asthma. The true risk in the whole cohort is known. A 95% interval comes from a procedure that, across many studies, captures the truth 95% of the time. Any single interval either contains it or doesn’t. Run 100 studies and count the misses.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="ciN">Children per study</label><input type="range" id="ciN" min="30" max="2000" value="200"><output id="ciNO"></output></div>
+  <div class="ctrl"><label for="ciL">Confidence level</label><select id="ciL"><option value="0.8">80%</option><option value="0.9">90%</option><option value="0.95" selected="">95%</option><option value="0.99">99%</option></select></div>
+  <div class="btns"><button type="button" id="ciRun">Run 100 new studies</button></div>
+  <svg id="dance" viewbox="0 0 520 420" role="img" aria-label="Confidence intervals from 100 studies"></svg>
+  <div class="legend"><span><i style="background:var(--p1)"></i>interval contains the truth</span><span><i style="background:var(--p2)"></i>interval misses</span><span><i style="background:var(--c-ink)"></i>true risk</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="ciStats"></div><div class="now" id="ciNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[\hat\pi \pm z_{1-\alpha/2}\sqrt{\frac{\hat\pi(1-\hat\pi)}{n}}\]</span> <span class="math display">\[P_\pi\big(L \le \pi \le U\big) = 1 - \alpha \ \text{ for every } \pi\]</span></p>
+<div class="note">
+<p><span class="math inline">\(z_{0.975} = 1.96\)</span> for a 95% interval. The probability statement is about the procedure, over repeated samples.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>smp <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">200</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>p  <span class="ot">&lt;-</span> <span class="fu">mean</span>(smp<span class="sc">$</span>asthma)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p) <span class="sc">/</span> <span class="dv">200</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>p <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.96</span>, <span class="fl">1.96</span>) <span class="sc">*</span> se</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">binom.test</span>(<span class="fu">sum</span>(smp<span class="sc">$</span>asthma), <span class="dv">200</span>)<span class="sc">$</span>conf.int</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="ciReport"></span></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Common pitfall">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Common pitfall
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>“There is a 95% probability that the true risk lies between 9% and 18%.” For a confidence interval, the 95% describes the method, not this interval. The statement in quotes is what a Bayesian credible interval says (Lesson 19).</p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="gardner1986confidence">Gardner and Altman (<a href="#ref-gardner1986confidence" role="doc-biblioref">1986</a>)</span> argued for reporting confidence intervals rather than p-values; <span class="citation" data-cites="greenland2016statistical">Greenland et al. (<a href="#ref-greenland2016statistical" role="doc-biblioref">2016</a>)</span> list common misinterpretations of intervals; <span class="citation" data-cites="kirkwood2003essential">Kirkwood and Sterne (<a href="#ref-kirkwood2003essential" role="doc-biblioref">2003</a>)</span> derive intervals for risks and rates.</p>
+</div>
+</section>
+<section id="s2" class="level2">
+<h2 class="anchored" data-anchor-id="s2">6.2 Hypothesis tests and p-values</h2>
+<p>A test asks: if there were truly no effect, how surprising would data like ours be? The <strong>p-value</strong> is the probability, computed under the null hypothesis, of a result at least as extreme as the one observed. To see its behavior, run many studies comparing asthma risk between two groups. First use a fake “exposure” assigned by coin toss, so the null is true; then the real exposure, high modeled NO₂.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Exposure"><button type="button" id="pvNull" aria-pressed="true">Coin-toss exposure (null true)</button><button type="button" id="pvReal" aria-pressed="false">High NO₂, ≥ 30 µg/m³</button></div>
+  <div class="ctrl"><label for="pvN">Children per study</label><input type="range" id="pvN" min="100" max="3000" step="50" value="500"><output id="pvNO"></output></div>
+  <div class="btns"><button type="button" id="pvRun">Run 1,000 studies</button></div>
+  <svg id="pvHist" viewbox="0 0 520 260" role="img" aria-label="Histogram of p-values"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="pvStats"></div><div class="now" id="pvNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[H_0: \pi_1 = \pi_0 \quad\text{vs}\quad H_1: \pi_1 \ne \pi_0\]</span> <span class="math display">\[z = \frac{\hat\pi_1 - \hat\pi_0}{\sqrt{\bar\pi(1-\bar\pi)\left(\frac{1}{n_1} + \frac{1}{n_0}\right)}}, \qquad p = 2\,P(Z \ge |z|)\]</span></p>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>smp <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">500</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">high =</span> no2_modeled <span class="sc">&gt;=</span> <span class="dv">30</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="fu">table</span>(smp<span class="sc">$</span>high, smp<span class="sc">$</span>asthma)[, <span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>],</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="pvReport"></span></p>
+<div class="note">
+<p>Report the effect estimate with its confidence interval and the exact p-value, not only “p &lt; 0.05”.</p>
+</div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (optional): p-values under the null and under a real effect">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (optional): p-values under the null and under a real effect
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-2" class="callout-2-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">6</span>)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>one_study <span class="ot">&lt;-</span> <span class="cf">function</span>(n, <span class="at">real =</span> <span class="cn">TRUE</span>) {</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  smp <span class="ot">&lt;-</span> <span class="fu">slice_sample</span>(cohort, <span class="at">n =</span> n)</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  expo <span class="ot">&lt;-</span> <span class="cf">if</span> (real) smp<span class="sc">$</span>no2_modeled <span class="sc">&gt;=</span> <span class="dv">30</span> <span class="cf">else</span> <span class="fu">runif</span>(n) <span class="sc">&lt;</span> <span class="fl">0.5</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">prop.test</span>(<span class="fu">c</span>(<span class="fu">sum</span>(smp<span class="sc">$</span>asthma[expo]), <span class="fu">sum</span>(smp<span class="sc">$</span>asthma[<span class="sc">!</span>expo])),</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">c</span>(<span class="fu">sum</span>(expo), <span class="fu">sum</span>(<span class="sc">!</span>expo)), <span class="at">correct =</span> <span class="cn">FALSE</span>)<span class="sc">$</span>p.value</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a>p_null <span class="ot">&lt;-</span> <span class="fu">map_dbl</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>, \(i) <span class="fu">one_study</span>(<span class="dv">500</span>, <span class="at">real =</span> <span class="cn">FALSE</span>))</span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>p_real <span class="ot">&lt;-</span> <span class="fu">map_dbl</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">1000</span>, \(i) <span class="fu">one_study</span>(<span class="dv">500</span>, <span class="at">real =</span> <span class="cn">TRUE</span>))</span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">null_below_0.05 =</span> <span class="fu">mean</span>(p_null <span class="sc">&lt;</span> <span class="fl">0.05</span>), <span class="at">real_below_0.05 =</span> <span class="fu">mean</span>(p_real <span class="sc">&lt;</span> <span class="fl">0.05</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; null_below_0.05 real_below_0.05 
+#&gt;           0.048           0.258</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="wasserstein2016asa">Wasserstein and Lazar (<a href="#ref-wasserstein2016asa" role="doc-biblioref">2016</a>)</span> is the American Statistical Association’s statement on p-values; <span class="citation" data-cites="greenland2016statistical">Greenland et al. (<a href="#ref-greenland2016statistical" role="doc-biblioref">2016</a>)</span> explain 25 common misinterpretations; <span class="citation" data-cites="matthews1996interaction">Matthews and Altman (<a href="#ref-matthews1996interaction" role="doc-biblioref">1996</a>)</span> on comparing effect sizes rather than p-values.</p>
+</div>
+</section>
+<section id="s3" class="level2">
+<h2 class="anchored" data-anchor-id="s3">6.3 Errors, power and exaggerated estimates</h2>
+<p>Rejecting a true null is a <strong>type I error</strong>, with probability α. Missing a real effect is a <strong>type II error</strong>. <strong>Power</strong> is the probability of detecting an effect of a given size, and it depends on the effect, the baseline risk, the sample size and α. Small studies have low power, and there is a second, less obvious problem: when a low-powered study does reach significance, its estimate tends to be far too large.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pwRR">True risk ratio</label><input type="range" id="pwRR" min="1" max="2" step="0.05" value="1.25"><output id="pwRRO"></output></div>
+  <div class="ctrl"><label for="pwN">Children per group</label><input type="range" id="pwN" min="50" max="5000" step="50" value="500"><output id="pwNO"></output></div>
+  <div class="ctrl"><label for="pwA">Significance level α</label><select id="pwA"><option value="0.01">0.01</option><option value="0.05" selected="">0.05</option><option value="0.1">0.10</option></select></div>
+  <svg id="pwPlot" viewbox="0 0 520 250" role="img" aria-label="Power against sample size"></svg>
+  <div class="btns"><button type="button" id="pwSim">Simulate 2,000 studies at this size</button></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="pwStats"></div><div class="now" id="pwNow"></div></div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Common pitfall">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Common pitfall
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Treating a significant result from a small study as a reliable estimate of the effect. Among the studies that pass p &lt; 0.05, the estimates are biased upward, often severely. This “winner’s curse” is one reason early findings shrink when replicated.</p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="button2013power">Button et al. (<a href="#ref-button2013power" role="doc-biblioref">2013</a>)</span> show how low power undermines reliability, including the exaggeration of significant effects; <span class="citation" data-cites="greenland2016statistical">Greenland et al. (<a href="#ref-greenland2016statistical" role="doc-biblioref">2016</a>)</span> on misinterpretations of power; <span class="citation" data-cites="kirkwood2003essential">Kirkwood and Sterne (<a href="#ref-kirkwood2003essential" role="doc-biblioref">2003</a>)</span> give sample size and power calculations for epidemiological comparisons.</p>
+</div>
+</section>
+<section id="s4" class="level2">
+<h2 class="anchored" data-anchor-id="s4">6.4 Multiple testing</h2>
+<p>Test twenty exposures that have no effect at all, each at α = 0.05, and you expect one “significant” result by chance alone. The chance of at least one false positive is 64%. A Bonferroni correction divides α by the number of tests, at a cost in power. Whether to correct depends on the question: confirming a single pre-specified hypothesis, or exploring many.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="mtK">Number of null exposures tested</label><input type="range" id="mtK" min="1" max="60" value="20"><output id="mtKO"></output></div>
+  <label class="small"><input type="checkbox" id="mtBon"> Apply a Bonferroni correction</label>
+  <div class="btns"><button type="button" id="mtRun">Run one study with these tests</button><button type="button" id="mtMany">Repeat 1,000 times</button></div>
+  <svg id="mtPlot" viewbox="0 0 520 250" role="img" aria-label="p-values of the tested exposures"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="mtStats"></div><div class="now" id="mtNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[P(\text{at least one false positive}) = 1 - (1-\alpha)^m\]</span> <span class="math display">\[\text{Bonferroni: reject } H_{0j} \text{ if } p_j &lt; \alpha / m\]</span></p>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.003</span>, <span class="fl">0.02</span>, <span class="fl">0.04</span>, <span class="fl">0.30</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_values, <span class="at">method =</span> <span class="st">"bonferroni"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_values, <span class="at">method =</span> <span class="st">"holm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="mtReport"></span></p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="bender2001adjusting">Bender and Lange (<a href="#ref-bender2001adjusting" role="doc-biblioref">2001</a>)</span> explain when and how to adjust for multiple testing; <span class="citation" data-cites="rothman1990no">Rothman (<a href="#ref-rothman1990no" role="doc-biblioref">1990</a>)</span> argues that adjustment is often unnecessary when results are interpreted with care; <span class="citation" data-cites="greenland2016statistical">Greenland et al. (<a href="#ref-greenland2016statistical" role="doc-biblioref">2016</a>)</span> place both views in context.</p>
+</div>
+</section>
+<section id="s5" class="level2">
+<h2 class="anchored" data-anchor-id="s5">6.5 Absence of evidence and equivalence</h2>
+<p>A non-significant result means the data are compatible with no effect. They may also be compatible with a large effect. “Absence of evidence is not evidence of absence.” To support the claim that an effect is negligible, set a margin in advance, here a risk ratio between 0.9 and 1.1, and check whether the confidence interval lies entirely inside it. Move the estimate and its precision and watch the four possible conclusions.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="eqE">Estimated risk ratio</label><input type="range" id="eqE" min="0.7" max="1.6" step="0.01" value="1.05"><output id="eqEO"></output></div>
+  <div class="ctrl"><label for="eqS">Standard error of log RR</label><input type="range" id="eqS" min="0.01" max="0.3" step="0.005" value="0.12"><output id="eqSO"></output></div>
+  <div class="ctrl"><label for="eqM">Equivalence margin (±)</label><input type="range" id="eqM" min="0.05" max="0.3" step="0.01" value="0.1"><output id="eqMO"></output></div>
+  <svg id="eqPlot" viewbox="0 0 520 200" role="img" aria-label="Confidence interval against the null and the equivalence margin"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="eqStats"></div><div class="now" id="eqNow"></div></div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Bayesian preview">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Bayesian preview
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A frequentist test can reject “no effect” but can never support it; that needs the separate equivalence test above. A Bayesian analysis can state the probability that the effect lies inside the margin (a “region of practical equivalence”), and a Bayes factor can weigh “no effect” against “some effect” directly. Lesson 23 compares the approaches.</p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="altman1995absence">Altman and Bland (<a href="#ref-altman1995absence" role="doc-biblioref">1995</a>)</span> on why a non-significant result is not evidence of no effect; <span class="citation" data-cites="lakens2017equivalence">Lakens (<a href="#ref-lakens2017equivalence" role="doc-biblioref">2017</a>)</span> is a practical primer on equivalence tests (TOST); <span class="citation" data-cites="greenland2016statistical">Greenland et al. (<a href="#ref-greenland2016statistical" role="doc-biblioref">2016</a>)</span> on interpreting non-significant results.</p>
+</div>
+</section>
+<section id="quiz" class="level2">
+<h2 class="anchored" data-anchor-id="quiz">Check your understanding</h2>
+<div class="cw" id="quizzes"></div>
+</section>
+<section id="take" class="level2">
+<h2 class="anchored" data-anchor-id="take">Key takeaways</h2>
+<ul>
+<li>A 95% confidence interval comes from a procedure that captures the truth in 95% of studies. Its width shows precision.</li>
+<li>A p-value is the probability of data at least this extreme if the null were true. It is not the probability that the null is true, nor a measure of effect size.</li>
+<li>Under a true null, p-values are uniformly distributed: 5% fall below 0.05 by chance.</li>
+<li>Power depends on effect size, baseline risk, sample size and α. Significant results from low-powered studies exaggerate effects.</li>
+<li>Testing many hypotheses inflates false positives; correct when confirming, interpret carefully when exploring.</li>
+<li>Non-significant does not mean no effect. To support “no meaningful effect”, use an equivalence margin.</li>
+</ul>
+<div class="done" data-lesson="lesson-06"><button type="button"></button><span></span></div>
+<script src="assets/lesson-06.js"></script>
+
+
+</section>
+<section id="bibliography" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-altman1995absence" class="csl-entry" role="listitem">
+Altman, Douglas G., and J. Martin Bland. 1995. <span>“Absence of Evidence Is Not Evidence of Absence.”</span> <em>BMJ</em> 311: 485.
+</div>
+<div id="ref-bender2001adjusting" class="csl-entry" role="listitem">
+Bender, Ralf, and Stefan Lange. 2001. <span>“Adjusting for Multiple Testing: When and How?”</span> <em>Journal of Clinical Epidemiology</em> 54 (4): 343–49.
+</div>
+<div id="ref-button2013power" class="csl-entry" role="listitem">
+Button, Katherine S., John P. A. Ioannidis, Claire Mokrysz, et al. 2013. <span>“Power Failure: Why Small Sample Size Undermines the Reliability of Neuroscience.”</span> <em>Nature Reviews Neuroscience</em> 14 (5): 365–76. <a href="https://doi.org/10.1038/nrn3475">https://doi.org/10.1038/nrn3475</a>.
+</div>
+<div id="ref-gardner1986confidence" class="csl-entry" role="listitem">
+Gardner, Martin J., and Douglas G. Altman. 1986. <span>“Confidence Intervals Rather Than <span>P</span> Values: Estimation Rather Than Hypothesis Testing.”</span> <em>BMJ</em> 292: 746–50.
+</div>
+<div id="ref-greenland2016statistical" class="csl-entry" role="listitem">
+Greenland, Sander, Stephen J. Senn, Kenneth J. Rothman, et al. 2016. <span>“Statistical Tests, p Values, Confidence Intervals, and Power: A Guide to Misinterpretations.”</span> <em>European Journal of Epidemiology</em> 31 (4): 337–50. <a href="https://doi.org/10.1007/s10654-016-0149-3">https://doi.org/10.1007/s10654-016-0149-3</a>.
+</div>
+<div id="ref-kirkwood2003essential" class="csl-entry" role="listitem">
+Kirkwood, Betty R., and Jonathan A. C. Sterne. 2003. <em>Essential Medical Statistics</em>. 2nd ed. Blackwell Science.
+</div>
+<div id="ref-lakens2017equivalence" class="csl-entry" role="listitem">
+Lakens, Daniël. 2017. <span>“Equivalence Tests: A Practical Primer for t Tests, Correlations, and Meta-Analyses.”</span> <em>Social Psychological and Personality Science</em> 8 (4): 355–62. <a href="https://doi.org/10.1177/1948550617697177">https://doi.org/10.1177/1948550617697177</a>.
+</div>
+<div id="ref-matthews1996interaction" class="csl-entry" role="listitem">
+Matthews, John N. S., and Douglas G. Altman. 1996. <span>“Interaction 2: Compare Effect Sizes Not <span>P</span> Values.”</span> <em>BMJ</em> 313: 808.
+</div>
+<div id="ref-rothman1990no" class="csl-entry" role="listitem">
+Rothman, Kenneth J. 1990. <span>“No Adjustments Are Needed for Multiple Comparisons.”</span> <em>Epidemiology</em> 1 (1): 43–46.
+</div>
+<div id="ref-wasserstein2016asa" class="csl-entry" role="listitem">
+Wasserstein, Ronald L., and Nicole A. Lazar. 2016. <span>“The <span>ASA</span> Statement on p-Values: Context, Process, and Purpose.”</span> <em>The American Statistician</em> 70 (2): 129–33. <a href="https://doi.org/10.1080/00031305.2016.1154108">https://doi.org/10.1080/00031305.2016.1154108</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script src="assets/course.js"></script>
+<script src="assets/glossary-data.js"></script>
+<script src="assets/glossary-ui.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/danieljeannetot\.github\.io\/stats-epi\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-05.html" class="pagination-link" aria-label="Lesson 5 · Likelihood and estimation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lesson 5 · Likelihood and estimation</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-07.html" class="pagination-link" aria-label="Lesson 7 · Linear regression">
+        <span class="nav-page-text">Lesson 7 · Linear regression</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>All data are simulated. Course text CC BY 4.0, code MIT.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

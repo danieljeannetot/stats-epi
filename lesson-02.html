@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.19">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="The rules of probability, conditional probability and independence, Bayes’ theorem, and diagnostic tests.">
+
+<title>Lesson 2 · Probability and conditional probability – Statistics for epidemiology</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-03.html" rel="next">
+<link href="./lesson-01.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ec014dda407d74dcf7cceb6e5cf46d3e.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-057e7596b9a0f9d5a0687abd3f8ff44f.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-ec014dda407d74dcf7cceb6e5cf46d3e.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-9720d28c34b556a5626c65cb089a59a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-0bde3d10eb1978ca27b664fc71250111.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-9720d28c34b556a5626c65cb089a59a6.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="assets/course.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics for epidemiology</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./glossary.html"> 
+<span class="menu-text">Glossary</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./course-plan.html"> 
+<span class="menu-text">Course plan</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-00.html">Part I · Foundations</a></li><li class="breadcrumb-item"><a href="./lesson-02.html">Lesson 2 · Probability and conditional probability</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part I · Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-00.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 0 · Welcome: the city, the data and how to use the course</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 1 · Describing data and epidemiological measures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-02.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Lesson 2 · Probability and conditional probability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 3 · Random variables and probability distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 4 · Sampling, sampling distributions and the central limit theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 5 · Likelihood and estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 6 · Confidence intervals and hypothesis tests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part II · Frequentist regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 7 · Linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 8 · Generalized linear models: logistic and Poisson regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 9 · Confounding, effect modification and interaction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 10 · Model checking, comparison and selection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 11 · Nonlinear effects: categories, polynomials, splines and GAMs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part III · Causal inference, measurement and burden</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 12 · Causal inference: from association to effect</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 13 · Measurement error and misclassification</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 14 · Measuring disease burden</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part IV · Time, space and clustering</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 15 · Time-series regression for health data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-16.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 16 · Distributed lag and distributed lag non-linear models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-17.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 17 · Spatial data and spatial autocorrelation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-18.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 18 · Clustered data and mixed-effects models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part V · Bayesian modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-19.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 19 · Bayesian thinking: from Bayes’ rule to a model equation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-20.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 20 · Priors: what they say and how much they matter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-21.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 21 · Computing the posterior: Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-22.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 22 · Bayesian regression and GLMs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">In this lesson</h2>
+   
+  <ul class="collapse">
+  <li><a href="#s1" id="toc-s1" class="nav-link active" data-scroll-target="#s1">2.1 Probability and its rules</a></li>
+  <li><a href="#s2" id="toc-s2" class="nav-link" data-scroll-target="#s2">2.2 Conditional probability and independence</a></li>
+  <li><a href="#s3" id="toc-s3" class="nav-link" data-scroll-target="#s3">2.3 Bayes’ theorem and diagnostic tests</a></li>
+  <li><a href="#s4" id="toc-s4" class="nav-link" data-scroll-target="#s4">2.4 Likelihood ratios: updating a probability</a></li>
+  <li><a href="#quiz" id="toc-quiz" class="nav-link" data-scroll-target="#quiz">Check your understanding</a></li>
+  <li><a href="#take" id="toc-take" class="nav-link" data-scroll-target="#take">Key takeaways</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-00.html">Part I · Foundations</a></li><li class="breadcrumb-item"><a href="./lesson-02.html">Lesson 2 · Probability and conditional probability</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Lesson 2 · Probability and conditional probability</h1>
+<p class="subtitle lead">Part I · Foundations</p>
+</div>
+
+<div>
+  <div class="description">
+    The rules of probability, conditional probability and independence, Bayes’ theorem, and diagnostic tests.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="meta-pills">
+<p><span>About 2 hours</span> <span>Before this: Lesson 1</span> <span>Threads: frequentist ↔︎ Bayesian (first appearance of Bayes’ rule)</span></p>
+</div>
+<div class="objectives">
+<p>By the end of this lesson you will be able to</p>
+<ul>
+<li>compute joint, marginal and conditional probabilities from a 2×2 table;</li>
+<li>decide whether two events are independent, and explain what that means for a study;</li>
+<li>use Bayes’ theorem to turn sensitivity, specificity and prevalence into predictive values;</li>
+<li>explain why a good test can still produce mostly false positives;</li>
+<li>update a probability with a likelihood ratio, the simplest form of Bayesian reasoning.</li>
+</ul>
+</div>
+<div class="why">
+<p><strong>Why it matters.</strong> “Children whose parents smoke are more likely to develop asthma” is a statement about conditional probability. So is “a positive wheeze questionnaire means a child probably has asthma”, and that one is often wrong. Reversing a conditional probability is one of the most common reasoning errors in medicine, and the same error reappears later as the misreading of p-values.</p>
+</div>
+<section id="s1" class="level2">
+<h2 class="anchored" data-anchor-id="s1">2.1 Probability and its rules</h2>
+<p>A probability is a number between 0 and 1. In a cohort, the probability of an event is estimated by the proportion of children who experience it. Two events can be combined: both happen (the <strong>intersection</strong>, written A ∩ B), or at least one happens (the <strong>union</strong>, A ∪ B). Choose two events in the asthma cohort. The mosaic plot divides the children into the four combinations, with each area proportional to the number of children.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pairSel">Event B</label><select id="pairSel">
+    <option value="smoke">a parent smokes at home</option>
+    <option value="no2">modeled NO₂ at least 30 µg/m³</option>
+    <option value="boy">the child is a boy</option>
+    <option value="wheeze">the wheeze questionnaire is positive</option></select></div>
+  <p class="small">Event A is always "the child develops asthma by age 8".</p>
+  <svg id="mosaic" viewbox="0 0 520 330" role="img" aria-label="Mosaic plot of events A and B"></svg>
+  <div class="legend"><span><i style="background:var(--p2)"></i>asthma (A)</span><span><i style="background:var(--c-rule)"></i>no asthma</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="pStats"></div><div class="now" id="pNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[P(A \cup B) = P(A) + P(B) - P(A \cap B)\]</span> <span class="math display">\[P(A \mid B) = \frac{P(A \cap B)}{P(B)}\]</span> <span class="math display">\[\text{independent} \iff P(A \cap B) = P(A)\,P(B)\]</span></p>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_A       =</span> <span class="fu">mean</span>(asthma),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_B       =</span> <span class="fu">mean</span>(parent_smoke),</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_AandB   =</span> <span class="fu">mean</span>(asthma <span class="sc">&amp;</span> parent_smoke),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_AorB    =</span> <span class="fu">mean</span>(asthma <span class="sc">|</span> parent_smoke),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_A_givB  =</span> <span class="fu">mean</span>(asthma[parent_smoke]),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_A_givnB =</span> <span class="fu">mean</span>(asthma[<span class="sc">!</span>parent_smoke]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="pReport"></span></p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="blitzstein2019introduction">Blitzstein and Hwang (<a href="#ref-blitzstein2019introduction" role="doc-biblioref">2019</a>)</span> develop probability from first principles; <span class="citation" data-cites="kirkwood2003essential">Kirkwood and Sterne (<a href="#ref-kirkwood2003essential" role="doc-biblioref">2003</a>)</span> introduce it for medical statistics; <span class="citation" data-cites="clayton1993statistical">Clayton and Hills (<a href="#ref-clayton1993statistical" role="doc-biblioref">1993</a>)</span> connect probability to epidemiological models.</p>
+</div>
+</section>
+<section id="s2" class="level2">
+<h2 class="anchored" data-anchor-id="s2">2.2 Conditional probability and independence</h2>
+<p>Conditioning restricts attention to the children for whom one event is true. In the mosaic plot, P(A | B) is the height of the orange part in the left column, and P(A | not B) in the right column. If the two heights are equal, knowing B tells you nothing about A: the events are <strong>independent</strong>. If they differ, the events are associated. Association between an exposure and an outcome is exactly what epidemiology measures; the risk ratio from Lesson 1 is P(A | B) / P(A | not B).</p>
+<p>The order of conditioning matters. P(asthma | positive questionnaire) and P(positive questionnaire | asthma) are different numbers, and the next section shows how far apart they can be. Switch event B to the questionnaire and compare them.</p>
+<div class="cw cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="condTable"></table></div><div class="now" id="condNow"></div></div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (optional): joint and conditional probabilities">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (optional): joint and conditional probabilities
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(parent_smoke, asthma) <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_joint =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(parent_smoke) <span class="sc">|&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">p_asthma_given_smoke =</span> n <span class="sc">/</span> <span class="fu">sum</span>(n)) <span class="sc">|&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 4 × 5
+#&gt;   parent_smoke asthma     n p_joint p_asthma_given_smoke
+#&gt;   &lt;lgl&gt;         &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt;                &lt;dbl&gt;
+#&gt; 1 FALSE             0  3385  0.677                 0.879
+#&gt; 2 FALSE             1   465  0.093                 0.121
+#&gt; 3 TRUE              0   929  0.186                 0.808
+#&gt; 4 TRUE              1   221  0.0442                0.192</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># independence would make these two equal</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(cohort, <span class="fu">c</span>(<span class="at">p_A =</span> <span class="fu">mean</span>(asthma),</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>               <span class="at">p_A_given_B =</span> <span class="fu">mean</span>(asthma[parent_smoke])))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;         p_A p_A_given_B 
+#&gt;   0.1372000   0.1921739</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="blitzstein2019introduction">Blitzstein and Hwang (<a href="#ref-blitzstein2019introduction" role="doc-biblioref">2019</a>)</span> on conditioning and independence; <span class="citation" data-cites="gigerenzer1995improve">Gigerenzer and Hoffrage (<a href="#ref-gigerenzer1995improve" role="doc-biblioref">1995</a>)</span> show that natural frequencies make conditional reasoning much easier; <span class="citation" data-cites="lash2021modern">Lash et al. (<a href="#ref-lash2021modern" role="doc-biblioref">2021</a>)</span> on measures of association as contrasts of conditional risks.</p>
+</div>
+</section>
+<section id="s3" class="level2">
+<h2 class="anchored" data-anchor-id="s3">2.3 Bayes’ theorem and diagnostic tests</h2>
+<p>The wheeze questionnaire is used to screen for asthma. Its <strong>sensitivity</strong> is the probability of a positive result in a child with asthma; its <strong>specificity</strong> the probability of a negative result in a child without. Parents and doctors want the reverse: given a positive result, how likely is asthma? That is the <strong>positive predictive value (PPV)</strong>, and Bayes’ theorem gives it. The icon array shows 1,000 children; change the prevalence, sensitivity and specificity.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="dPrev">Prevalence</label><input type="range" id="dPrev" min="1" max="50" value="13"><output id="dPrevO"></output></div>
+  <div class="ctrl"><label for="dSe">Sensitivity</label><input type="range" id="dSe" min="50" max="99" value="85"><output id="dSeO"></output></div>
+  <div class="ctrl"><label for="dSp">Specificity</label><input type="range" id="dSp" min="50" max="99" value="90"><output id="dSpO"></output></div>
+  <div class="btns"><button type="button" id="dCohort">Use the values observed in the cohort</button><button type="button" id="dRare">A rare condition (1%)</button></div>
+  <svg id="icons" viewbox="0 0 520 300" role="img" aria-label="Icon array of 1,000 children"></svg>
+  <div class="legend"><span><i style="background:var(--p2)"></i>true positive</span><span><i style="background:var(--p2);opacity:.3"></i>false negative</span><span><i style="background:var(--p1)"></i>false positive</span><span><i style="background:var(--c-rule)"></i>true negative</span></div>
+</div>
+<div class="cpanel">
+  <svg id="tree" viewbox="0 0 520 250" role="img" aria-label="Natural frequency tree"></svg>
+  <div class="statgrid" id="dStats"></div>
+  <div class="now" id="dNow"></div>
+</div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[Se = P(T^+ \mid D^+) \qquad Sp = P(T^- \mid D^-)\]</span> <span class="math display">\[PPV = P(D^+ \mid T^+) = \frac{Se \cdot p}{Se \cdot p + (1 - Sp)(1 - p)}\]</span></p>
+<div class="note">
+<p><span class="math inline">\(p\)</span> = prevalence, <span class="math inline">\(D^+\)</span> = has asthma, <span class="math inline">\(T^+\)</span> = positive test.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">sens =</span> <span class="fu">mean</span>(wheeze_q[asthma <span class="sc">==</span> <span class="dv">1</span>]),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">spec =</span> <span class="fu">mean</span>(<span class="sc">!</span>wheeze_q[asthma <span class="sc">==</span> <span class="dv">0</span>]),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ppv  =</span> <span class="fu">mean</span>(asthma[wheeze_q]),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">npv  =</span> <span class="fu">mean</span>(<span class="dv">1</span> <span class="sc">-</span> asthma[<span class="sc">!</span>wheeze_q]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="dReport"></span></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Common pitfall">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Common pitfall
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Reading sensitivity as the probability that a positive child has the condition. With a prevalence of 1%, a test with 90% sensitivity and 90% specificity gives a PPV of only about 8%: more than nine in ten positives are false. Try the “rare condition” button.</p>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (optional): diagnostic accuracy in the cohort">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (optional): diagnostic accuracy in the cohort
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-3" class="callout-3-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">count</span>(wheeze_q, asthma) <span class="sc">|&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_wider</span>(<span class="at">names_from =</span> asthma, <span class="at">values_from =</span> n, <span class="at">names_prefix =</span> <span class="st">"asthma_"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 2 × 3
+#&gt;   wheeze_q asthma_0 asthma_1
+#&gt;   &lt;lgl&gt;       &lt;int&gt;    &lt;int&gt;
+#&gt; 1 FALSE        3900      122
+#&gt; 2 TRUE          414      564</code></pre>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">sens =</span> <span class="fu">mean</span>(wheeze_q[asthma <span class="sc">==</span> <span class="dv">1</span>]),</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>            <span class="at">spec =</span> <span class="fu">mean</span>(<span class="sc">!</span>wheeze_q[asthma <span class="sc">==</span> <span class="dv">0</span>]),</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">ppv  =</span> <span class="fu">mean</span>(asthma[wheeze_q]),</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">npv  =</span> <span class="fu">mean</span>(<span class="dv">1</span> <span class="sc">-</span> asthma[<span class="sc">!</span>wheeze_q]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 × 4
+#&gt;    sens  spec   ppv   npv
+#&gt;   &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt; &lt;dbl&gt;
+#&gt; 1 0.822 0.904 0.577 0.970</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="altman1994diagnostic1">Altman and Bland (<a href="#ref-altman1994diagnostic1" role="doc-biblioref">1994a</a>)</span> and <span class="citation" data-cites="altman1994diagnostic2">Altman and Bland (<a href="#ref-altman1994diagnostic2" role="doc-biblioref">1994b</a>)</span> are short classics on sensitivity, specificity and predictive values; <span class="citation" data-cites="gigerenzer1995improve">Gigerenzer and Hoffrage (<a href="#ref-gigerenzer1995improve" role="doc-biblioref">1995</a>)</span> and <span class="citation" data-cites="hoffrage2000communicating">Hoffrage et al. (<a href="#ref-hoffrage2000communicating" role="doc-biblioref">2000</a>)</span> show how natural frequencies, like the tree above, prevent errors.</p>
+</div>
+</section>
+<section id="s4" class="level2">
+<h2 class="anchored" data-anchor-id="s4">2.4 Likelihood ratios: updating a probability</h2>
+<p>Bayes’ theorem has an especially simple form on the odds scale. A <strong>likelihood ratio</strong> says how many times more likely a test result is in children with asthma than without. Multiply the pre-test odds by it, and you get the post-test odds. This is updating: start from what you believed before the test, and let the evidence move you. The same logic, applied to parameters instead of diagnoses, is the core of Bayesian statistics (Part V).</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="lPre">Pre-test probability</label><input type="range" id="lPre" min="1" max="90" value="13"><output id="lPreO"></output></div>
+  <div class="ctrl"><label for="lSe">Sensitivity</label><input type="range" id="lSe" min="50" max="99" value="85"><output id="lSeO"></output></div>
+  <div class="ctrl"><label for="lSp">Specificity</label><input type="range" id="lSp" min="50" max="99" value="90"><output id="lSpO"></output></div>
+  <svg id="lrPlot" viewbox="0 0 520 280" role="img" aria-label="Post-test probability against pre-test probability"></svg>
+  <div class="legend"><span><i style="background:var(--p2)"></i>after a positive result</span><span><i style="background:var(--p1)"></i>after a negative result</span><span><i style="background:var(--c-lik)"></i>no test</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="lStats"></div><div class="now" id="lNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[LR^+ = \frac{Se}{1 - Sp} \qquad LR^- = \frac{1 - Se}{Sp}\]</span> <span class="math display">\[\text{post-test odds} = \text{pre-test odds} \times LR\]</span></p>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>lr_pos    <span class="ot">&lt;-</span> sens <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> spec)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>pre_odds  <span class="ot">&lt;-</span> p_pre <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> p_pre)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>post_odds <span class="ot">&lt;-</span> pre_odds <span class="sc">*</span> lr_pos</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>p_post    <span class="ot">&lt;-</span> post_odds <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> post_odds)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="lReport"></span></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Bayesian preview">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Bayesian preview
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Replace “has asthma” with “the true effect of NO₂ is β” and “test result” with “the data”. Bayes’ theorem then turns a prior belief about β and the likelihood of the data into a posterior belief: <span class="math inline">\(p(\beta \mid \text{data}) \propto p(\text{data} \mid \beta)\, p(\beta)\)</span>. The pre-test probability becomes the prior, the likelihood ratio becomes the likelihood, and the post-test probability becomes the posterior. Lesson 19 builds this up step by step.</p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="deeks2004diagnostic">Deeks and Altman (<a href="#ref-deeks2004diagnostic" role="doc-biblioref">2004</a>)</span> explain likelihood ratios for test results; <span class="citation" data-cites="bland1998bayesians">Bland and Altman (<a href="#ref-bland1998bayesians" role="doc-biblioref">1998</a>)</span> contrast Bayesian and frequentist reasoning in a page; <span class="citation" data-cites="held2020applied">Held and Sabanés Bové (<a href="#ref-held2020applied" role="doc-biblioref">2020</a>)</span> develop likelihood and Bayesian inference together.</p>
+</div>
+</section>
+<section id="quiz" class="level2">
+<h2 class="anchored" data-anchor-id="quiz">Check your understanding</h2>
+<div class="cw" id="quizzes"></div>
+</section>
+<section id="take" class="level2">
+<h2 class="anchored" data-anchor-id="take">Key takeaways</h2>
+<ul>
+<li>Probabilities of combined events follow simple rules: P(A ∪ B) = P(A) + P(B) − P(A ∩ B).</li>
+<li>P(A | B) restricts attention to cases where B is true. P(A | B) and P(B | A) are different.</li>
+<li>Events are independent when conditioning on one doesn’t change the probability of the other. An exposure–outcome association is a departure from independence.</li>
+<li>Bayes’ theorem reverses a conditional probability. Predictive values depend strongly on prevalence.</li>
+<li>On the odds scale, updating is a multiplication by the likelihood ratio, the simplest form of Bayesian reasoning.</li>
+</ul>
+<div class="done" data-lesson="lesson-02"><button type="button"></button><span></span></div>
+<script src="assets/lesson-02.js"></script>
+
+
+</section>
+<section id="bibliography" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-altman1994diagnostic1" class="csl-entry" role="listitem">
+Altman, Douglas G., and J. Martin Bland. 1994a. <span>“Diagnostic Tests 1: Sensitivity and Specificity.”</span> <em>BMJ</em> 308: 1552.
+</div>
+<div id="ref-altman1994diagnostic2" class="csl-entry" role="listitem">
+Altman, Douglas G., and J. Martin Bland. 1994b. <span>“Diagnostic Tests 2: Predictive Values.”</span> <em>BMJ</em> 309: 102.
+</div>
+<div id="ref-bland1998bayesians" class="csl-entry" role="listitem">
+Bland, J. Martin, and Douglas G. Altman. 1998. <span>“Bayesians and Frequentists.”</span> <em>BMJ</em> 317: 1151.
+</div>
+<div id="ref-blitzstein2019introduction" class="csl-entry" role="listitem">
+Blitzstein, Joseph K., and Jessica Hwang. 2019. <em>Introduction to Probability</em>. 2nd ed. CRC Press.
+</div>
+<div id="ref-clayton1993statistical" class="csl-entry" role="listitem">
+Clayton, David, and Michael Hills. 1993. <em>Statistical Models in Epidemiology</em>. Oxford University Press.
+</div>
+<div id="ref-deeks2004diagnostic" class="csl-entry" role="listitem">
+Deeks, Jonathan J., and Douglas G. Altman. 2004. <span>“Diagnostic Tests 4: Likelihood Ratios.”</span> <em>BMJ</em> 329: 168–69.
+</div>
+<div id="ref-gigerenzer1995improve" class="csl-entry" role="listitem">
+Gigerenzer, Gerd, and Ulrich Hoffrage. 1995. <span>“How to Improve <span>B</span>ayesian Reasoning Without Instruction: Frequency Formats.”</span> <em>Psychological Review</em> 102 (4): 684–704. <a href="https://doi.org/10.1037/0033-295X.102.4.684">https://doi.org/10.1037/0033-295X.102.4.684</a>.
+</div>
+<div id="ref-held2020applied" class="csl-entry" role="listitem">
+Held, Leonhard, and Daniel Sabanés Bové. 2020. <em>Likelihood and <span>B</span>ayesian Inference: With Applications in Biology and Medicine</em>. 2nd ed. Springer.
+</div>
+<div id="ref-hoffrage2000communicating" class="csl-entry" role="listitem">
+Hoffrage, Ulrich, Samuel Lindsey, Ralph Hertwig, and Gerd Gigerenzer. 2000. <span>“Communicating Statistical Information.”</span> <em>Science</em> 290 (5500): 2261–62.
+</div>
+<div id="ref-kirkwood2003essential" class="csl-entry" role="listitem">
+Kirkwood, Betty R., and Jonathan A. C. Sterne. 2003. <em>Essential Medical Statistics</em>. 2nd ed. Blackwell Science.
+</div>
+<div id="ref-lash2021modern" class="csl-entry" role="listitem">
+Lash, Timothy L., Tyler J. VanderWeele, Sebastien Haneuse, and Kenneth J. Rothman. 2021. <em>Modern Epidemiology</em>. 4th ed. Wolters Kluwer.
+</div>
+</div></section></div></main> <!-- /main -->
+<script src="assets/course.js"></script>
+<script src="assets/glossary-data.js"></script>
+<script src="assets/glossary-ui.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/danieljeannetot\.github\.io\/stats-epi\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-01.html" class="pagination-link" aria-label="Lesson 1 · Describing data and epidemiological measures">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lesson 1 · Describing data and epidemiological measures</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-03.html" class="pagination-link" aria-label="Lesson 3 · Random variables and probability distributions">
+        <span class="nav-page-text">Lesson 3 · Random variables and probability distributions</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>All data are simulated. Course text CC BY 4.0, code MIT.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>
