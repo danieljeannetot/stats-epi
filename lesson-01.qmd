@@ -1,0 +1,528 @@
+---
+title: "Lesson 1 · Describing data and epidemiological measures"
+subtitle: "Part I · Foundations"
+description: "Variable types, summaries, risks, odds, rates, comparisons between groups and age standardization."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 2 hours]{} [Before this: Lesson 0]{} [Threads: uncertainty (preview)]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- classify variables by type, and say what that implies for summaries and models;
+- choose between mean (SD) and median (IQR), and explain why;
+- compute and interpret risks, odds and rates, and use person-time correctly;
+- compare groups with risk differences, risk ratios and odds ratios, and know when the odds ratio misleads;
+- explain why crude rates can rank districts wrongly, and fix it with direct age standardization.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Before any model, an epidemiologist describes. Is a district's emergency department busier because its people are sicker, or because they are older? Is asthma more common near busy roads? The answer starts with choosing the right measure, and a wrong choice here can mislead more than any later statistical error.
+
+:::
+
+## 1.1 Types of variables {#s1}
+
+The type of a variable decides how you can summarize it and which model can describe it. A count variable calls for Poisson models, a binary outcome for logistic models, and a continuous variable for linear models. Classify each variable from the two course datasets, then check your answer.
+
+```{=html}
+<div class="cw"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="varTable"><tr><th>Variable</th><th>Example values</th><th>Your classification</th><th></th><th>Feedback</th></tr></table></div></div>
+```
+
+The types: **binary** (two values), **nominal** (unordered categories), **ordinal** (ordered categories), **count** (whole numbers of events), **continuous** (any value on a scale), and **date or time**.
+
+::: {.further}
+
+**Further reading:** @stevens1946theory introduced the classification of measurement scales; @kirkwood2003essential and @altman1991practical cover variable types in medical data.
+
+:::
+
+## 1.2 Distributions and summaries {#s2}
+
+A summary condenses a distribution into a few numbers, and which numbers you choose depends on its shape. The [mean]{.gterm data-term="mean"} uses every value, so a few extreme values pull it. The median is the middle value, so it ignores how extreme the extremes are. The same goes for spread: the standard deviation reacts to outliers, the interquartile range doesn't. Skewness measures how lopsided the distribution is.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="hVar">Variable</label><select id="hVar">
+    <option value="city">Daily emergency visits, whole city</option>
+    <option value="lake">Daily visits, Lakeside, age 65+</option>
+    <option value="pm">Daily PM2.5 (µg/m³)</option>
+    <option value="temp">Daily mean temperature (°C)</option>
+    <option value="no2">Children's modeled NO₂ (µg/m³)</option></select></div>
+  <div class="ctrl"><label for="hSample">Use</label><select id="hSample"><option value="all">all values</option><option value="30">a random sample of 30 values</option></select><button id="hResample" type="button">New sample</button></div>
+  <div class="ctrl"><label for="hOut">Add one extra value</label><input type="range" id="hOut" min="0" max="100" value="0"><output id="hOutO">none</output></div>
+  <svg id="hist" viewBox="0 0 520 260" role="img" aria-label="Histogram of the selected variable"></svg>
+  <div class="legend"><span><i style="background:var(--p1)"></i>mean</span><span><i style="background:var(--p2)"></i>median</span><span><i style="background:var(--c-hl);border-radius:50%;width:10px"></i>the extra value</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="hStats"></div><div class="now" id="hNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i \qquad s = \sqrt{\frac{\sum_{i}(x_i - \bar{x})^2}{n-1}}$$
+$$\text{median} = Q(0.5) \qquad \text{IQR} = Q(0.75) - Q(0.25)$$
+
+::: {.note}
+
+$Q(p)$ is the value below which a fraction $p$ of the data lies.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+city_daily |>
+  summarise(
+    n      = n(),
+    mean   = mean(visits),
+    sd     = sd(visits),
+    median = median(visits),
+    q1     = quantile(visits, 0.25),
+    q3     = quantile(visits, 0.75))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#hReport}
+
+::: {.note}
+
+Convention: mean (SD) for roughly symmetric data, median (IQR) for skewed data.
+
+:::
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): summaries and a histogram"}
+
+```{r}
+city_daily <- visits |>
+  group_by(date) |>
+  summarise(visits = sum(visits), pm25 = first(pm25), .groups = "drop")
+
+city_daily |>
+  summarise(across(c(visits, pm25),
+                   list(mean = mean, sd = sd, median = median,
+                        q1 = ~ quantile(.x, 0.25), q3 = ~ quantile(.x, 0.75))))
+
+ggplot(city_daily, aes(pm25)) +
+  geom_histogram(binwidth = 1, fill = "grey70") +
+  geom_vline(xintercept = mean(city_daily$pm25), colour = "steelblue", linewidth = 1) +
+  geom_vline(xintercept = median(city_daily$pm25), colour = "firebrick", linewidth = 1) +
+  labs(x = "Daily PM2.5 (µg/m³)", y = "Number of days")
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @altman1996skewness show how to spot skewness from published summaries; @weissgerber2015beyond argue for showing distributions rather than bar charts; @tukey1977exploratory is the classic on exploring data.
+
+:::
+
+## 1.3 Measures of occurrence: risk, odds and rate {#s3}
+
+Three numbers describe how often a health event occurs, and they answer different questions. A risk is the proportion of people who develop the outcome over a stated period. The odds compare those who develop it with those who don't. An incidence rate counts events per unit of person-time, which is what you need when people can have repeated events, or are observed for different lengths of time, as with emergency visits.
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$R = \frac{D}{N} \qquad O = \frac{D}{N - D} = \frac{R}{1 - R} \qquad I = \frac{D}{PT}$$
+
+::: {.note}
+
+$D$ = cases or events, $N$ = people at risk, $PT$ = person-time.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+cohort |>
+  summarise(
+    cases = sum(asthma),
+    n     = n(),
+    risk  = cases / n,
+    odds  = cases / (n - cases))
+
+visits |>
+  summarise(
+    events = sum(visits),
+    py     = sum(population) / 365.25,
+    rate   = 1000 * events / py)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#occReport}
+
+::::
+
+:::::
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <h4>Risk and odds are not the same number</h4>
+  <div class="ctrl"><label for="rSl">Risk</label><input type="range" id="rSl" min="1" max="90" value="13"><output id="rSlO"></output></div>
+  <svg id="riskOdds" viewBox="0 0 520 200" role="img" aria-label="Risk compared with odds"></svg>
+  <div class="now" id="roNow"></div>
+</div>
+<div class="cpanel">
+  <h4>Emergency visits per 1,000 person-years, by district (2020–2024)</h4>
+  <svg id="rateBars" viewBox="0 0 520 330" role="img" aria-label="Crude visit rates by district"></svg>
+  <p class="small">Each resident contributes one person-day for every day they live in the district, so 5 years of a population of 1,000 gives about 5,000 person-years.</p>
+</div>
+</div>
+```
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): risk, odds and rates"}
+
+```{r}
+cohort |>
+  summarise(cases = sum(asthma), n = n(),
+            risk = cases / n, odds = cases / (n - cases))
+
+visits |>
+  group_by(district) |>
+  summarise(events = sum(visits), py = sum(population) / 365.25, .groups = "drop") |>
+  mutate(rate_per_1000py = 1000 * events / py) |>
+  arrange(desc(rate_per_1000py))
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @vandenbroucke2012incidence explain incidence rates in dynamic populations; @lash2021modern and @clayton1993statistical treat risks, odds and rates in depth.
+
+:::
+
+## 1.4 Comparing groups: difference, ratio and odds ratio {#s4}
+
+To ask whether NO₂ matters, compare children with higher and lower exposure. The risk difference says how many extra cases per 100 children. The risk ratio says how many times higher the risk is. The odds ratio compares odds instead of risks. Logistic regression (Lesson 8) produces odds ratios, which is why you'll see them so often.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="cut">"High NO₂" means at least</label><input type="range" id="cut" min="18" max="40" step="1" value="30"><output id="cutO"></output></div>
+  <div class="tw"><table data-quarto-disable-processing="true" class="t" id="twoByTwo"></table></div>
+  <div class="statgrid" id="cmpStats"></div>
+  <div class="now" id="cmpNow"></div>
+</div>
+<div class="cpanel">
+  <h4>When does the odds ratio exaggerate?</h4>
+  <p>Keep the true risk ratio fixed at 1.5 and change how common the outcome is in the unexposed group.</p>
+  <div class="ctrl"><label for="b0">Risk in the unexposed</label><input type="range" id="b0" min="1" max="50" value="5"><output id="b0O"></output></div>
+  <svg id="orRr" viewBox="0 0 520 220" role="img" aria-label="Odds ratio versus risk ratio"></svg>
+  <div class="now" id="orNow"></div>
+</div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$RD = R_1 - R_0 \qquad RR = \frac{R_1}{R_0}$$
+$$OR = \frac{R_1/(1-R_1)}{R_0/(1-R_0)} = \frac{ad}{bc}$$
+
+::: {.note}
+
+Subscript 1 = exposed (high NO₂), 0 = unexposed; $a, b, c, d$ are the cells of the 2×2 table.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+cohort |>
+  mutate(high = no2_modeled >= 30) |>
+  summarise(r1 = mean(asthma[high]),
+            r0 = mean(asthma[!high])) |>
+  mutate(rd = r1 - r0,
+         rr = r1 / r0,
+         or = (r1 / (1 - r1)) /
+              (r0 / (1 - r0)))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#cmpReport}
+
+::: {.note}
+
+How the 95% confidence interval is calculated is explained in Lesson 6.
+
+:::
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Reading an odds ratio as "times the risk". With asthma at about 14%, the two are close. For a common outcome they diverge sharply: an OR of 2.3 may correspond to a risk only 1.5 times higher.
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): the 2×2 table and its measures"}
+
+```{r}
+cohort |>
+  mutate(high_no2 = no2_modeled >= 30) |>
+  count(high_no2, asthma) |>
+  pivot_wider(names_from = asthma, values_from = n, names_prefix = "asthma_")
+
+cohort |>
+  mutate(high_no2 = no2_modeled >= 30) |>
+  summarise(r1 = mean(asthma[high_no2]), r0 = mean(asthma[!high_no2])) |>
+  mutate(rd = r1 - r0, rr = r1 / r0,
+         or = (r1 / (1 - r1)) / (r0 / (1 - r0)))
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @altman1998odds and @zhang1998whats on odds ratios for common outcomes; @bland2000odds on the odds ratio itself; @royston2006dichotomizing on why cut-offs lose information.
+
+:::
+
+## 1.5 Crude rates mislead: age standardization {#s5}
+
+Older people visit the emergency department more often. A district with many older residents will have a high crude rate even if each age group there is no worse off than elsewhere. Direct standardization asks: what would each district's rate be if it had the same age structure as a common standard population? Here the standard is the whole city.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Rate type"><button id="showCrude" aria-pressed="true" type="button">Crude rates</button><button id="showStd" aria-pressed="false" type="button">Age-standardized rates</button></div>
+  <svg id="stdBars" viewBox="0 0 520 360" role="img" aria-label="District rates, crude or age-standardized"></svg>
+  <p class="small">Bars are sorted by the selected measure. The number on the left is the district's rank. The figure on the right is its share of residents aged 65+.</p>
+</div>
+<div class="cpanel">
+  <div class="ctrl"><label for="stdD">Look inside a district</label><select id="stdD"></select></div>
+  <div class="tw"><table data-quarto-disable-processing="true" class="t" id="stdTable"></table></div>
+  <div class="now" id="stdNow"></div>
+</div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$r_{jk} = \frac{D_{jk}}{PT_{jk}} \qquad w_k = \frac{N_k^{\text{std}}}{\sum_{k'} N_{k'}^{\text{std}}}$$
+$$ASR_j = \sum_k w_k\, r_{jk}$$
+
+::: {.note}
+
+$j$ = district, $k$ = age group. The crude rate weights each $r_{jk}$ by district $j$'s own age structure instead of $w_k$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+std_w <- visits |>
+  distinct(district, age_group, population) |>
+  group_by(age_group) |>
+  summarise(n = sum(population)) |>
+  mutate(w = n / sum(n))
+
+visits |>
+  group_by(district, age_group) |>
+  summarise(r = 1000 * sum(visits) /
+              (sum(population) / 365.25)) |>
+  left_join(std_w, by = "age_group") |>
+  group_by(district) |>
+  summarise(asr = sum(w * r))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#stdReport}
+
+::: {.note}
+
+Always name the standard population. Standardized rates are only comparable when they use the same one.
+
+:::
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): crude and age-standardized rates"}
+
+```{r}
+std_w <- visits |>
+  distinct(district, age_group, population) |>
+  group_by(age_group) |>
+  summarise(n = sum(population), .groups = "drop") |>
+  mutate(w = n / sum(n))
+
+rates <- visits |>
+  group_by(district, age_group) |>
+  summarise(visits = sum(visits), py = sum(population) / 365.25, .groups = "drop") |>
+  mutate(rate = 1000 * visits / py)
+
+rates |>
+  left_join(std_w, by = "age_group") |>
+  group_by(district) |>
+  summarise(crude = 1000 * sum(visits) / sum(py),
+            asr   = sum(w * rate), .groups = "drop") |>
+  arrange(desc(asr))
+```
+
+:::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+Every rate and risk in this lesson is an estimate from a finite number of events. A Bayesian treats each district's true rate as an uncertain quantity with a distribution. For a large district like Old Town, the data pin the rate down tightly. For small districts, a Bayesian hierarchical model pulls the estimate part of the way toward the city average, because a few hundred events say less than tens of thousands. You'll see this partial pooling in Lessons 18 and 24, and the uncertainty around a single rate in Lesson 19.
+
+:::
+
+::: {.callout-warning title="Common pitfalls"}
+
+**Comparing crude rates across populations with different age structures.** Always check whether a difference survives standardization.
+
+**Mean ± SD for skewed data.** For PM2.5, the mean minus two SDs comes close to zero, which is impossible for a concentration. Report the median and IQR instead.
+
+**Calling a risk a rate.** "14% of children developed asthma by age 8" is a risk (cumulative incidence). A rate needs person-time in its denominator.
+
+:::
+
+::: {.further}
+
+**Further reading:** @ahmad2001age describe the WHO world standard population; @keiding2014standardization give the history and the link between standardization and causal inference; @lash2021modern covers standardization methods.
+
+:::
+
+## Check your understanding {#quiz}
+
+Each question gives feedback when you check it. Some are about statistics, some about epidemiology.
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- The type of a variable decides how to summarize it and, later, which model fits it.
+- Skewed data are summarized by the median and IQR. The mean and SD react strongly to extreme values.
+- Risk, odds and rate answer different questions. Rates need person-time.
+- Risk differences and risk ratios are easier to interpret than odds ratios. The OR approximates the RR only when the outcome is rare.
+- Crude rates mix the effect of age structure with the effect of place. Direct standardization removes the first.
+
+```{=html}
+<div class="done" data-lesson="lesson-01"><button type="button"></button><span></span></div>
+<script src="assets/lesson-01.js"></script>
+```

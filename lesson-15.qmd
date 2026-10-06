@@ -1,0 +1,256 @@
+---
+title: "Lesson 15 · Time-series regression for health data"
+subtitle: "Part IV · Time, space and clustering"
+description: "Trend, seasonality and day-of-week patterns; controlling for time with splines; residual autocorrelation; and the time-stratified case-crossover design."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lessons 8, 10 and 11]{} [Threads: bias · uncertainty]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- decompose a daily health series into trend, season, day of week and residual variation;
+- control for seasonal and long-term confounding with a spline of time, and judge how much flexibility it needs;
+- check residual autocorrelation and overdispersion in a time-series model;
+- explain the time-stratified case-crossover design and why it gives the same answer as a time-series model.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Time-series studies compare a population with itself from day to day, so slow-changing confounders such as age structure and smoking are controlled by design. What remains are things that change with time: seasons, long-term trends, weekdays and holidays. PM2.5 is higher in winter, and so are respiratory visits. Unless the season is handled carefully, part of the seasonal rise in visits is wrongly blamed on pollution.
+
+:::
+
+## 15.1 What's in a daily series? {#s1}
+
+A daily count of emergency visits mixes several patterns: a slow **long-term trend**, an annual **seasonal** cycle, a weekly **day-of-week** cycle, holidays, and day-to-day noise that may contain the effects of temperature and pollution we want to study. A regression model separates them. Switch each component on to see its contribution.
+
+```{=html}
+<div class="cw cpanel">
+  <div class="btns" role="group" aria-label="Components"><label class="small"><input type="checkbox" id="dTr" checked> trend</label> <label class="small"><input type="checkbox" id="dSe" checked> season</label> <label class="small"><input type="checkbox" id="dDw"> day of week</label></div>
+  <div class="ctrl"><label for="dYr">Show year</label><select id="dYr"><option value="all">all five years</option><option>2020</option><option>2021</option><option selected>2022</option><option>2023</option><option>2024</option></select></div>
+  <svg id="dSer" viewBox="0 0 1000 260" role="img" aria-label="Daily visits and fitted components"></svg>
+  <svg id="dRes" viewBox="0 0 1000 150" role="img" aria-label="What remains after removing the components"></svg>
+  <div class="now" id="dNow"></div>
+</div>
+```
+
+::: {.further}
+
+**Further reading:** @bhaskaran2013time is a widely used tutorial on time-series regression in environmental epidemiology; @peng2008statistical cover the methods with R examples; @armstrong2006models discusses temperature–mortality models.
+
+:::
+
+## 15.2 How much to control for time? {#s2}
+
+A spline of time with a few degrees of freedom per year removes the seasons and trends. Too few, and seasonal confounding leaks into the pollution estimate. Too many, and the spline starts to absorb the short-term variation that carries the information about pollution. The usual approach is to examine how the estimate changes across a range, and to choose the flexibility in advance. Here the question is the effect of PM2.5 (average of the same and previous day) on daily visits, adjusted for temperature and day of week.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="tDf">Degrees of freedom per year for time</label><input type="range" id="tDf" min="0" max="12" value="7"><output id="tDfO"></output></div>
+  <label class="small"><input type="checkbox" id="tTemp" checked> adjust for temperature</label>
+  <svg id="tSens" viewBox="0 0 520 260" role="img" aria-label="PM2.5 estimate by flexibility of the time spline"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="tStats"></div><div class="now" id="tNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$Y_t \sim \text{quasi-Poisson}(\mu_t)$$
+$$\log\mu_t = \alpha + \beta\,\overline{PM}_{t,t-1} + s(t; \text{df}) + f(T_t) + \gamma^\top \mathrm{dow}_t$$
+
+::: {.note}
+
+$s(t; \text{df})$ = natural spline of time; $f$ = spline of temperature.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+fit <- glm(visits ~ pm01 +
+             splines::ns(t, df = 7 * 5) +
+             splines::ns(temp, df = 3) + dow,
+           family = quasipoisson,
+           data = city_daily)
+```
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Choosing the degrees of freedom for time by looking at which value gives the most striking (or the most significant) pollution estimate. Fix the choice in advance from the literature, typically 4 to 8 per year, and report the sensitivity analysis.
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): sensitivity of the PM2.5 estimate to the time spline"}
+
+```{r}
+city_daily <- visits |>
+  group_by(date) |>
+  summarise(visits = sum(visits), temp = first(temp_city), pm25 = first(pm25),
+            dow = first(dow), holiday = first(holiday), .groups = "drop") |>
+  mutate(t = row_number(), pm01 = (pm25 + lag(pm25)) / 2 / 10) |>
+  filter(!is.na(pm01))
+
+fit_df <- function(df_per_year) {
+  f <- glm(visits ~ pm01 + splines::ns(t, df = df_per_year * 5) + splines::ns(temp, df = 3) + dow,
+           family = quasipoisson, data = city_daily)
+  b <- coef(f)["pm01"]; s <- sqrt(vcov(f)["pm01", "pm01"])
+  tibble(df_per_year, rr = exp(b), low = exp(b - 1.96 * s), high = exp(b + 1.96 * s),
+         dispersion = summary(f)$dispersion)
+}
+map(c(2, 4, 7, 10), fit_df) |> bind_rows()
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @peng2006model study how the choice of time adjustment affects pollution estimates; @bhaskaran2013time give practical guidance on choosing degrees of freedom; @peng2008statistical on sensitivity analyses.
+
+:::
+
+## 15.3 Residual autocorrelation and dispersion {#s3}
+
+After the time spline, residuals should look like noise. If today's residual still predicts tomorrow's, standard errors are too small. The autocorrelation function shows this, lag by lag. With the model from 15.2, see how the residual autocorrelation and dispersion change with the degrees of freedom.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel"><svg id="aAcf" viewBox="0 0 520 220" role="img" aria-label="Autocorrelation of residuals"></svg></div>
+<div class="cpanel"><div class="now" id="aNow"></div></div>
+</div>
+```
+
+::: {.further}
+
+**Further reading:** @bhaskaran2013time on residual checks in time-series studies; @peng2008statistical on autocorrelation and overdispersion; @fox2016applied on GLM residuals.
+
+:::
+
+## 15.4 The time-stratified case-crossover design {#s4}
+
+A **case-crossover** study compares each case's exposure on the day of the event with the same person's exposure on nearby control days. In the **time-stratified** version, control days are the other days on the same weekday in the same month and year. Each stratum then acts as its own comparison, so season, trend and day of week are controlled by design. Analyzed with a conditional Poisson model, it is equivalent to a time-series model with an indicator for every stratum.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel"><svg id="ccPlot" viewBox="0 0 520 240" role="img" aria-label="Estimates from three designs"></svg></div>
+<div class="cpanel"><div class="statgrid" id="ccStats"></div><div class="now" id="ccNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\log\mu_t = \alpha_{s(t)} + \beta\,\overline{PM}_{t,t-1} + f(T_t)$$
+$$L_c(\beta) = \prod_s \prod_{t \in s}\left(\frac{e^{\beta x_t}}{\sum_{t' \in s} e^{\beta x_{t'}}}\right)^{y_t}$$
+
+::: {.note}
+
+$s(t)$ = stratum (year × month × weekday). Conditioning on each stratum's total removes $\alpha_s$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+city_daily <- city_daily |>
+  mutate(stratum = interaction(year(date),
+                               month(date), dow))
+glm(visits ~ pm01 + splines::ns(temp, df = 3) +
+      stratum, family = quasipoisson,
+    data = city_daily)
+# or gnm::gnm(..., eliminate = stratum)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#ccReport}
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+In a Bayesian time-series model, the smooth function of time can be given a random-walk prior, which says that each week's level is close to the previous week's. Its smoothness is then estimated from the data rather than chosen as a number of degrees of freedom. Lesson 25 uses this for the trend.
+
+:::
+
+::: {.further}
+
+**Further reading:** @maclure1991case introduced the case-crossover design; @janes2005case show why time-stratified referents avoid bias; @armstrong2014conditional explain the conditional Poisson model and its equivalence with case-crossover analysis.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Daily health series contain trend, season, day-of-week and holiday patterns, which confound short-term exposures that share them.
+- A spline of time controls seasonal and long-term confounding. Its flexibility should be chosen in advance and checked in a sensitivity analysis.
+- Residual autocorrelation and overdispersion show what the model misses; quasi-Poisson standard errors account for overdispersion.
+- The time-stratified case-crossover design controls time trends by design, and is equivalent to a conditional Poisson time-series model.
+
+```{=html}
+<div class="done" data-lesson="lesson-15"><button type="button"></button><span></span></div>
+<script src="assets/lesson-15.js"></script>
+```

@@ -1,0 +1,961 @@
+# Glossary source, part 4: time series, lags, space, clustering and Bayesian methods.
+
+- id: time-series
+  term: Time-series study
+  category: Time series
+  aliases: [time-series study, time-series studies, time series, time-series regression, time-series analysis]
+  short: >-
+    A study relating day-to-day changes in an exposure to day-to-day changes in health counts in one population.
+  full: >-
+    Because the population is compared with itself, slowly varying confounders (age structure,
+    smoking) are controlled by design. What remains to control are trends, seasons, day of week and
+    holidays.
+  formal: >-
+    Typically $Y_t \sim \text{quasi-Poisson}(\mu_t)$, $\log\mu_t = \alpha + f(x_t) + s(t) + \gamma^\top
+    \text{dow}_t$, with $s(t)$ a spline of time.
+  related: [seasonality, trend, autocorrelation, dlnm]
+  lessons: [15]
+
+- id: trend
+  term: Long-term trend
+  category: Time series
+  aliases: [long-term trend, long-term trends, secular trend, trend, trends]
+  short: >-
+    Slow change in the level of a series over years, from changes in population, coding or services.
+  related: [seasonality, time-series]
+  lessons: [15]
+
+- id: seasonality
+  term: Seasonality
+  category: Time series
+  aliases: [seasonality, seasonal pattern, seasonal patterns, seasonal variation, seasonal]
+  short: >-
+    A pattern that repeats every year, such as winter peaks in respiratory visits.
+  full: >-
+    Seasons confound temperature effects, because temperature is itself seasonal. Controlling
+    seasonality too weakly attributes seasonal illness to temperature; controlling it too strongly
+    removes real temperature variation.
+  related: [trend, fourier-terms, time-series]
+  lessons: [15]
+
+- id: autocorrelation
+  term: Autocorrelation
+  category: Time series
+  aliases: [autocorrelation, autocorrelated, serial correlation, autocorrelation function, ACF]
+  short: >-
+    Correlation of a series with itself at earlier times: today resembles yesterday.
+  full: >-
+    Residual autocorrelation means the model hasn't captured all time patterns. It makes standard
+    errors too small. The ACF plot shows the correlation at each lag.
+  formal: >-
+    $\rho(k) = \mathrm{Corr}(Y_t, Y_{t-k})$, estimated by
+    $\hat{\rho}(k) = \frac{\sum_t (y_t - \bar{y})(y_{t-k} - \bar{y})}{\sum_t (y_t - \bar{y})^2}$.
+  r: "acf(residuals(fit, type = \"pearson\"))"
+  related: [time-series, independence, spatial-autocorrelation]
+  lessons: [15]
+
+- id: fourier-terms
+  term: Fourier terms
+  category: Time series
+  aliases: [Fourier terms, Fourier series, harmonic terms]
+  short: >-
+    Sine and cosine terms used to model smooth seasonal cycles.
+  formal: >-
+    $\sum_{h=1}^{H}\left[a_h \sin\left(\frac{2\pi h\, t}{365.25}\right) + b_h \cos\left(\frac{2\pi h\, t}{365.25}\right)\right]$.
+  related: [seasonality]
+  lessons: [15]
+
+- id: case-crossover
+  term: Case-crossover design
+  category: Time series
+  aliases: [case-crossover design, case-crossover, time-stratified case-crossover]
+  short: >-
+    A design comparing each case's exposure on the event day with their own exposure on nearby
+    control days.
+  full: >-
+    Each person serves as their own control, so time-invariant confounders are removed. The
+    time-stratified version (control days on the same weekday in the same month) gives results
+    equivalent to a time-series model.
+  formal: >-
+    Analyzed by conditional logistic regression, strata = case × month; estimates the rate ratio.
+  related: [time-series, case-control-study]
+  lessons: [15]
+
+- id: harvesting
+  term: Harvesting (mortality displacement)
+  category: Time series
+  aliases: [harvesting, mortality displacement, short-term displacement]
+  short: >-
+    When an exposure brings forward events by only a few days among people who were already very frail.
+  full: >-
+    Shows as an excess followed by a deficit in the lag–response curve. The cumulative effect over a
+    long enough lag accounts for it.
+  related: [lag, dlm, cumulative-effect]
+  lessons: [16]
+
+- id: lag
+  term: Lag
+  category: Lags and DLNMs
+  aliases: [lag, lags, lagged, lagged effect, lagged effects, lag structure]
+  short: >-
+    The delay between an exposure and its effect: lag 2 means the exposure two days earlier.
+  formal: >-
+    The exposure at lag $\ell$ for day $t$ is $x_{t-\ell}$.
+  related: [dlm, lag-response, harvesting]
+  lessons: [15, 16]
+
+- id: dlm
+  term: Distributed lag model (DLM)
+  category: Lags and DLNMs
+  aliases: [distributed lag model, distributed lag models, DLM, DLMs]
+  short: >-
+    A model in which the effect of an exposure is spread over several days, with one coefficient per lag.
+  full: >-
+    Unconstrained DLMs have highly correlated lag coefficients ([[multicollinearity]]) and noisy
+    estimates. Constraining the lag curve to a smooth shape stabilizes them.
+  formal: >-
+    $\log\mu_t = \alpha + \sum_{\ell=0}^{L}\beta_\ell\, x_{t-\ell} + \dots$, with cumulative effect $\sum_\ell \beta_\ell$.
+  related: [dlnm, lag, cumulative-effect, multicollinearity]
+  lessons: [16]
+
+- id: dlnm
+  term: Distributed lag non-linear model (DLNM)
+  category: Lags and DLNMs
+  aliases: [distributed lag non-linear model, distributed lag non-linear models, distributed lag nonlinear model, DLNM, DLNMs]
+  short: >-
+    A model that lets an exposure's effect be non-linear in its level and spread over several lags at once.
+  full: >-
+    The effect is a surface over exposure level and lag, built from a [[cross-basis]]. Summaries
+    include the cumulative [[exposure-response-function]], the [[mmt]], and relative risks at chosen
+    percentiles.
+  formal: >-
+    $\log\mu_t = \alpha + \sum_{j}\sum_{k} \eta_{jk}\, w_{t,jk} + \dots$, where
+    $w_{t,jk} = \sum_\ell b_j(x_{t-\ell})\, c_k(\ell)$ combine a basis $b_j$ in the exposure and $c_k$ in the lag.
+  r: |-
+    cb <- dlnm::crossbasis(d$temp, lag = 21,
+                           argvar = list(fun = "ns", df = 4), arglag = list(fun = "ns", df = 4))
+  report: >-
+    "RR at the 99th temperature percentile relative to the MMT: 1.32 (95% CI 1.18 to 1.48), cumulative over lags 0–21"
+  related: [cross-basis, exposure-response-function, mmt, lag-response]
+  lessons: [16]
+
+- id: cross-basis
+  term: Cross-basis
+  category: Lags and DLNMs
+  aliases: [cross-basis, crossbasis, cross basis]
+  short: >-
+    The set of variables that describes an exposure's effect jointly over its level and its lag in a DLNM.
+  related: [dlnm, spline]
+  lessons: [16]
+
+- id: exposure-response-function
+  term: Exposure–response function (ERF)
+  category: Lags and DLNMs
+  aliases: [exposure-response function, exposure–response function, exposure-response functions, exposure-response curve, exposure–response curve, exposure-response relationship, ERF, ERFs, dose-response]
+  short: >-
+    The curve showing how the relative risk changes across exposure levels.
+  full: >-
+    For temperature it is typically U- or J-shaped, with a minimum at the [[mmt]]. In a DLNM it is
+    usually reported cumulatively over all lags.
+  related: [dlnm, mmt, cumulative-effect]
+  lessons: [11, 16]
+
+- id: lag-response
+  term: Lag–response curve
+  category: Lags and DLNMs
+  aliases: [lag-response, lag–response, lag-response curve, lag–response curve, lag-response function]
+  short: >-
+    The curve showing how the effect of an exposure at a given level is distributed over lags.
+  related: [dlnm, lag, harvesting]
+  lessons: [16]
+
+- id: cumulative-effect
+  term: Cumulative effect
+  category: Lags and DLNMs
+  aliases: [cumulative effect, cumulative effects, cumulative relative risk, overall cumulative]
+  short: >-
+    The total effect of an exposure summed over all lags.
+  formal: >-
+    $\log RR_{\text{cum}}(x) = \sum_{\ell=0}^{L}\log RR(x, \ell)$; its variance needs the full covariance
+    of the lag coefficients.
+  related: [dlm, dlnm, harvesting]
+  lessons: [16]
+
+- id: mmt
+  term: Minimum morbidity or mortality temperature (MMT)
+  category: Lags and DLNMs
+  aliases: [minimum morbidity temperature, minimum mortality temperature, minimum risk temperature, MMT, MMTs]
+  short: >-
+    The temperature at which the cumulative exposure–response curve is lowest, used as the reference for relative risks.
+  full: >-
+    The MMT is itself an estimate with uncertainty, often wide and asymmetric. Conventional intervals
+    for RRs treat it as known, which is why they pinch to zero width at the reference.
+  formal: >-
+    $\mathrm{MMT} = \arg\min_x \log RR_{\text{cum}}(x)$ over a restricted range, often the 1st–99th
+    percentiles.
+  related: [exposure-response-function, dlnm]
+  lessons: [16, 25]
+
+- id: areal-data
+  term: Areal data
+  category: Spatial
+  aliases: [areal data, area-level data, lattice data]
+  short: >-
+    Data aggregated over areas, such as visits per district.
+  related: [point-data, disease-mapping, spatial-autocorrelation]
+  lessons: [17]
+
+- id: point-data
+  term: Point-referenced data
+  category: Spatial
+  aliases: [point-referenced data, point data, geostatistical data]
+  short: >-
+    Data recorded at exact locations, such as monitors or home addresses.
+  related: [areal-data, kriging]
+  lessons: [17]
+
+- id: kriging
+  term: Kriging
+  category: Spatial
+  aliases: [kriging]
+  short: >-
+    Spatial interpolation that predicts values at unmeasured locations from nearby measurements,
+    weighted by their spatial correlation.
+  related: [point-data, spatial-autocorrelation]
+  lessons: [17]
+
+- id: spatial-autocorrelation
+  term: Spatial autocorrelation
+  category: Spatial
+  aliases: [spatial autocorrelation, spatially correlated, spatial correlation, spatial dependence]
+  short: >-
+    The tendency of nearby areas to have similar values.
+  full: >-
+    Neighboring districts share environment and population characteristics. Ignoring spatial
+    autocorrelation in residuals overstates precision.
+  related: [morans-i, autocorrelation, car-model]
+  lessons: [17]
+
+- id: morans-i
+  term: Moran's I
+  category: Spatial
+  aliases: [Moran's I, Morans I, Moran I]
+  short: >-
+    A statistic measuring spatial autocorrelation: positive when neighbors resemble each other.
+  formal: >-
+    $$I = \frac{n}{\sum_{ij} w_{ij}} \frac{\sum_i\sum_j w_{ij}(y_i - \bar{y})(y_j - \bar{y})}{\sum_i (y_i - \bar{y})^2}$$
+    with $E[I] = -1/(n-1)$ under no autocorrelation, usually tested by permutation.
+  r: "spdep::moran.test(x, spdep::nb2listw(nb))"
+  related: [spatial-autocorrelation, adjacency]
+  lessons: [17]
+
+- id: adjacency
+  term: Neighbors and spatial weights
+  category: Spatial
+  aliases: [adjacency matrix, spatial weights, spatial weights matrix, neighbor structure, neighbour structure, neighbors, neighbours, queen contiguity, rook contiguity]
+  short: >-
+    A definition of which areas count as neighbors, written as a matrix W.
+  formal: >-
+    $w_{ij} = 1$ if areas $i$ and $j$ share a border (queen: share a border or corner), else 0;
+    often row-standardized.
+  r: "spdep::poly2nb(districts_sf, queen = TRUE)"
+  related: [morans-i, car-model]
+  lessons: [17, 25]
+
+- id: ecological-fallacy
+  term: Ecological fallacy
+  category: Spatial
+  aliases: [ecological fallacy, ecological bias, ecological inference]
+  short: >-
+    Wrongly concluding that an association between area averages holds for the individuals within them.
+  related: [ecological-study, areal-data]
+  lessons: [17]
+
+- id: small-area-estimation
+  term: Small-area problem
+  category: Spatial
+  aliases: [small-area estimation, small area estimation, small-numbers problem, small numbers problem, small areas]
+  short: >-
+    Rates and SMRs for areas with few people are very unstable, so the most extreme values on a map
+    are often just the smallest areas.
+  full: >-
+    Smoothing estimates toward the overall mean or toward neighbors ([[shrinkage]]) gives more
+    reliable maps.
+  related: [smr, disease-mapping, shrinkage, bym2]
+  lessons: [17, 25]
+
+- id: disease-mapping
+  term: Disease mapping
+  category: Spatial
+  aliases: [disease mapping, disease map, disease maps]
+  short: >-
+    Mapping area-level disease risk, usually as smoothed relative risks or SMRs.
+  formal: >-
+    $O_j \sim \mathrm{Poisson}(E_j\theta_j)$, $\log\theta_j = \alpha + u_j + v_j$, with spatially structured
+    $u_j$ and unstructured $v_j$ effects.
+  related: [smr, bym2, car-model]
+  lessons: [17, 25]
+
+- id: car-model
+  term: Conditional autoregressive (CAR) model
+  category: Spatial
+  aliases: [conditional autoregressive model, conditional autoregressive, CAR model, CAR prior, ICAR, intrinsic CAR]
+  short: >-
+    A model for spatially structured area effects, in which each area's effect is centered on the
+    average of its neighbors.
+  formal: >-
+    Intrinsic CAR: $u_j \mid u_{-j} \sim \mathrm{Normal}\!\left(\frac{1}{n_j}\sum_{k \sim j} u_k,\ \frac{\tau^2}{n_j}\right)$,
+    with $n_j$ neighbors.
+  related: [bym2, adjacency, disease-mapping]
+  lessons: [25]
+
+- id: bym2
+  term: BYM2 model
+  category: Spatial
+  aliases: [BYM2, BYM model, Besag-York-Mollié, Besag–York–Mollié]
+  short: >-
+    A spatial model that splits area effects into spatially structured and unstructured parts, with
+    a parameter giving the share that is spatial.
+  formal: >-
+    $u_j = \sigma\left(\sqrt{\rho}\, s_j + \sqrt{1-\rho}\, v_j\right)$, with $s$ a scaled ICAR effect, $v_j
+    \sim \mathrm{Normal}(0,1)$, and $\rho \in [0,1]$ the proportion of spatial variance.
+  related: [car-model, disease-mapping, hierarchical-model]
+  lessons: [25]
+
+- id: clustering
+  term: Clustering (clustered data)
+  category: Multilevel models
+  aliases: [clustering, clustered data, clustered observations]
+  short: >-
+    When observations come in groups, such as children within schools, whose members resemble each other.
+  full: >-
+    Clustered observations carry less independent information than their number suggests. Ignoring
+    clustering gives standard errors that are too small.
+  related: [icc, random-effect, robust-standard-error]
+  lessons: [18]
+
+- id: icc
+  term: Intraclass correlation (ICC)
+  category: Multilevel models
+  aliases: [intraclass correlation, intra-class correlation, intraclass correlation coefficient, ICC]
+  short: >-
+    The share of the total variation that lies between clusters, or the correlation between two
+    members of the same cluster.
+  formal: >-
+    $ICC = \frac{\tau^2}{\tau^2 + \sigma^2}$; for logistic models, $\sigma^2 = \pi^2/3$ on the latent scale.
+    Design effect $= 1 + (m - 1)\,ICC$ for clusters of size $m$.
+  related: [clustering, random-intercept]
+  lessons: [18]
+
+- id: fixed-effect
+  term: Fixed effect
+  category: Multilevel models
+  aliases: [fixed effect, fixed effects, fixed-effect, fixed-effects]
+  short: >-
+    An effect treated as a fixed unknown constant, estimated separately for each group without
+    borrowing information across groups.
+  confusion: >-
+    "Fixed effects" means different things in econometrics, in mixed models and in meta-analysis.
+    Check which is meant.
+  related: [random-effect, partial-pooling]
+  lessons: [18]
+
+- id: random-effect
+  term: Random effect
+  category: Multilevel models
+  aliases: [random effect, random effects, random-effects, mixed model, mixed models, mixed-effects model, mixed-effects models]
+  short: >-
+    A group-specific effect treated as drawn from a common distribution, so groups borrow
+    information from each other.
+  full: >-
+    A random effect is, in effect, a prior whose variance is estimated from the data. It is the
+    frequentist route to [[partial-pooling]].
+  formal: >-
+    $g(\mu_{ij}) = \alpha + u_j + x_{ij}^\top\beta$, $u_j \sim \mathrm{Normal}(0, \tau^2)$.
+  r: "lme4::glmer(asthma ~ no2_modeled + (1 | school), family = binomial, data = cohort)"
+  related: [random-intercept, random-slope, partial-pooling, hierarchical-model]
+  lessons: [18, 24]
+
+- id: random-intercept
+  term: Random intercept
+  category: Multilevel models
+  aliases: [random intercept, random intercepts]
+  short: >-
+    A random effect that lets each group have its own baseline level.
+  r: "(1 | school)"
+  related: [random-effect, random-slope]
+  lessons: [18]
+
+- id: random-slope
+  term: Random slope
+  category: Multilevel models
+  aliases: [random slope, random slopes]
+  short: >-
+    A random effect that lets each group have its own effect of a predictor, such as a district-specific heat effect.
+  formal: >-
+    $\log\mu_{tj} = \alpha + u_{0j} + (\beta + u_{1j})x_{tj}$, with $(u_{0j}, u_{1j})$ bivariate normal.
+  r: "(1 + temp | district)"
+  related: [random-intercept, effect-modification]
+  lessons: [18, 24]
+
+- id: partial-pooling
+  term: Partial pooling (no pooling, complete pooling)
+  category: Multilevel models
+  aliases: [partial pooling, no pooling, complete pooling, borrowing strength, borrow strength]
+  short: >-
+    Estimating each group's effect as a compromise between its own data (no pooling) and the overall
+    average (complete pooling).
+  full: >-
+    Groups with little data are pulled most toward the average; large groups keep close to their own
+    estimate. Hierarchical models decide how much to pool from the data.
+  formal: >-
+    For normal models, $\hat{\theta}_j^{\text{pp}} = w_j\bar{y}_j + (1 - w_j)\hat{\mu}$ with
+    $w_j = \frac{\tau^2}{\tau^2 + \sigma_j^2}$.
+  related: [shrinkage, random-effect, hierarchical-model]
+  lessons: [18, 24]
+
+- id: shrinkage
+  term: Shrinkage
+  category: Multilevel models
+  aliases: [shrinkage, shrunken estimate, shrunken estimates]
+  short: >-
+    Pulling noisy estimates toward a common value, which trades a little bias for much less variance.
+  full: >-
+    Random effects, penalized splines, ridge regression and Bayesian priors all shrink. Shrunken
+    estimates are, on average, closer to the truth when there are many noisy estimates.
+  related: [partial-pooling, penalized-spline, prior, hierarchical-model]
+  lessons: [11, 18, 24]
+
+- id: blup
+  term: BLUP (best linear unbiased predictor)
+  category: Multilevel models
+  aliases: [BLUP, BLUPs, best linear unbiased predictor, conditional modes]
+  short: >-
+    The shrunken estimate of a group's random effect from a mixed model.
+  r: "lme4::ranef(fit)"
+  related: [random-effect, shrinkage]
+  lessons: [18]
+
+- id: meta-analysis
+  term: Meta-analysis
+  category: Multilevel models
+  aliases: [meta-analysis, meta-analyses, meta-regression, two-stage analysis, two-stage meta-analysis, multi-city study, multi-location study]
+  short: >-
+    Combining estimates from several studies or locations into an overall estimate.
+  full: >-
+    Multi-city temperature studies often use a two-stage design: fit a DLNM in each city, then pool
+    the city-specific curves with a multivariate meta-analysis. Random-effects meta-analysis allows
+    true effects to differ ([[heterogeneity]]).
+  formal: >-
+    Random effects: $\hat{\theta}_k \sim \mathrm{Normal}(\theta_k, s_k^2)$, $\theta_k \sim \mathrm{Normal}(\mu, \tau^2)$;
+    pooled $\hat{\mu} = \sum_k w_k\hat{\theta}_k/\sum_k w_k$ with $w_k = 1/(s_k^2 + \hat{\tau}^2)$.
+  r: "mixmeta::mixmeta(coefs ~ 1, S = vcovs, method = \"reml\")"
+  related: [heterogeneity, random-effect, partial-pooling]
+  lessons: [18]
+
+- id: heterogeneity
+  term: Heterogeneity
+  category: Multilevel models
+  aliases: [heterogeneity, heterogeneous, between-study heterogeneity, I², I-squared, tau-squared, τ²]
+  short: >-
+    Genuine variation in effects between studies, places or groups, beyond what chance explains.
+  full: >-
+    Heat effects differ between cities and districts because of climate, housing and population. In
+    meta-analysis it is quantified by τ² (the variance of true effects) and I² (the share of
+    observed variation due to real differences). Explaining it is the job of meta-regression and
+    effect modification analyses.
+  formal: >-
+    Cochran's $Q = \sum_k w_k(\hat{\theta}_k - \hat{\theta})^2$ with $w_k = 1/s_k^2$;
+    $I^2 = \max\left(0, \frac{Q - (K-1)}{Q}\right)$; $\tau^2 = \mathrm{Var}(\theta_k)$.
+  confusion: >-
+    Not the same as [[heteroskedasticity]], which is non-constant error variance within a single model.
+  related: [meta-analysis, effect-modification, heteroskedasticity, random-slope]
+  lessons: [18, 24]
+
+- id: bayesian-inference
+  term: Bayesian inference
+  category: Bayesian basics
+  aliases: [Bayesian inference, Bayesian analysis, Bayesian statistics, Bayesian approach, Bayesian model, Bayesian models]
+  short: >-
+    Inference that describes unknown parameters with probability distributions, updated from prior to
+    posterior by the data.
+  formal: >-
+    $p(\theta \mid y) = \frac{p(y \mid \theta)\,p(\theta)}{p(y)} \propto p(y \mid \theta)\,p(\theta)$.
+  related: [prior, posterior, likelihood, bayes-theorem]
+  lessons: [19]
+
+- id: prior
+  term: Prior distribution
+  category: Bayesian basics
+  aliases: [prior distribution, prior distributions, prior, priors]
+  pre: [the, a, its, this, that, informative, weakly, vague, flat, skeptical, narrow, wide, normal, hierarchical, your, same, different, of, "on", and]
+  short: >-
+    A probability distribution describing what is plausible for a parameter before seeing the data.
+  full: >-
+    Priors must be placed on the parameters of the model equation. They range from
+    [[vague-prior|vague]] to [[informative-prior|informative]]; [[weakly-informative-prior|weakly
+    informative]] priors are a common default. Check them with [[prior-predictive-check|prior
+    predictive checks]].
+  formal: >-
+    $p(\theta)$, for example $\beta \sim \mathrm{Normal}(0, 0.05^2)$ on the log rate ratio scale.
+  r: "prior(normal(0, 0.05), class = \"b\")"
+  related: [posterior, likelihood, weakly-informative-prior, prior-predictive-check]
+  lessons: [19, 20]
+
+- id: posterior
+  term: Posterior distribution
+  category: Bayesian basics
+  aliases: [posterior distribution, posterior distributions, posterior, posteriors]
+  pre: [the, a, its, this, joint, marginal, of, and]
+  short: >-
+    The distribution of a parameter after combining the prior with the data through the likelihood.
+  full: >-
+    In practice the posterior is represented by thousands of [[posterior-draws|draws]] from MCMC.
+    Any question about the parameters is answered by computing on the draws.
+  formal: >-
+    $p(\theta \mid y) \propto p(y \mid \theta)\,p(\theta)$, normalized by the [[marginal-likelihood]] $p(y)$.
+  related: [prior, likelihood, credible-interval, posterior-draws]
+  lessons: [19]
+
+- id: posterior-draws
+  term: Posterior draws
+  category: Bayesian computation
+  aliases: [posterior draws, posterior samples, draws]
+  short: >-
+    A large set of parameter values sampled from the posterior, which represent it.
+  full: >-
+    Every derived quantity (a rate ratio, a predicted count, an attributable number, an MMT) is
+    computed on each draw. The spread of the results is its uncertainty.
+  r: "posterior::as_draws_df(fit)"
+  related: [posterior, mcmc]
+  lessons: [19, 22]
+
+- id: credible-interval
+  term: Credible interval
+  category: Bayesian basics
+  aliases: [credible interval, credible intervals, CrI, CrIs, posterior interval, highest density interval]
+  short: >-
+    An interval containing a stated probability of the posterior, such as 95%.
+  full: >-
+    A 95% credible interval can be read as "given the model, prior and data, there is a 95%
+    probability the parameter lies here", the reading people often wrongly give to confidence
+    intervals.
+  formal: >-
+    Equal-tailed: the 2.5th and 97.5th percentiles of $p(\theta \mid y)$. Highest density interval: the
+    narrowest region containing 95%.
+  report: >-
+    "RR 1.14 (95% credible interval 1.03 to 1.26)"
+  related: [confidence-interval, posterior]
+  lessons: [19]
+
+- id: posterior-predictive
+  term: Posterior predictive distribution
+  category: Bayesian basics
+  aliases: [posterior predictive distribution, posterior predictive, predictive distribution]
+  short: >-
+    The distribution of new data implied by the model and the posterior, combining parameter and outcome uncertainty.
+  formal: >-
+    $p(\tilde{y} \mid y) = \int p(\tilde{y} \mid \theta)\,p(\theta \mid y)\,d\theta$.
+  r: "brms::posterior_predict(fit)"
+  related: [posterior-predictive-check, posterior]
+  lessons: [22]
+
+- id: conjugate-prior
+  term: Conjugate prior
+  category: Bayesian basics
+  aliases: [conjugate prior, conjugate priors, conjugacy, conjugate]
+  short: >-
+    A prior that, combined with a given likelihood, gives a posterior in the same family.
+  formal: >-
+    Poisson–gamma: $\lambda \sim \mathrm{Gamma}(a, b)$ and $y_1, \dots, y_n \sim \mathrm{Poisson}(\lambda)$ give
+    $\lambda \mid y \sim \mathrm{Gamma}(a + \sum y_i,\ b + n)$. Beta–binomial is the analogue for proportions.
+  related: [gamma-distribution, beta-distribution, prior]
+  lessons: [19]
+
+- id: grid-approximation
+  term: Grid approximation
+  category: Bayesian computation
+  aliases: [grid approximation, grid posterior]
+  short: >-
+    Computing a posterior by evaluating prior × likelihood on a grid of parameter values.
+  full: >-
+    Works for one or two parameters, which is why it is used for teaching. With many parameters the
+    grid becomes impossibly large, and MCMC is used instead.
+  related: [mcmc, posterior]
+  lessons: [19]
+
+- id: informative-prior
+  term: Informative prior
+  category: Priors
+  aliases: [informative prior, informative priors]
+  short: >-
+    A prior that encodes substantial existing knowledge, such as results of earlier studies.
+  related: [weakly-informative-prior, vague-prior, prior]
+  lessons: [20]
+
+- id: weakly-informative-prior
+  term: Weakly informative prior
+  category: Priors
+  aliases: [weakly informative prior, weakly informative priors, weakly informative, regularizing prior]
+  short: >-
+    A prior that rules out implausible values but lets the data dominate wherever they are informative.
+  full: >-
+    For a heat effect, $\mathrm{Normal}(0, 0.05)$ on the log scale says "almost certainly less than about
+    ±10% per degree". It costs nothing when data are plentiful and protects estimates when they are not.
+  related: [prior, vague-prior, shrinkage]
+  lessons: [20]
+
+- id: vague-prior
+  term: Vague (non-informative) prior
+  category: Priors
+  aliases: [vague prior, vague priors, non-informative prior, noninformative prior, uninformative prior, flat prior, flat priors, diffuse prior]
+  short: >-
+    A very wide prior intended to express little information.
+  full: >-
+    "Uninformative" priors do not exist: a prior flat on one scale is informative on another, and very
+    wide priors can imply absurd predictions. They also distort [[bayes-factor|Bayes factors]] (see
+    [[lindleys-paradox]]).
+  related: [weakly-informative-prior, lindleys-paradox]
+  lessons: [20, 23]
+
+- id: prior-predictive-check
+  term: Prior predictive check
+  category: Priors
+  aliases: [prior predictive check, prior predictive checks, prior predictive simulation, prior predictive distribution]
+  short: >-
+    Simulating data from the prior alone, to see whether the prior implies plausible outcomes.
+  formal: >-
+    Draw $\theta^{(s)} \sim p(\theta)$, then $\tilde{y}^{(s)} \sim p(y \mid \theta^{(s)})$, and inspect $\tilde{y}$.
+  r: "brm(..., sample_prior = \"only\")"
+  related: [prior, posterior-predictive-check]
+  lessons: [20]
+
+- id: prior-sensitivity
+  term: Prior sensitivity analysis
+  category: Priors
+  aliases: [prior sensitivity, prior sensitivity analysis, sensitivity to the prior]
+  short: >-
+    Refitting with different priors to see whether the conclusions change.
+  related: [prior, weakly-informative-prior]
+  lessons: [20, 23]
+
+- id: mcmc
+  term: Markov chain Monte Carlo (MCMC)
+  category: Bayesian computation
+  aliases: [Markov chain Monte Carlo, MCMC, sampler, samplers, sampling algorithm]
+  short: >-
+    Algorithms that draw samples from the posterior by wandering through parameter space, spending
+    time in each region in proportion to its posterior probability.
+  formal: >-
+    A Markov chain $\theta^{(1)}, \theta^{(2)}, \dots$ whose stationary distribution is $p(\theta \mid y)$;
+    averages over the chain converge to posterior expectations.
+  related: [metropolis, hmc, r-hat, ess, posterior-draws]
+  lessons: [21]
+
+- id: metropolis
+  term: Metropolis algorithm
+  category: Bayesian computation
+  aliases: [Metropolis algorithm, Metropolis-Hastings, Metropolis sampler, Metropolis]
+  short: >-
+    An MCMC algorithm that proposes random jumps and always accepts uphill moves, sometimes downhill ones.
+  formal: >-
+    Propose $\theta^* \sim q(\cdot \mid \theta)$ (symmetric); accept with probability
+    $\min\left(1, \frac{p(\theta^* \mid y)}{p(\theta \mid y)}\right)$.
+  related: [mcmc, hmc]
+  lessons: [21]
+
+- id: hmc
+  term: Hamiltonian Monte Carlo (HMC, NUTS)
+  category: Bayesian computation
+  aliases: [Hamiltonian Monte Carlo, HMC, NUTS, No-U-Turn Sampler, Stan]
+  short: >-
+    An MCMC algorithm that uses the shape of the posterior to make long, efficient moves. Stan uses it.
+  related: [mcmc, divergent-transition]
+  lessons: [21]
+
+- id: warmup
+  term: Warm-up (burn-in)
+  category: Bayesian computation
+  aliases: [warm-up, warmup, burn-in]
+  short: >-
+    The early MCMC iterations, used to reach the posterior and tune the sampler, then discarded.
+  related: [mcmc, trace-plot]
+  lessons: [21]
+
+- id: chain
+  term: Chain
+  category: Bayesian computation
+  aliases: [MCMC chain, MCMC chains, chains]
+  auto: false
+  short: >-
+    One run of an MCMC sampler. Several chains from different starting points are run to check convergence.
+  related: [r-hat, trace-plot]
+  lessons: [21]
+
+- id: trace-plot
+  term: Trace plot
+  category: Bayesian computation
+  aliases: [trace plot, trace plots, traceplot]
+  short: >-
+    A plot of each chain's sampled values against iteration. Healthy chains overlap like a fuzzy caterpillar.
+  r: "bayesplot::mcmc_trace(fit)"
+  related: [r-hat, chain]
+  lessons: [21]
+
+- id: r-hat
+  term: R-hat (potential scale reduction factor)
+  category: Bayesian computation
+  aliases: [R-hat, Rhat, R̂, potential scale reduction factor]
+  short: >-
+    A convergence diagnostic comparing variation between chains with variation within them. Values
+    above 1.01 are a warning.
+  formal: >-
+    $\hat{R} = \sqrt{\frac{\frac{n-1}{n}W + \frac{1}{n}B}{W}}$, with $W$ the mean within-chain variance and $B$
+    the between-chain variance (modern versions use rank-normalized split chains).
+  related: [ess, trace-plot, mcmc]
+  lessons: [21]
+
+- id: ess
+  term: Effective sample size (ESS)
+  category: Bayesian computation
+  aliases: [effective sample size, effective sample sizes, ESS, bulk-ESS, tail-ESS]
+  short: >-
+    The number of independent draws that would carry the same information as the correlated MCMC draws.
+  formal: >-
+    $ESS = \frac{N}{1 + 2\sum_{k \ge 1}\rho_k}$, with $\rho_k$ the autocorrelation of the chain at lag $k$.
+  related: [r-hat, mcmc]
+  lessons: [21]
+
+- id: divergent-transition
+  term: Divergent transition
+  category: Bayesian computation
+  aliases: [divergent transition, divergent transitions, divergences, divergence]
+  short: >-
+    A warning from Stan that the sampler could not explore part of the posterior reliably.
+  full: >-
+    Divergences often signal a difficult geometry, such as the funnel in hierarchical models. Do not
+    ignore them; reparameterize or rethink the priors.
+  related: [hmc, non-centered]
+  lessons: [21, 24]
+
+- id: posterior-predictive-check
+  term: Posterior predictive check
+  category: Bayesian basics
+  aliases: [posterior predictive check, posterior predictive checks, pp_check]
+  short: >-
+    Comparing data simulated from the fitted model with the observed data, to see whether the model
+    could have produced them.
+  r: "brms::pp_check(fit, ndraws = 20)"
+  related: [posterior-predictive, prior-predictive-check]
+  lessons: [22]
+
+- id: marginal-likelihood
+  term: Marginal likelihood (evidence)
+  category: Bayesian model comparison
+  aliases: [marginal likelihood, marginal likelihoods, model evidence]
+  short: >-
+    How well a model predicted the data before seeing it, averaging the likelihood over the prior.
+  full: >-
+    It penalizes models whose priors spread over many values that turn out to be wrong. It is the
+    ingredient of [[bayes-factor|Bayes factors]], and is very sensitive to the prior.
+  formal: >-
+    $p(y \mid M) = \int p(y \mid \theta, M)\,p(\theta \mid M)\,d\theta$.
+  r: "bridgesampling::bridge_sampler(fit)"
+  related: [bayes-factor, lindleys-paradox]
+  lessons: [23]
+
+- id: bayes-factor
+  term: Bayes factor
+  category: Bayesian model comparison
+  aliases: [Bayes factor, Bayes factors, BF, BF10, BF01]
+  short: >-
+    The ratio of how well two models or hypotheses predicted the observed data.
+  full: >-
+    BF₁₀ = 10 means the data are 10 times more probable under H1 than under H0. Bayes factors can
+    support the null, compare non-nested models and weigh many hypotheses at once, but they depend
+    strongly on the priors within each hypothesis.
+  formal: >-
+    $BF_{10} = \frac{p(y \mid H_1)}{p(y \mid H_0)}$, and posterior odds = $BF_{10}$ × prior odds.
+  report: >-
+    Labels (Lee & Wagenmakers): 1–3 anecdotal, 3–10 moderate, 10–30 strong, 30–100 very strong, >100 extreme.
+  related: [marginal-likelihood, savage-dickey, lindleys-paradox, posterior-model-probability]
+  lessons: [23]
+
+- id: savage-dickey
+  term: Savage–Dickey density ratio
+  category: Bayesian model comparison
+  aliases: [Savage-Dickey, Savage–Dickey, Savage-Dickey density ratio, Savage–Dickey density ratio]
+  short: >-
+    A shortcut: the Bayes factor for a point null equals the posterior density at the null value
+    divided by the prior density there.
+  formal: >-
+    For nested $H_0: \beta = 0$, $BF_{01} = \frac{p(\beta = 0 \mid y, H_1)}{p(\beta = 0 \mid H_1)}$.
+  related: [bayes-factor]
+  lessons: [23]
+
+- id: lindleys-paradox
+  term: Lindley's paradox
+  category: Bayesian model comparison
+  aliases: [Lindley's paradox, Lindley paradox, Jeffreys-Lindley paradox]
+  short: >-
+    A clearly significant result can come with a Bayes factor favoring the null, when the prior
+    under the alternative is very vague.
+  full: >-
+    A vague alternative spreads its predictions over huge effects that never happen, so it predicts
+    the data poorly. The fix is a prior based on subject knowledge.
+  related: [bayes-factor, vague-prior, marginal-likelihood]
+  lessons: [23]
+
+- id: rope
+  term: Region of practical equivalence (ROPE)
+  category: Bayesian model comparison
+  aliases: [region of practical equivalence, ROPE]
+  short: >-
+    A range of effects agreed in advance to be too small to matter, used to judge practical significance.
+  formal: >-
+    Report $P(\theta \in \text{ROPE} \mid y)$, or whether the 95% credible interval lies inside it.
+  related: [equivalence-test, credible-interval]
+  lessons: [23]
+
+- id: loo
+  term: Leave-one-out cross-validation (LOO, PSIS-LOO)
+  category: Bayesian model comparison
+  aliases: [leave-one-out cross-validation, LOO, PSIS-LOO, LOO-CV, elpd, ELPD]
+  short: >-
+    Comparing Bayesian models by how well each predicts every observation when that observation is left out.
+  formal: >-
+    $\mathrm{elpd}_{\text{loo}} = \sum_i \log p(y_i \mid y_{-i})$, estimated by Pareto-smoothed importance
+    sampling without refitting.
+  r: "loo::loo_compare(loo(fit1), loo(fit2))"
+  related: [waic, cross-validation, aic]
+  lessons: [23]
+
+- id: waic
+  term: Widely applicable information criterion (WAIC)
+  category: Bayesian model comparison
+  aliases: [widely applicable information criterion, Watanabe-Akaike information criterion, WAIC]
+  short: >-
+    A Bayesian analogue of AIC that estimates out-of-sample predictive accuracy. Lower is better.
+  formal: >-
+    $WAIC = -2\left(\sum_i \log E_{\text{post}}[p(y_i \mid \theta)] - \sum_i \mathrm{Var}_{\text{post}}[\log p(y_i \mid \theta)]\right)$.
+  related: [loo, aic]
+  lessons: [23]
+
+- id: posterior-model-probability
+  term: Posterior model probability
+  category: Bayesian model comparison
+  aliases: [posterior model probability, posterior model probabilities, posterior probability of a model]
+  short: >-
+    The probability of each model given the data, from the Bayes factors and the prior model probabilities.
+  formal: >-
+    $P(M_k \mid y) = \frac{p(y \mid M_k)P(M_k)}{\sum_j p(y \mid M_j)P(M_j)}$.
+  related: [bayes-factor, marginal-likelihood]
+  lessons: [23]
+
+- id: informative-hypothesis
+  term: Informative (order-constrained) hypothesis
+  category: Bayesian model comparison
+  aliases: [informative hypothesis, informative hypotheses, order-constrained hypothesis, order-constrained hypotheses, encompassing prior]
+  short: >-
+    A hypothesis stated as constraints on several parameters, such as "harmful in the elderly and
+    larger than in the young".
+  formal: >-
+    Encompassing-prior Bayes factor against the unconstrained model: $BF_{iu} = f_i / c_i$, the share of
+    posterior draws satisfying the constraints divided by the share of prior draws satisfying them.
+  r: "bain::bain(fit, \"b_old > b_young > 0\")"
+  related: [bayes-factor, effect-modification]
+  lessons: [23]
+
+- id: hierarchical-model
+  term: Hierarchical (multilevel) model
+  category: Hierarchical models
+  aliases: [hierarchical model, hierarchical models, hierarchical regression, multilevel model, multilevel models, Bayesian hierarchical model]
+  short: >-
+    A model in which group-level parameters are themselves given a distribution with its own unknown
+    parameters, so groups inform each other.
+  full: >-
+    District heat effects, school effects or exposure-specific coefficients are drawn from a common
+    distribution whose mean and spread are learned from the data. This produces [[partial-pooling]]
+    and stabilizes estimates for small groups and correlated exposures.
+  formal: >-
+    $y_{ij} \sim p(y \mid \theta_j)$, $\theta_j \sim \mathrm{Normal}(\mu, \tau^2)$, with [[hyperprior|hyperpriors]]
+    $p(\mu)$, $p(\tau)$.
+  r: "brms::brm(visits ~ temp + (1 + temp | district), family = negbinomial, data = d)"
+  related: [hyperprior, partial-pooling, random-effect, exchangeability]
+  lessons: [24, 25]
+
+- id: hyperprior
+  term: Hyperprior
+  category: Hierarchical models
+  aliases: [hyperprior, hyperpriors, hyperparameter, hyperparameters]
+  short: >-
+    A prior on the parameters of a prior, such as the between-district standard deviation τ.
+  full: >-
+    Hyperpriors on variance parameters matter. Half-normal or exponential priors on τ are safer than
+    the once-common inverse-gamma(0.001, 0.001).
+  formal: >-
+    E.g. $\tau \sim \mathrm{Half\text{-}Normal}(0, 0.1)$ in $\theta_j \sim \mathrm{Normal}(\mu, \tau^2)$.
+  related: [hierarchical-model, prior]
+  lessons: [24]
+
+- id: non-centered
+  term: Non-centered parameterization (funnel)
+  category: Hierarchical models
+  aliases: [non-centered parameterization, non-centred parameterisation, funnel, Neal's funnel]
+  short: >-
+    Rewriting group effects as standardized effects times τ, which removes a funnel-shaped geometry
+    that makes sampling fail.
+  formal: >-
+    Centered: $\theta_j \sim \mathrm{Normal}(\mu, \tau^2)$. Non-centered: $z_j \sim \mathrm{Normal}(0,1)$,
+    $\theta_j = \mu + \tau z_j$.
+  related: [divergent-transition, hierarchical-model]
+  lessons: [24]
+
+- id: dirichlet-process
+  term: Dirichlet process prior
+  category: Hierarchical models
+  aliases: [Dirichlet process, Dirichlet process prior, Dirichlet process priors, DP prior]
+  short: >-
+    A semiparametric prior that lets coefficients cluster into an unknown number of groups with shared values.
+  full: >-
+    Used for many correlated exposures: instead of one bell curve, the coefficients may form several
+    clusters, one of which can sit at zero (variable selection).
+  formal: >-
+    $\beta_j \sim G$, $G \sim \mathrm{DP}(\alpha, G_0)$; draws from $G$ are discrete, so coefficients tie.
+  related: [hierarchical-model, shrinkage]
+  lessons: [24]
+
+- id: random-walk-prior
+  term: Random-walk prior
+  category: Hierarchical models
+  aliases: [random-walk prior, random walk prior, RW1, RW2, random walk]
+  short: >-
+    A smoothing prior that expects each value of a curve to be close to the previous one (RW1) or to
+    continue the previous slope (RW2).
+  formal: >-
+    RW1: $f_k - f_{k-1} \sim \mathrm{Normal}(0, \sigma^2)$. RW2: $f_k - 2f_{k-1} + f_{k-2} \sim \mathrm{Normal}(0, \sigma^2)$.
+    The Bayesian counterpart of a penalized spline.
+  related: [penalized-spline, shrinkage]
+  lessons: [25]
+
+- id: inla
+  term: INLA (integrated nested Laplace approximation)
+  category: Bayesian computation
+  aliases: [INLA, integrated nested Laplace approximation, R-INLA]
+  short: >-
+    A fast, accurate approximation to Bayesian posteriors for a large class of hierarchical models,
+    widely used for spatial and spatio-temporal models.
+  related: [mcmc, bym2, hierarchical-model]
+  lessons: [25]
+
+- id: laplace-approximation
+  term: Laplace approximation
+  category: Bayesian computation
+  aliases: [Laplace approximation]
+  short: >-
+    Approximating a posterior or an integral by a normal distribution centered at its peak.
+  formal: >-
+    $\log p(y) \approx \log p(y \mid \hat{\theta}) + \log p(\hat{\theta}) + \frac{k}{2}\log 2\pi - \frac{1}{2}\log|H|$,
+    with $H$ the negative Hessian of the log posterior at its mode $\hat{\theta}$.
+  related: [inla, marginal-likelihood]
+  lessons: [23, 25]

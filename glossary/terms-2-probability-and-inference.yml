@@ -1,0 +1,755 @@
+# Glossary source, part 2: probability, distributions, sampling and inference.
+
+- id: probability
+  term: Probability
+  category: Probability
+  aliases: [probability, probabilities]
+  short: >-
+    A number between 0 and 1 expressing how likely an event is.
+  full: >-
+    Frequentists interpret probability as the long-run frequency of an event in repeated trials.
+    Bayesians also use it for degrees of belief about unknown quantities, such as a parameter. The
+    rules of calculation are the same under both views.
+  formal: >-
+    A function $P$ on events satisfying the Kolmogorov axioms: $P(A) \ge 0$, $P(\Omega) = 1$, and
+    $P(A \cup B) = P(A) + P(B)$ for disjoint $A$ and $B$.
+  related: [conditional-probability, independence, bayes-theorem]
+  lessons: [2]
+
+- id: conditional-probability
+  term: Conditional probability
+  category: Probability
+  aliases: [conditional probability, conditional probabilities]
+  short: >-
+    The probability of one event given that another has occurred, written P(A | B).
+  full: >-
+    Conditioning restricts attention to cases where B is true. P(positive test | asthma) and
+    P(asthma | positive test) are different numbers, and confusing them is one of the most common
+    errors in medicine and statistics.
+  formal: >-
+    $$P(A \mid B) = \frac{P(A \cap B)}{P(B)}, \quad P(B) > 0$$
+  confusion: >-
+    $P(A \mid B) \neq P(B \mid A)$ in general. A p-value is P(data this extreme | H0), not P(H0 | data).
+  related: [bayes-theorem, sensitivity, ppv, p-value]
+  lessons: [2]
+
+- id: independence
+  term: Independence
+  category: Probability
+  aliases: [independence, statistically independent, independent events]
+  short: >-
+    Two events or variables are independent if knowing one tells you nothing about the other.
+  full: >-
+    Many methods assume independent observations. Daily counts are not independent over time
+    ([[autocorrelation]]), children in the same school are not independent ([[clustering]]), and
+    neighboring districts are not independent ([[spatial-autocorrelation]]). Ignoring this makes
+    standard errors too small.
+  formal: >-
+    Events: $P(A \cap B) = P(A)P(B)$, equivalently $P(A \mid B) = P(A)$. Random variables: the joint
+    distribution factorizes, $f(x, y) = f_X(x) f_Y(y)$.
+  related: [conditional-probability, autocorrelation, clustering]
+  lessons: [2, 15, 18]
+
+- id: bayes-theorem
+  term: Bayes' theorem
+  category: Probability
+  aliases: [Bayes' theorem, Bayes theorem, Bayes' rule, Bayes rule]
+  short: >-
+    The rule for reversing a conditional probability: from P(B | A) to P(A | B).
+  full: >-
+    In diagnostic testing it turns sensitivity and prevalence into the [[ppv|positive predictive
+    value]]. In Bayesian statistics, applied to parameters, it gives the [[posterior]] from the
+    [[prior]] and the [[likelihood]].
+  formal: >-
+    $$P(A \mid B) = \frac{P(B \mid A)\,P(A)}{P(B)}$$ For parameters $\theta$ and data $y$:
+    $p(\theta \mid y) \propto p(y \mid \theta)\, p(\theta)$.
+  related: [conditional-probability, ppv, posterior, prior, likelihood]
+  lessons: [2, 19]
+
+- id: sensitivity
+  term: Sensitivity
+  category: Diagnostic accuracy
+  aliases: [sensitivity]
+  short: >-
+    The probability that a test is positive in someone who has the condition.
+  full: >-
+    A sensitive test misses few cases. In Example B, the wheeze questionnaire detects 85% of
+    children with asthma. Sensitivity is a property of the test and does not depend on prevalence.
+  formal: >-
+    $Se = P(T^+ \mid D^+) = \frac{TP}{TP + FN}$.
+  epi: >-
+    Imperfect sensitivity of an outcome or exposure measure causes [[misclassification]].
+  related: [specificity, ppv, misclassification]
+  lessons: [2, 13]
+
+- id: specificity
+  term: Specificity
+  category: Diagnostic accuracy
+  aliases: [specificity]
+  short: >-
+    The probability that a test is negative in someone who does not have the condition.
+  formal: >-
+    $Sp = P(T^- \mid D^-) = \frac{TN}{TN + FP}$.
+  related: [sensitivity, npv, misclassification]
+  lessons: [2, 13]
+
+- id: ppv
+  term: Positive predictive value (PPV)
+  category: Diagnostic accuracy
+  aliases: [positive predictive value, PPV]
+  short: >-
+    The probability that someone with a positive test has the condition.
+  full: >-
+    Unlike sensitivity and specificity, the PPV depends strongly on prevalence. A good test applied
+    where the condition is rare produces mostly false positives.
+  formal: >-
+    $$PPV = P(D^+ \mid T^+) = \frac{Se \cdot p}{Se \cdot p + (1 - Sp)(1 - p)}$$ by [[bayes-theorem]],
+    with prevalence $p$.
+  related: [npv, sensitivity, specificity, bayes-theorem]
+  lessons: [2]
+
+- id: npv
+  term: Negative predictive value (NPV)
+  category: Diagnostic accuracy
+  aliases: [negative predictive value, NPV]
+  short: >-
+    The probability that someone with a negative test does not have the condition.
+  formal: >-
+    $$NPV = P(D^- \mid T^-) = \frac{Sp(1 - p)}{Sp(1 - p) + (1 - Se)\,p}$$
+  related: [ppv, specificity]
+  lessons: [2]
+
+- id: diagnostic-likelihood-ratio
+  term: Diagnostic likelihood ratio (LR+, LR−)
+  category: Diagnostic accuracy
+  aliases: [diagnostic likelihood ratio, positive likelihood ratio, negative likelihood ratio, LR+]
+  short: >-
+    How many times more likely a test result is in people with the condition than without it.
+  full: >-
+    Likelihood ratios update the odds of disease: post-test odds = pre-test odds × LR. Not to be
+    confused with the [[likelihood-ratio-test]].
+  formal: >-
+    $LR^+ = Se/(1 - Sp)$ and $LR^- = (1 - Se)/Sp$.
+  related: [sensitivity, specificity, bayes-theorem]
+  lessons: [2]
+
+- id: random-variable
+  term: Random variable
+  category: Probability
+  aliases: [random variable, random variables]
+  short: >-
+    A quantity whose value is determined by chance, described by a probability distribution.
+  full: >-
+    Tomorrow's number of emergency visits is a random variable before it is observed. Once
+    observed, it is a fixed number, an observation of that random variable.
+  formal: >-
+    A function $X: \Omega \to \mathbb{R}$ from the outcomes of a random experiment to numbers, with
+    a distribution $P(X \in A)$.
+  related: [pmf, pdf, expected-value]
+  lessons: [3]
+
+- id: probability-distribution
+  term: Probability distribution
+  category: Probability
+  aliases: [probability distribution, probability distributions]
+  short: >-
+    A description of all values a random variable can take and how probable each is.
+  full: >-
+    Discrete distributions are described by a [[pmf]], continuous ones by a [[pdf]]. Statistical
+    models are, at heart, assumptions about distributions.
+  related: [pmf, pdf, cdf, random-variable]
+  lessons: [3]
+
+- id: pmf
+  term: Probability mass function (PMF)
+  category: Probability
+  aliases: [probability mass function, PMF]
+  short: >-
+    For a discrete random variable, the probability of each possible value.
+  formal: >-
+    $p(x) = P(X = x)$, with $p(x) \ge 0$ and $\sum_x p(x) = 1$.
+  r: "dpois(0:20, lambda = 8)"
+  related: [pdf, poisson-distribution]
+  lessons: [3]
+
+- id: pdf
+  term: Probability density function (PDF)
+  category: Probability
+  aliases: [probability density function, probability density, density function, PDF]
+  short: >-
+    For a continuous random variable, a curve whose area over an interval gives the probability of
+    that interval.
+  full: >-
+    The height of a density is not a probability, and it can exceed 1 when a distribution is
+    narrow. Only areas are probabilities. Heights are useful for comparing how plausible two values
+    are relative to each other.
+  formal: >-
+    $f(x) \ge 0$ with $P(a \le X \le b) = \int_a^b f(x)\,dx$ and $\int_{-\infty}^{\infty} f(x)\,dx = 1$.
+  r: "dnorm(x, mean = 0, sd = 1)"
+  related: [pmf, cdf, normal-distribution]
+  lessons: [3]
+
+- id: cdf
+  term: Cumulative distribution function (CDF)
+  category: Probability
+  aliases: [cumulative distribution function, CDF, distribution function]
+  short: >-
+    The probability that a random variable is at most a given value.
+  formal: >-
+    $F(x) = P(X \le x)$. For continuous variables, $F(x) = \int_{-\infty}^x f(u)\,du$.
+  r: "pnorm(1.96)   # 0.975"
+  related: [pdf, quantile]
+  lessons: [3]
+
+- id: expected-value
+  term: Expected value
+  category: Probability
+  aliases: [expected value, expectation, expected values]
+  short: >-
+    The long-run average value of a random variable, weighting each value by its probability.
+  formal: >-
+    $E[X] = \sum_x x\,p(x)$ (discrete) or $E[X] = \int x\,f(x)\,dx$ (continuous). Expectation is
+    linear: $E[aX + bY] = aE[X] + bE[Y]$.
+  related: [mean, variance, random-variable]
+  lessons: [3]
+
+- id: bernoulli
+  term: Bernoulli distribution
+  category: Distributions
+  aliases: [Bernoulli distribution, Bernoulli]
+  short: >-
+    The distribution of a single yes/no outcome with probability π of "yes".
+  formal: >-
+    $P(Y = 1) = \pi$, $P(Y = 0) = 1 - \pi$; $E[Y] = \pi$, $\mathrm{Var}(Y) = \pi(1 - \pi)$.
+  related: [binomial, binary, logistic-regression]
+  lessons: [3, 8]
+
+- id: binomial
+  term: Binomial distribution
+  category: Distributions
+  aliases: [binomial distribution, binomial]
+  short: >-
+    The number of "successes" in n independent trials, each with the same probability π.
+  formal: >-
+    $$P(Y = k) = \binom{n}{k}\pi^k(1 - \pi)^{n-k}, \quad k = 0, \dots, n$$ with $E[Y] = n\pi$ and
+    $\mathrm{Var}(Y) = n\pi(1-\pi)$.
+  r: "dbinom(k, size = n, prob = p)"
+  related: [bernoulli, poisson-distribution]
+  lessons: [3]
+
+- id: poisson-distribution
+  term: Poisson distribution
+  category: Distributions
+  aliases: [Poisson distribution, Poisson model, Poisson]
+  short: >-
+    The distribution of counts of events that occur independently at a constant rate.
+  full: >-
+    Its single parameter μ is both the mean and the variance. It is the limit of the binomial when
+    n is large and π small, which is why it fits counts of rare events in large populations, like
+    daily emergency visits. Real counts often vary more than Poisson allows ([[overdispersion]]).
+  formal: >-
+    $$P(Y = k) = \frac{\mu^k e^{-\mu}}{k!}, \quad k = 0, 1, 2, \dots$$ with $E[Y] = \mathrm{Var}(Y) = \mu$.
+  r: "dpois(k, lambda = mu)"
+  related: [overdispersion, negative-binomial, poisson-regression, count]
+  lessons: [3, 8]
+
+- id: normal-distribution
+  term: Normal distribution
+  category: Distributions
+  aliases: [normal distribution, Gaussian distribution, Gaussian, normally distributed]
+  short: >-
+    The symmetric bell-shaped distribution described by its mean and standard deviation.
+  full: >-
+    It arises as the distribution of averages ([[clt]]), and underlies linear regression, many
+    confidence intervals, and many priors. About 95% of its mass lies within 1.96 SDs of the mean.
+  formal: >-
+    $$f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\!\left(-\frac{(x - \mu)^2}{2\sigma^2}\right)$$ written
+    $X \sim \mathrm{Normal}(\mu, \sigma^2)$.
+  r: "dnorm(x, mean = mu, sd = sigma)"
+  related: [clt, standard-error, linear-regression]
+  lessons: [3, 4]
+
+- id: negative-binomial
+  term: Negative binomial distribution
+  category: Distributions
+  aliases: [negative binomial distribution, negative binomial, negative binomial model]
+  short: >-
+    A distribution for overdispersed counts: like Poisson, but with variance larger than the mean.
+  full: >-
+    It can be seen as a Poisson whose rate itself varies at random (a gamma mixture). The emergency
+    visits in Example A were simulated this way.
+  formal: >-
+    $E[Y] = \mu$ and $\mathrm{Var}(Y) = \mu + \mu^2/\phi$, where $\phi > 0$ is the shape (size)
+    parameter. As $\phi \to \infty$ it becomes Poisson.
+  r: "MASS::glm.nb(visits ~ temp, data = d)"
+  related: [overdispersion, poisson-distribution, quasi-poisson]
+  lessons: [3, 8]
+
+- id: overdispersion
+  term: Overdispersion
+  category: Distributions
+  aliases: [overdispersion, overdispersed, extra-Poisson variation]
+  short: >-
+    More variation in counts than a Poisson model allows.
+  full: >-
+    Overdispersion arises from unmeasured factors that make some days or places busier than the
+    model predicts. Ignoring it gives standard errors that are too small and p-values that are too
+    small. Remedies are [[quasi-poisson]] models, [[negative-binomial]] models, or random effects.
+  formal: >-
+    $\mathrm{Var}(Y) > E[Y]$. Estimated by the dispersion statistic
+    $\hat{\phi} = \frac{1}{n - p}\sum_i \frac{(y_i - \hat{\mu}_i)^2}{\hat{\mu}_i}$, which is about 1
+    under a correct Poisson model.
+  related: [poisson-distribution, negative-binomial, quasi-poisson]
+  lessons: [3, 8, 15]
+
+- id: gamma-distribution
+  term: Gamma distribution
+  category: Distributions
+  aliases: [gamma distribution]
+  short: >-
+    A flexible distribution for positive quantities, often used as a prior for rates.
+  formal: >-
+    $f(x) = \frac{b^a}{\Gamma(a)} x^{a-1} e^{-bx}$, $x > 0$, with mean $a/b$ and variance $a/b^2$. It
+    is the [[conjugate-prior]] for a Poisson rate.
+  related: [conjugate-prior, negative-binomial]
+  lessons: [19]
+
+- id: beta-distribution
+  term: Beta distribution
+  category: Distributions
+  aliases: [beta distribution]
+  short: >-
+    A distribution for quantities between 0 and 1, such as a risk or a proportion.
+  formal: >-
+    $f(\pi) = \frac{\pi^{a-1}(1-\pi)^{b-1}}{B(a, b)}$, $0 < \pi < 1$, with mean $a/(a+b)$. It is the
+    conjugate prior for a binomial probability.
+  related: [conjugate-prior, binomial]
+  lessons: [19]
+
+- id: population
+  term: Population (target population)
+  category: Sampling and estimation
+  aliases: [target population, source population]
+  short: >-
+    The whole group you want to draw conclusions about.
+  full: >-
+    A study sample is drawn from a source population, and results are generalized to a target
+    population. When these differ, results may not transport.
+  related: [sample, parameter]
+  lessons: [4]
+
+- id: sample
+  term: Sample
+  category: Sampling and estimation
+  aliases: [random sample, sample size]
+  auto: false
+  short: >-
+    The subset of the population that is actually observed.
+  full: >-
+    Estimates vary from sample to sample. That variation is what standard errors and confidence
+    intervals describe.
+  related: [population, sampling-distribution]
+  lessons: [4]
+
+- id: parameter
+  term: Parameter
+  category: Sampling and estimation
+  aliases: [parameter, parameters]
+  short: >-
+    A fixed but unknown number describing a population or a model, such as a true risk ratio.
+  full: >-
+    Parameters are written with Greek letters (α, β, μ). Estimates of them are written with hats
+    ($\hat{\beta}$). In Bayesian statistics, parameters are given probability distributions.
+  related: [estimator, bias]
+  lessons: [4, 5]
+
+- id: estimator
+  term: Estimator and estimate
+  category: Sampling and estimation
+  aliases: [estimator, estimators]
+  short: >-
+    An estimator is a rule for computing a guess of a parameter from data. An estimate is the number it produces.
+  full: >-
+    The sample mean is an estimator; 436 visits per day is an estimate. Estimators are judged by
+    their [[bias]], their variance, and their combination, the mean squared error.
+  formal: >-
+    An estimator is a function of the data, $\hat{\theta} = g(Y_1, \dots, Y_n)$, itself a random
+    variable with a [[sampling-distribution]]. $\mathrm{MSE}(\hat{\theta}) = \mathrm{Bias}^2 +
+    \mathrm{Var}(\hat{\theta})$.
+  related: [bias, sampling-distribution, standard-error]
+  lessons: [4]
+
+- id: bias
+  term: Bias
+  category: Sampling and estimation
+  aliases: [bias, biased, unbiased]
+  short: >-
+    A systematic difference between what an estimate targets and the truth.
+  full: >-
+    Statistical bias is a property of an estimator: on average across repeated samples, it misses
+    the truth. In epidemiology, bias also means systematic error from the study itself:
+    [[confounding]], [[selection-bias]] and information bias ([[misclassification]], [[measurement-error]]).
+    More data reduce random error, not bias.
+  formal: >-
+    $\mathrm{Bias}(\hat{\theta}) = E[\hat{\theta}] - \theta$.
+  related: [confounding, selection-bias, measurement-error, estimator]
+  lessons: [4, 9, 12, 13]
+
+- id: precision
+  term: Precision
+  category: Sampling and estimation
+  aliases: [precision, imprecise, imprecision]
+  short: >-
+    How little an estimate would vary across repeated studies, the opposite of random error.
+  full: >-
+    Precise estimates have narrow confidence intervals. Precision says nothing about bias: an
+    estimate can be precisely wrong.
+  formal: >-
+    Often defined as the inverse variance, $1/\mathrm{Var}(\hat{\theta})$.
+  related: [standard-error, bias, confidence-interval]
+  lessons: [4]
+
+- id: sampling-distribution
+  term: Sampling distribution
+  category: Sampling and estimation
+  aliases: [sampling distribution, sampling distributions, sampling variability, sampling variation]
+  short: >-
+    The distribution an estimate would have across many repeated samples from the same population.
+  full: >-
+    You only ever see one sample, so the sampling distribution is a thought experiment, made
+    visible by simulation or approximated by theory. Its spread is the [[standard-error]].
+  related: [standard-error, clt, bootstrap]
+  lessons: [4]
+
+- id: standard-error
+  term: Standard error (SE)
+  category: Sampling and estimation
+  aliases: [standard error, standard errors, SE, SEs]
+  short: >-
+    The standard deviation of an estimate's sampling distribution: how much it would vary across repeated samples.
+  full: >-
+    The SE measures the precision of an estimate. It shrinks as the sample grows, roughly with the
+    square root of the sample size. 95% confidence intervals are often estimate ± 1.96 × SE.
+  formal: >-
+    $SE(\hat{\theta}) = \sqrt{\mathrm{Var}(\hat{\theta})}$. For a mean, $SE(\bar{x}) = \sigma/\sqrt{n}$,
+    estimated by $s/\sqrt{n}$.
+  confusion: >-
+    The [[sd|standard deviation]] describes the data; the SE describes the estimate.
+  related: [sd, sampling-distribution, confidence-interval]
+  lessons: [4, 5, 6]
+
+- id: clt
+  term: Central limit theorem (CLT)
+  category: Sampling and estimation
+  aliases: [central limit theorem, CLT]
+  short: >-
+    Averages of many independent values are approximately normally distributed, whatever the
+    distribution of the values themselves.
+  full: >-
+    This is why so many confidence intervals use the normal distribution. It needs a large enough
+    sample, and more of it when the data are skewed.
+  formal: >-
+    For i.i.d. $X_i$ with mean $\mu$ and finite variance $\sigma^2$,
+    $\sqrt{n}(\bar{X}_n - \mu)/\sigma \xrightarrow{d} \mathrm{Normal}(0, 1)$ as $n \to \infty$.
+  related: [normal-distribution, sampling-distribution]
+  lessons: [4]
+
+- id: bootstrap
+  term: Bootstrap
+  category: Sampling and estimation
+  aliases: [bootstrap, bootstrapping, bootstrapped, bootstrap resampling]
+  short: >-
+    Estimating the uncertainty of an estimate by recomputing it on many resamples of the data.
+  full: >-
+    Each bootstrap sample draws n observations with replacement from the original data. The spread
+    of the recomputed estimates approximates the sampling distribution. For time series or
+    clustered data, resample blocks or clusters, not individual observations.
+  formal: >-
+    Draw $B$ samples $y^{*(b)}$ from the empirical distribution, compute $\hat{\theta}^{*(b)}$, and use
+    the percentiles or the SD of $\{\hat{\theta}^{*(b)}\}$.
+  related: [sampling-distribution, standard-error]
+  lessons: [4, 16]
+
+- id: likelihood
+  term: Likelihood
+  category: Likelihood
+  aliases: [likelihood, likelihood function, likelihoods]
+  short: >-
+    How probable the observed data are under each possible value of the parameters, viewed as a
+    function of the parameters.
+  full: >-
+    The likelihood is the model equation plus its distribution, evaluated on the data. It is the
+    shared engine of frequentist and Bayesian inference: maximum likelihood finds its peak, and
+    Bayesian inference multiplies it by the prior.
+  formal: >-
+    $L(\theta) = p(y \mid \theta) = \prod_{i=1}^{n} p(y_i \mid \theta)$ for independent observations.
+    It is not a probability distribution over $\theta$.
+  confusion: >-
+    The likelihood of a parameter value is not the probability that the value is true.
+  related: [log-likelihood, mle, posterior, prior]
+  lessons: [5, 19]
+
+- id: log-likelihood
+  term: Log-likelihood
+  category: Likelihood
+  aliases: [log-likelihood, log likelihood]
+  short: >-
+    The logarithm of the likelihood, which turns products over observations into sums.
+  formal: >-
+    $\ell(\theta) = \log L(\theta) = \sum_i \log p(y_i \mid \theta)$. Differences in log-likelihood
+    are used in [[likelihood-ratio-test|likelihood ratio tests]] and in [[aic]].
+  related: [likelihood, mle, deviance]
+  lessons: [5]
+
+- id: mle
+  term: Maximum likelihood estimate (MLE)
+  category: Likelihood
+  aliases: [maximum likelihood estimate, maximum likelihood estimation, maximum likelihood, MLE, MLEs]
+  short: >-
+    The parameter value that makes the observed data most probable: the peak of the likelihood.
+  full: >-
+    `glm()` and most standard software find MLEs by iterative algorithms. When the likelihood is
+    flat in some direction, for example with highly correlated exposures, the algorithm may fail to
+    converge.
+  formal: >-
+    $\hat{\theta} = \arg\max_\theta \ell(\theta)$, typically solving $\partial \ell / \partial \theta = 0$.
+    Under regularity conditions $\hat{\theta} \approx \mathrm{Normal}(\theta, I(\theta)^{-1})$.
+  related: [likelihood, fisher-information, wald-test]
+  lessons: [5]
+
+- id: fisher-information
+  term: Fisher information
+  category: Likelihood
+  aliases: [Fisher information, observed information, information matrix]
+  short: >-
+    How sharply the likelihood peaks: more information means a smaller standard error.
+  formal: >-
+    $I(\theta) = -E\!\left[\frac{\partial^2 \ell}{\partial \theta^2}\right]$, with
+    $SE(\hat{\theta}) \approx 1/\sqrt{I(\hat{\theta})}$. The observed information uses the curvature at
+    the MLE without the expectation.
+  related: [mle, standard-error]
+  lessons: [5]
+
+- id: confidence-interval
+  term: Confidence interval (CI)
+  category: Testing and intervals
+  aliases: [confidence interval, confidence intervals, CI, CIs, 95% CI]
+  short: >-
+    A range computed by a procedure that, across repeated studies, contains the true value a stated
+    proportion of the time.
+  full: >-
+    A 95% CI comes from a method with 95% [[coverage]]. Any single interval either contains the
+    truth or does not. The width shows precision; it says nothing about bias.
+  formal: >-
+    An interval $[L(Y), U(Y)]$ with $P_\theta(L(Y) \le \theta \le U(Y)) = 0.95$ for all $\theta$. The Wald
+    interval is $\hat{\theta} \pm 1.96\,SE(\hat{\theta})$.
+  confusion: >-
+    "95% probability that the true value lies in this interval" describes a [[credible-interval]],
+    not a confidence interval.
+  report: >-
+    "RR 1.21 (95% CI 1.06 to 1.38)"
+  related: [coverage, standard-error, credible-interval]
+  lessons: [6]
+
+- id: coverage
+  term: Coverage
+  category: Testing and intervals
+  aliases: [coverage, coverage probability]
+  short: >-
+    The proportion of intervals, across repeated studies, that contain the true value.
+  full: >-
+    A well-behaved 95% CI has 95% coverage. Intervals that ignore overdispersion,
+    [[autocorrelation]] or [[clustering]] cover the truth less often than they claim.
+  related: [confidence-interval]
+  lessons: [6]
+
+- id: null-hypothesis
+  term: Null hypothesis (H0)
+  category: Testing and intervals
+  aliases: [null hypothesis, null hypotheses, H0]
+  short: >-
+    The hypothesis a test tries to find evidence against, usually "no effect".
+  full: >-
+    A frequentist test can reject the null or fail to reject it, never accept it. "No evidence of
+    an effect" is not "evidence of no effect"; for that, use an [[equivalence-test]].
+  formal: >-
+    A statement about a parameter, such as $H_0: \beta = 0$, against an alternative $H_1: \beta \neq 0$.
+  related: [alternative-hypothesis, p-value, equivalence-test]
+  lessons: [6]
+
+- id: alternative-hypothesis
+  term: Alternative hypothesis (H1)
+  category: Testing and intervals
+  aliases: [alternative hypothesis, alternative hypotheses, H1]
+  short: >-
+    The hypothesis that is supported when the null is rejected.
+  full: >-
+    It can be two-sided ($\beta \neq 0$) or one-sided ($\beta > 0$). The choice must be made before
+    seeing the data.
+  related: [null-hypothesis, one-sided-test]
+  lessons: [6]
+
+- id: test-statistic
+  term: Test statistic
+  category: Testing and intervals
+  aliases: [test statistic, test statistics, z statistic, z-statistic]
+  short: >-
+    A number computed from the data that measures how far they are from what the null hypothesis predicts.
+  formal: >-
+    For example, the Wald statistic $z = \hat{\beta} / SE(\hat{\beta})$, approximately
+    $\mathrm{Normal}(0,1)$ under $H_0: \beta = 0$.
+  related: [p-value, wald-test]
+  lessons: [6]
+
+- id: p-value
+  term: p-value
+  category: Testing and intervals
+  aliases: [p-value, p-values, P value, P values]
+  short: >-
+    The probability, if the null hypothesis were true, of a result at least as extreme as the one observed.
+  full: >-
+    A small p-value says the data would be surprising under the null. It does not give the
+    probability that the null is true, and it says nothing about the size or importance of an
+    effect. With huge samples, trivial effects have tiny p-values.
+  formal: >-
+    $p = P_{H_0}(T \ge t_{\mathrm{obs}})$ for a test statistic $T$ (one-sided), or
+    $P_{H_0}(|T| \ge |t_{\mathrm{obs}}|)$ (two-sided). Under $H_0$, p is uniformly distributed.
+  confusion: >-
+    p = 0.03 does not mean a 3% chance that the null is true, nor a 97% chance that the effect is real.
+  report: >-
+    Report exact p-values (p = 0.03) alongside effect estimates and CIs, not just "p < 0.05".
+  related: [null-hypothesis, significance-level, confidence-interval, bayes-factor]
+  lessons: [6, 23]
+
+- id: significance-level
+  term: Significance level (α)
+  category: Testing and intervals
+  aliases: [significance level, alpha level, statistically significant, statistical significance]
+  short: >-
+    The threshold below which a p-value leads to rejecting the null, conventionally 0.05.
+  full: >-
+    α is the [[type-i-error]] rate the procedure tolerates. "Statistically significant" only means
+    p < α. It is not a statement about clinical or public health importance.
+  related: [p-value, type-i-error]
+  lessons: [6]
+
+- id: type-i-error
+  term: Type I error
+  category: Testing and intervals
+  aliases: [type I error, type I errors, false positive, false positives, false-positive]
+  short: >-
+    Rejecting a null hypothesis that is true: a false positive.
+  formal: >-
+    $P(\text{reject } H_0 \mid H_0 \text{ true}) = \alpha$.
+  related: [type-ii-error, significance-level, multiple-testing]
+  lessons: [6]
+
+- id: type-ii-error
+  term: Type II error
+  category: Testing and intervals
+  aliases: [type II error, type II errors, false negative, false negatives]
+  short: >-
+    Failing to reject a null hypothesis that is false: a false negative.
+  formal: >-
+    $P(\text{not reject } H_0 \mid H_1 \text{ true}) = \beta_{II} = 1 - \text{power}$.
+  related: [type-i-error, power]
+  lessons: [6]
+
+- id: power
+  term: Statistical power
+  category: Testing and intervals
+  aliases: [power, statistical power, underpowered]
+  pre: [statistical, the, low, high, enough, its, of, has, with, more]
+  short: >-
+    The probability that a test detects an effect of a given size when it truly exists.
+  full: >-
+    Power grows with sample size, effect size and precision. An underpowered study often fails to
+    reject the null even when the effect is real, and when it does reject, its estimate tends to
+    exaggerate the effect.
+  formal: >-
+    $\text{power} = P(\text{reject } H_0 \mid \theta = \theta_1)$ for a specified alternative $\theta_1$.
+  related: [type-ii-error, sample]
+  lessons: [6]
+
+- id: multiple-testing
+  term: Multiple testing (multiplicity)
+  category: Testing and intervals
+  aliases: [multiple testing, multiple comparisons, multiplicity, Bonferroni correction, Bonferroni]
+  short: >-
+    Running many tests raises the chance that at least one is falsely significant.
+  full: >-
+    With 20 independent tests at α = 0.05, the chance of at least one false positive is 64%.
+    Corrections such as Bonferroni (α/m per test) control this at the cost of power. Hierarchical
+    models offer a Bayesian alternative by shrinking noisy estimates.
+  formal: >-
+    Family-wise error rate for $m$ independent tests: $1 - (1 - \alpha)^m$. Bonferroni rejects when
+    $p_j < \alpha / m$.
+  related: [type-i-error, hierarchical-model]
+  lessons: [6, 24]
+
+- id: one-sided-test
+  term: One-sided and two-sided tests
+  category: Testing and intervals
+  aliases: [one-sided test, one-sided tests, two-sided test, two-sided tests, one-sided, two-sided]
+  short: >-
+    A one-sided test looks for an effect in one stated direction; a two-sided test in either.
+  full: >-
+    The one-sided p-value is half the two-sided one when the estimate falls in the stated
+    direction. Choosing the direction after seeing the data is not legitimate.
+  related: [alternative-hypothesis, p-value]
+  lessons: [6]
+
+- id: equivalence-test
+  term: Equivalence test (TOST)
+  category: Testing and intervals
+  aliases: [equivalence test, equivalence testing, TOST, two one-sided tests]
+  short: >-
+    A test designed to support "the effect is negligibly small", using a margin set in advance.
+  full: >-
+    Two one-sided tests check whether the effect is above −δ and below +δ. Both must reject. It is
+    the frequentist way to provide evidence for the absence of a meaningful effect.
+  formal: >-
+    Test $H_0: |\theta| \ge \delta$ against $H_1: |\theta| < \delta$, rejecting when both one-sided
+    p-values are below α; equivalently, when the $(1-2\alpha)$ CI lies inside $(-\delta, \delta)$.
+  related: [null-hypothesis, rope]
+  lessons: [6, 23]
+
+- id: wald-test
+  term: Wald test
+  category: Testing and intervals
+  aliases: [Wald test, Wald tests, Wald interval]
+  short: >-
+    A test that compares an estimate with its standard error, the default in regression output.
+  formal: >-
+    $z = (\hat{\theta} - \theta_0)/SE(\hat{\theta})$, compared with $\mathrm{Normal}(0,1)$; for several
+    parameters, $W = (\hat{\theta} - \theta_0)^\top \widehat{\mathrm{Var}}^{-1} (\hat{\theta} - \theta_0)
+    \sim \chi^2_k$.
+  r: "summary(fit)$coefficients   # z value and Pr(>|z|)"
+  related: [test-statistic, likelihood-ratio-test]
+  lessons: [6, 8]
+
+- id: likelihood-ratio-test
+  term: Likelihood ratio test (LRT)
+  category: Testing and intervals
+  aliases: [likelihood ratio test, likelihood ratio tests, likelihood-ratio test, LRT, LRTs]
+  short: >-
+    A test comparing two nested models by how much better the larger one fits.
+  formal: >-
+    $D = 2(\ell_1 - \ell_0)$, approximately $\chi^2_k$ under the null, where $k$ is the number of extra
+    parameters in the larger model.
+  r: "anova(fit0, fit1, test = \"LRT\")"
+  related: [nested-models, deviance, aic]
+  lessons: [10]
+
+- id: chi-square-test
+  term: Chi-square test
+  category: Testing and intervals
+  aliases: [chi-square test, chi-squared test, chi-square, chi-squared, χ²]
+  short: >-
+    A test of association between categorical variables, or of how well counts fit expected values.
+  formal: >-
+    $X^2 = \sum \frac{(O - E)^2}{E}$, approximately $\chi^2$ with $(r-1)(c-1)$ degrees of freedom for
+    an $r \times c$ table.
+  r: "chisq.test(table(cohort$parent_smoke, cohort$asthma))"
+  related: [likelihood-ratio-test]
+  lessons: [6]

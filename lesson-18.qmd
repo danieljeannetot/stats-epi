@@ -1,0 +1,359 @@
+---
+title: "Lesson 18 · Clustered data and mixed-effects models"
+subtitle: "Part IV · Time, space and clustering"
+description: "Clustering and the intraclass correlation, no, complete and partial pooling, random effects, two-stage meta-analysis of location-specific effects, and standard errors under clustering."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lessons 8 and 17]{} [Threads: shrinkage · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- explain why observations in the same cluster are correlated, and quantify it with the ICC;
+- contrast no pooling, complete pooling and partial pooling of group estimates;
+- interpret random intercepts and the shrinkage of group estimates they produce;
+- pool location-specific effects in a two-stage meta-analysis, and quantify heterogeneity;
+- explain why ignoring clustering gives standard errors that are too small, especially for cluster-level exposures.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Children in the same school share teachers, buildings and neighborhoods; emergency visits in the same district share a hospital and a population. Ignoring this makes studies look more precise than they are. And when we want an estimate for each school or each district, partial pooling, letting each group borrow information from the others, gives better estimates than analyzing each group alone.
+
+:::
+
+## 18.1 Clustering and the intraclass correlation {#s1}
+
+The 5,000 children attend 40 schools. If asthma risk varies between schools more than chance would explain, children in the same school are more alike than children from different schools. The **intraclass correlation** (ICC) measures this: the share of the variation that lies between clusters. Even a small ICC matters when clusters are large, through the **design effect**.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel"><svg id="cPlot" viewBox="0 0 520 340" role="img" aria-label="Asthma risk by school"></svg></div>
+<div class="cpanel"><div class="statgrid" id="cStats"></div><div class="now" id="cNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\mathrm{logit}\,\pi_{ij} = \alpha + u_j, \qquad u_j \sim \mathrm{Normal}(0, \tau^2)$$
+$$ICC = \frac{\tau^2}{\tau^2 + \pi^2/3}, \qquad \text{design effect} = 1 + (m - 1)\,ICC$$
+
+::: {.note}
+
+$i$ = child, $j$ = school, $m$ = average school size; $\pi^2/3$ is the variance of the logistic distribution.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+asthma[i] ~ bernoulli(p[i])
+logit(p[i]) = a + u[school[i]]
+u[j] ~ normal(0, tau)
+
+fit <- lme4::glmer(asthma ~ 1 + (1 | school),
+                   family = binomial, data = cohort)
+tau2 <- as.numeric(lme4::VarCorr(fit)$school)
+tau2 / (tau2 + pi^2 / 3)       # ICC
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#cReport}
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): random-intercept logistic model and ICC"}
+
+```{r}
+fit0 <- lme4::glmer(asthma ~ 1 + (1 | school), family = binomial, data = cohort)
+tau2 <- as.numeric(lme4::VarCorr(fit0)$school)
+c(tau = sqrt(tau2), icc = tau2 / (tau2 + pi^2 / 3))
+
+fit1 <- lme4::glmer(asthma ~ I(no2_modeled / 10) + ses + green + (1 | school),
+                    family = binomial, data = cohort)
+exp(lme4::fixef(fit1)[2])
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @snijders2012multilevel on the ICC and design effects; @gelman2007data introduce multilevel models through examples; @bates2015fitting describe the lme4 software.
+
+:::
+
+## 18.2 No pooling, complete pooling and partial pooling {#s2}
+
+What is the asthma risk in each school? **No pooling** uses each school's own data: unbiased but noisy for small schools. **Complete pooling** gives every school the overall risk: stable but wrong for schools that really differ. **Partial pooling**, what a random-effects model does, takes a weighted compromise. The weight depends on each school's size and on how much schools truly differ (τ). Because the data are simulated, each school's true risk is known, so you can see which approach gets closest.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pT">Between-school SD τ (logit scale)</label><input type="range" id="pT" min="0" max="1.5" step="0.01" value="0.2"><output id="pTO"></output></div>
+  <div class="btns"><button type="button" id="pEst">Estimate τ from the data</button><button type="button" id="pNo">No pooling (τ very large)</button><button type="button" id="pAll">Complete pooling (τ = 0)</button></div>
+  <svg id="pPlot" viewBox="0 0 520 340" role="img" aria-label="School risks under partial pooling"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="pStats"></div><div class="now" id="pNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\hat\theta_j^{\text{pp}} = w_j\,\hat\theta_j + (1 - w_j)\,\hat\mu, \qquad w_j = \frac{\tau^2}{\tau^2 + s_j^2}$$
+
+::: {.note}
+
+$\hat\theta_j$: school $j$'s own log-odds, with standard error $s_j$; $\hat\mu$: overall log-odds.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+lme4::ranef(fit0)$school    # shrunken u_j
+coef(fit0)$school |>         # alpha + u_j
+  mutate(risk = plogis(`(Intercept)`))
+```
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @efron1977stein explain why shrinkage improves many estimates at once; @gelman2007data on no, complete and partial pooling; @snijders2012multilevel on empirical Bayes estimates of random effects.
+
+:::
+
+## 18.3 Two-stage analysis: pooling district-specific heat effects {#s3}
+
+Multi-city temperature studies commonly use **two stages**: estimate the effect in each location separately, then combine the estimates in a **random-effects meta-analysis**. The meta-analysis gives a pooled effect, a measure of **heterogeneity** between locations, and improved location-specific estimates that borrow strength from the others. Here, each district's heat effect for residents aged 65+ is estimated on summer days.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel"><svg id="mPlot" viewBox="0 0 520 380" role="img" aria-label="Forest plot of district heat effects"></svg><div class="legend"><span><i style="background:var(--c-lik)"></i>district's own estimate</span><span><i style="background:var(--p4)"></i>after pooling (BLUP)</span><span><i style="background:var(--p2)"></i>pooled effect</span></div></div>
+<div class="cpanel"><div class="statgrid" id="mStats"></div><div class="now" id="mNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\hat\beta_j \sim \mathrm{Normal}(\beta_j, s_j^2), \qquad \beta_j \sim \mathrm{Normal}(\mu, \tau^2)$$
+$$Q = \sum_j \frac{(\hat\beta_j - \hat\beta_{\text{FE}})^2}{s_j^2}, \qquad I^2 = \max\!\left(0, \frac{Q - (J-1)}{Q}\right)$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+# stage 1: one model per district (see 18.3 code)
+# stage 2: random-effects meta-analysis
+meta <- mixmeta::mixmeta(b ~ 1, S = se^2,
+                         data = stage1,
+                         method = "reml")
+summary(meta)   # pooled effect, tau, I2
+blup(meta)      # shrunken district effects
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#mReport}
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): two-stage analysis of district heat effects"}
+
+```{r}
+summer65 <- visits |>
+  filter(month(date) %in% 6:8, age_group == "65+") |>
+  mutate(heat = temp - 22)
+
+stage1 <- summer65 |>
+  group_by(district) |>
+  group_modify(\(d, key) {
+    f <- glm(visits ~ heat + dow, family = quasipoisson, data = d)
+    tibble(b = coef(f)["heat"], se = sqrt(vcov(f)["heat", "heat"]))
+  }) |>
+  ungroup()
+
+# DerSimonian-Laird random-effects pooling, written out
+w  <- 1 / stage1$se^2
+fe <- sum(w * stage1$b) / sum(w)
+Q  <- sum(w * (stage1$b - fe)^2)
+tau2 <- max(0, (Q - (nrow(stage1) - 1)) / (sum(w) - sum(w^2) / sum(w)))
+wr <- 1 / (stage1$se^2 + tau2)
+c(pooled_pct_per_degC = 100 * (exp(sum(wr * stage1$b) / sum(wr)) - 1),
+  tau = sqrt(tau2), I2 = max(0, (Q - (nrow(stage1) - 1)) / Q))
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @dersimonian1986meta introduced the random-effects estimator used here; @higgins2002quantifying defined I²; @gasparrini2012multivariate extended two-stage pooling to whole exposure–response curves, as used in multi-city DLNM studies.
+
+:::
+
+## 18.4 Standard errors when observations are clustered {#s4}
+
+Ignoring clustering gives standard errors that are too small, because correlated observations carry less information than independent ones. The problem is worst for **cluster-level** exposures, which vary only between clusters: district traffic, for instance, takes just 12 values. **Cluster-robust** standard errors, or random-effects models, correct this.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="sX">Exposure</label><select id="sX"><option value="ses">SES score (varies between children)</option><option value="traffic">district traffic (varies only between districts)</option><option value="no2">modeled NO₂ (varies mostly between districts)</option></select></div>
+  <div class="ctrl"><label for="sC">Clusters</label><select id="sC"><option value="school">schools (40)</option><option value="district">districts (12)</option></select></div>
+  <svg id="sPlot" viewBox="0 0 520 200" role="img" aria-label="Naive and cluster-robust confidence intervals"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="sStats"></div><div class="now" id="sNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\widehat{\mathrm{Var}}_{\text{CR}}(\hat\beta) = I^{-1}\Big(\sum_{c} U_c U_c^\top\Big) I^{-1}, \qquad U_c = \sum_{i \in c} x_i\,(y_i - \hat\pi_i)$$
+
+::: {.note}
+
+$I$ = information matrix from the ordinary model; $U_c$ = score contribution of cluster $c$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+fit <- glm(asthma ~ traffic, family = binomial,
+           data = cohort_d)
+sqrt(diag(vcov(fit)))                    # naive
+sqrt(diag(sandwich::vcovCL(fit,
+          cluster = ~ district)))        # robust
+```
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+A random effect is a prior whose spread τ is estimated from the data. Bayesian hierarchical models make this explicit: they put a prior on τ itself and carry its uncertainty into every group estimate. With few groups, such as 12 districts, that uncertainty matters, and frequentist estimates of τ are often unstable. Lesson 24 develops this.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gelman2007data on the consequences of ignoring clustering; @snijders2012multilevel on cluster-level predictors and design effects; @fox2016applied on sandwich estimators.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Observations in the same cluster are correlated; the ICC measures how strongly, and the design effect turns it into lost information.
+- Partial pooling compromises between each group's own estimate and the overall mean, weighting by precision and by the true between-group variation.
+- Shrunken group estimates are, on average, closer to the truth than unpooled ones.
+- Two-stage meta-analysis pools location-specific effects and quantifies heterogeneity with τ² and I².
+- Ignoring clustering makes standard errors too small, especially for exposures measured at the cluster level.
+
+```{=html}
+<div class="done" data-lesson="lesson-18"><button type="button"></button><span></span></div>
+<script src="assets/lesson-18.js"></script>
+```

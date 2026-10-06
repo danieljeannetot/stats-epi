@@ -1,0 +1,384 @@
+---
+title: "Lesson 3 · Random variables and probability distributions"
+subtitle: "Part I · Foundations"
+description: "Expectation and variance; the binomial, Poisson and normal distributions; densities; overdispersion and the negative binomial."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 2.5 hours]{} [Before this: Lessons 1–2]{} [Threads: likelihood]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- describe a random variable by its distribution, expected value and variance;
+- recognize when the binomial, Poisson and normal distributions are reasonable models;
+- explain why a probability density can exceed 1, and why only areas are probabilities;
+- diagnose overdispersion in count data, and say what the negative binomial distribution adds.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Every statistical model in this course is "an equation plus a distribution". Choosing the distribution is choosing what kind of randomness you believe the data contain. Emergency visits are counts, so the Poisson distribution is the natural starting point. But real counts vary more than Poisson allows, and ignoring that makes every confidence interval too narrow.
+
+:::
+
+## 3.1 Random variables, expected value and variance {#s1}
+
+Tomorrow's number of emergency visits by older Lakeside residents is a random variable: before the day happens, it could take many values, each with some probability. The distribution of past days estimates those probabilities. Its center is the **expected value**, and its spread the **variance**. Choose a district and age group.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="rvD">District</label><select id="rvD"></select></div>
+  <div class="ctrl"><label for="rvG">Age group</label><select id="rvG"><option value="0">0–14</option><option value="1">15–64</option><option value="2" selected>65+</option></select></div>
+  <svg id="pmf" viewBox="0 0 520 260" role="img" aria-label="Empirical distribution of daily visits"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="rvStats"></div><div class="now" id="rvNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$E[Y] = \sum_{y} y \, P(Y = y)$$
+$$\mathrm{Var}(Y) = E\big[(Y - E[Y])^2\big]$$
+
+::: {.note}
+
+$Y$ = visits on a day; $P(Y = y)$ is estimated by the share of days with exactly $y$ visits.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+visits |>
+  filter(district == "Lakeside",
+         age_group == "65+") |>
+  summarise(mean = mean(visits),
+            var  = var(visits),
+            ratio = var / mean)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#rvReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @blitzstein2019introduction and @casella2002statistical define random variables, expectation and variance; @clayton1993statistical introduce them in an epidemiological setting.
+
+:::
+
+## 3.2 The binomial and Poisson distributions {#s2}
+
+The **binomial distribution** counts successes in a fixed number of independent trials, such as the number of children with asthma among 30 in a class. The **Poisson distribution** counts events that occur independently at a constant rate, such as emergency visits per day. When there are many trials, each with a small probability, the binomial becomes the Poisson. Move the sliders, and try "binomial with large n" to watch it happen.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Distribution"><button type="button" id="dBin" aria-pressed="true">Binomial</button><button type="button" id="dPoi" aria-pressed="false">Poisson</button></div>
+  <div class="ctrl" id="rowN"><label for="bN">Number of trials, n</label><input type="range" id="bN" min="1" max="500" value="30"><output id="bNO"></output></div>
+  <div class="ctrl" id="rowP"><label for="bP">Probability, π</label><input type="range" id="bP" min="1" max="90" value="13"><output id="bPO"></output></div>
+  <div class="ctrl" id="rowL" hidden><label for="pL">Mean, μ</label><input type="range" id="pL" min="1" max="400" value="80"><output id="pLO"></output></div>
+  <label class="small"><input type="checkbox" id="cmpPoi"> Overlay a Poisson with the same mean</label>
+  <svg id="dist" viewBox="0 0 520 260" role="img" aria-label="Probability mass function"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="dStats"></div><div class="now" id="dNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$P(Y = k) = \binom{n}{k}\pi^k (1-\pi)^{n-k}$$
+$$P(Y = k) = \frac{\mu^k e^{-\mu}}{k!}$$
+
+::: {.note}
+
+Binomial: $E[Y] = n\pi$, $\mathrm{Var}(Y) = n\pi(1-\pi)$. Poisson: $E[Y] = \mathrm{Var}(Y) = \mu$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+# a class of 30 children
+y ~ binomial(n = 30, p = 0.13)
+dbinom(0:10, size = 30, prob = 0.13)
+
+# visits on a day
+y ~ poisson(mu = 8)
+dpois(0:20, lambda = 8)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#dReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @blitzstein2019introduction derive the Poisson as a limit of the binomial; @clayton1993statistical use both as the basis of epidemiological models; @kirkwood2003essential give the practical rules for when each applies.
+
+:::
+
+## 3.3 The normal distribution, and why a density is not a probability {#s3}
+
+Continuous variables, like temperature or NO₂, are described by a **probability density**. The probability of falling in an interval is the **area** under the curve over that interval. A density's height is not a probability: when the distribution is narrow, the curve must be tall to keep the total area at 1, so its height can exceed 1. Change the mean, spread and interval.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="nM">Mean, μ</label><input type="range" id="nM" min="-2" max="2" step="0.1" value="0"><output id="nMO"></output></div>
+  <div class="ctrl"><label for="nS">Standard deviation, σ</label><input type="range" id="nS" min="0.1" max="2" step="0.05" value="1"><output id="nSO"></output></div>
+  <div class="ctrl"><label for="nA">Interval from</label><input type="range" id="nA" min="-4" max="4" step="0.1" value="-1.96"><output id="nAO"></output></div>
+  <div class="ctrl"><label for="nB">to</label><input type="range" id="nB" min="-4" max="4" step="0.1" value="1.96"><output id="nBO"></output></div>
+  <svg id="norm" viewBox="0 0 520 260" role="img" aria-label="Normal density with a shaded interval"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="nStats"></div><div class="now" id="nNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)$$
+$$P(a \le X \le b) = \int_a^b f(x)\,dx$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+x ~ normal(mu, sigma)
+
+dnorm(0, mean = 0, sd = 0.2)  # height: 1.99
+pnorm(1.96) - pnorm(-1.96)    # area: 0.95
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#nReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @altman1995normal on the normal distribution in medical statistics; @casella2002statistical on densities and distribution functions; @blitzstein2019introduction on continuous random variables.
+
+:::
+
+## 3.4 Overdispersion and the negative binomial {#s4}
+
+A Poisson model insists that the variance equals the mean. Real emergency counts vary more, because days differ in ways the model doesn't know about: winter, Mondays, heat waves. This extra variation is **overdispersion**. The negative binomial distribution allows it by letting the rate itself vary from day to day. Compare the observed counts with both models, then remove sources of variation and watch the overdispersion shrink.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="oD">District</label><select id="oD"></select></div>
+  <div class="ctrl"><label for="oG">Age group</label><select id="oG"><option value="0">0–14</option><option value="1">15–64</option><option value="2" selected>65+</option></select></div>
+  <div class="ctrl"><label for="oF">Days included</label><select id="oF"><option value="all">all 1,827 days</option><option value="season">winter days only (Dec–Feb)</option><option value="both">winter Tuesdays only</option></select></div>
+  <svg id="od" viewBox="0 0 520 270" role="img" aria-label="Observed counts against Poisson and negative binomial"></svg>
+  <div class="legend"><span><i style="background:var(--c-lik)"></i>observed days</span><span><i style="background:var(--p1)"></i>Poisson, same mean</span><span><i style="background:var(--p2)"></i>negative binomial, same mean and variance</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="oStats"></div><div class="now" id="oNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$Y \sim \mathrm{NegBin}(\mu, \phi)$$
+$$E[Y] = \mu, \qquad \mathrm{Var}(Y) = \mu + \frac{\mu^2}{\phi}$$
+
+::: {.note}
+
+As $\phi \to \infty$ the negative binomial becomes Poisson. Method-of-moments estimate: $\hat\phi = \bar y^2 / (s^2 - \bar y)$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+y ~ neg_binomial_2(mu, phi)
+
+d <- visits |> filter(district == "Old Town",
+                      age_group == "65+")
+m <- mean(d$visits); v <- var(d$visits)
+phi_hat <- m^2 / (v - m)
+dnbinom(0:60, mu = m, size = phi_hat)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#oReport}
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Assuming counts are Poisson without checking. If the variance is three times the mean, Poisson standard errors are about √3 ≈ 1.7 times too small, and a "significant" result may be nothing of the kind. Lessons 8 and 15 handle overdispersion inside regression models.
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): checking for overdispersion"}
+
+```{r}
+visits |>
+  group_by(district, age_group) |>
+  summarise(mean = mean(visits), var = var(visits),
+            ratio = var / mean, .groups = "drop") |>
+  arrange(desc(ratio)) |>
+  head()
+
+# the same check within a more homogeneous set of days
+visits |>
+  filter(month(date) %in% c(12, 1, 2), dow == "Tue") |>
+  group_by(district, age_group) |>
+  summarise(ratio = var(visits) / mean(visits), .groups = "drop") |>
+  summarise(median_ratio = median(ratio))
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @verhoef2007quasi compare quasi-Poisson and negative binomial models; @cameron2013regression and @hilbe2011negative are standard texts on count data.
+
+:::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+The negative binomial is a Poisson whose rate varies at random from day to day according to a gamma distribution. In Bayesian language, that is a hierarchical model: each day has its own rate, drawn from a common distribution. The same idea, with districts or schools instead of days, gives the hierarchical models of Lesson 24.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- A random variable is described by its distribution; its expected value is the long-run average and its variance the spread.
+- The binomial counts successes in n trials; the Poisson counts events at a constant rate, and has variance equal to its mean.
+- For continuous variables, probabilities are areas under a density. A density's height can exceed 1.
+- Real counts are usually overdispersed. Check the variance-to-mean ratio, and use negative binomial or quasi-Poisson models when it is well above 1.
+
+```{=html}
+<div class="done" data-lesson="lesson-03"><button type="button"></button><span></span></div>
+<script src="assets/lesson-03.js"></script>
+```

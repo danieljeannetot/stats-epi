@@ -1,0 +1,56 @@
+---
+title: "Statistics for epidemiology"
+subtitle: "From probability to Bayesian hierarchical models"
+toc: false
+---
+
+An interactive course for MSc students in epidemiology and public health. Twenty-five lessons, one simulated city and two running examples from environmental epidemiology. Every method is shown on data where the truth is known.
+
+```{=html}
+<div class="home-actions"><a class="primary" href="lesson-00.html">Start with Lesson 0 →</a><a href="glossary.html">Glossary and symbols</a><a href="course-plan.html">Course plan</a></div>
+<div class="prog"><div class="bar"><div id="pbar"></div></div><span id="ptxt"></span></div>
+```
+
+::: {.grid}
+
+::: {.g-col-12 .g-col-md-6}
+
+::: {.cpanel}
+
+#### Example A · Heat and emergency visits {.unnumbered}
+Five years of daily emergency department visits in 12 districts and 3 age groups, with temperature and PM2.5. Counts, time series, lags, nonlinear effects and maps.
+
+:::
+
+:::
+
+::: {.g-col-12 .g-col-md-6}
+
+::: {.cpanel}
+
+#### Example B · NO₂ and childhood asthma {.unnumbered}
+A birth cohort of 5,000 children with modeled and personal NO₂ exposure, socio-economic position and schools. Binary outcomes, causal inference, measurement error and disease burden.
+
+:::
+
+:::
+
+:::
+
+## How to use the course
+
+Work through the lessons in order. Each one has interactive demonstrations narrated by a **What's happening** box; models written three ways side by side (standard notation, a model list with R, and epidemiological reporting); optional R code in closed panels; **Bayesian previews** until Part V; and a concept quiz. Underlined terms open the glossary: hover for a short definition, click for the full entry. Mark lessons as complete to track your progress here. Progress is kept in your browser only.
+
+## The lessons
+
+```{=html}
+<div id="lessonGrid"></div>
+```
+
+## Five threads through the course
+
+[Likelihood]{style="color:var(--p1);font-weight:600"} · [Uncertainty]{style="color:var(--p2);font-weight:600"} · [Shrinkage]{style="color:var(--p3);font-weight:600"} · [Bias]{style="color:var(--p5);font-weight:600"} · [Frequentist ↔ Bayesian]{style="color:var(--p4);font-weight:600"}. Each lesson's header names the threads it develops.
+
+## About the data
+
+All data in this course are simulated. They resemble real environmental epidemiology data but describe no real city or person. The data files are in the course repository under `data/`, and `R/course-data.R` loads them.

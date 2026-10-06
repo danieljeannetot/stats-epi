@@ -1,0 +1,889 @@
+# Glossary source, part 1: describing data, epidemiological measures and burden.
+# Edit here, then run:  python3 tools/build_glossary.py
+# Fields: id, term, category, aliases, pre (optional words that must precede an alias),
+#   auto (false = only linked where marked by hand), short, full, formal, epi, r, report,
+#   confusion, related, lessons. Text can use **bold**, `code`, $math$, $$display math$$
+#   and [[term-id]] or [[term-id|label]] cross-references.
+
+- id: binary
+  term: Binary variable
+  category: Describing data
+  aliases: [binary variable, binary outcome, binary exposure, dichotomous variable]
+  short: >-
+    A variable that takes exactly two values, such as asthma yes or no.
+  full: >-
+    Binary variables are usually coded 0 and 1. Their mean is then the proportion of 1s, which
+    for an outcome is the [[risk]] or the [[prevalence]]. Binary outcomes are modeled with
+    [[logistic-regression]] or, for risk ratios, with log-binomial or Poisson models with robust
+    standard errors.
+  formal: >-
+    $Y \in \{0, 1\}$ with $P(Y = 1) = \pi$. Then $E[Y] = \pi$ and $\mathrm{Var}(Y) = \pi(1-\pi)$:
+    $Y$ follows a [[bernoulli]] distribution.
+  r: "mean(cohort$asthma)   # the proportion with asthma"
+  related: [bernoulli, risk, logistic-regression]
+  lessons: [1, 3, 8]
+
+- id: nominal
+  term: Nominal variable
+  category: Describing data
+  aliases: [nominal variable, nominal]
+  short: >-
+    A categorical variable whose categories have no natural order, such as district.
+  full: >-
+    Nominal variables are summarized with counts and proportions. In regression they enter as a
+    set of indicator (dummy) variables compared with a reference category, or, when there are
+    many categories, as [[random-effect|random effects]].
+  formal: >-
+    A variable taking values in a finite set $\{c_1, \dots, c_K\}$ with no ordering. Only equality
+    ($=$, $\neq$) is meaningful.
+  related: [ordinal, binary]
+  lessons: [1]
+
+- id: ordinal
+  term: Ordinal variable
+  category: Describing data
+  aliases: [ordinal variable, ordinal]
+  short: >-
+    A categorical variable whose categories are ordered, but with gaps that need not be equal.
+  full: >-
+    Age groups (0–14, 15–64, 65+) and severity scales are ordinal. You can say one category is
+    higher than another, but not by how much, so means are not meaningful. Summaries use counts,
+    proportions and medians.
+  formal: >-
+    A variable taking values in an ordered set $c_1 < c_2 < \dots < c_K$. Order is meaningful,
+    differences $c_{k+1} - c_k$ are not.
+  related: [nominal, continuous]
+  lessons: [1]
+
+- id: count
+  term: Count variable
+  category: Describing data
+  aliases: [count variable, count data, counts]
+  short: >-
+    A variable recording a whole number of events, such as emergency visits per day.
+  full: >-
+    Counts are non-negative integers. Their variance usually grows with their mean, so they are
+    modeled with the [[poisson-distribution]] or the [[negative-binomial]] distribution, typically
+    through [[poisson-regression]].
+  formal: >-
+    $Y \in \{0, 1, 2, \dots\}$. Under a Poisson model, $E[Y] = \mathrm{Var}(Y) = \mu$.
+  related: [poisson-distribution, overdispersion, poisson-regression]
+  lessons: [1, 3, 8]
+
+- id: continuous
+  term: Continuous variable
+  category: Describing data
+  aliases: [continuous variable, continuous exposure, continuous outcome]
+  short: >-
+    A measurement that can take any value on a scale, such as temperature or NO₂ concentration.
+  full: >-
+    Differences between values are meaningful, so means and standard deviations make sense.
+    Continuous exposures are best kept continuous in analysis. [[dichotomization|Dichotomizing]]
+    them loses information.
+  formal: >-
+    A variable taking values in an interval of the real line, $X \in (a, b) \subseteq \mathbb{R}$,
+    described by a [[pdf|probability density]].
+  related: [dichotomization, pdf]
+  lessons: [1]
+
+- id: histogram
+  term: Histogram
+  category: Describing data
+  aliases: [histogram, histograms]
+  short: >-
+    A chart that shows a distribution by counting values that fall in adjacent intervals (bins).
+  full: >-
+    The height of each bar is the number (or proportion) of observations in that bin. The shape
+    reveals [[skewness]], several peaks, or [[outlier|outliers]]. The impression depends on the
+    bin width, so try more than one.
+  r: "ggplot(city_daily, aes(pm25)) + geom_histogram(binwidth = 1)"
+  related: [skewness, outlier]
+  lessons: [1]
+
+- id: mean
+  term: Mean
+  category: Describing data
+  aliases: [mean, means, arithmetic mean, sample mean]
+  pre: [the, a, its, their, sample, arithmetic, weighted, posterior, population, group, overall, daily, and, of]
+  short: >-
+    The sum of the values divided by their number. It uses every value, so extreme values pull it.
+  full: >-
+    The mean is the balance point of a distribution. For roughly symmetric data it is the natural
+    summary of a typical value. For [[skewness|skewed]] data, a long tail drags it away from where
+    most values lie, and the [[median]] describes a typical value better.
+  formal: >-
+    $$\bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i$$ The population mean of a random variable is its
+    [[expected-value]], $E[X]$. The sample mean is an unbiased [[estimator|estimator]] of it.
+  r: "mean(x)"
+  report: >-
+    Mean (SD), for example "a mean of 436 visits per day (SD 52)".
+  confusion: >-
+    The mean of the data describes a typical value. The [[standard-error]] describes how precisely
+    the mean is estimated.
+  related: [median, sd, expected-value, skewness]
+  lessons: [1, 4]
+
+- id: median
+  term: Median
+  category: Describing data
+  aliases: [median, medians]
+  short: >-
+    The middle value when the data are ordered: half the values lie below it.
+  full: >-
+    The median ignores how extreme the extremes are, so it is robust to outliers and to long
+    tails. It is the preferred summary of a typical value for skewed data, reported with the
+    [[iqr]].
+  formal: >-
+    The 0.5 [[quantile]]: a value $m$ such that $P(X \le m) \ge 0.5$ and $P(X \ge m) \ge 0.5$. For
+    ordered data $x_{(1)} \le \dots \le x_{(n)}$, $m = x_{((n+1)/2)}$ when $n$ is odd, and the
+    average of the two middle values when $n$ is even.
+  r: "median(x)"
+  report: >-
+    Median (IQR), for example "median PM2.5 12.4 µg/m³ (IQR 9.8–15.9)".
+  related: [mean, iqr, quantile, skewness]
+  lessons: [1]
+
+- id: mode
+  term: Mode
+  category: Describing data
+  aliases: [mode]
+  pre: [the, a]
+  short: >-
+    The most frequent value, or the peak of a distribution.
+  full: >-
+    Useful for categorical data and for describing the shape of a distribution. A distribution
+    with two peaks is called bimodal, as daily temperature is (winter and summer).
+  formal: >-
+    For a discrete variable, the value $x$ maximizing $P(X = x)$. For a continuous variable, the
+    value maximizing the density $f(x)$.
+  related: [mean, median]
+  lessons: [1]
+
+- id: variance
+  term: Variance
+  category: Describing data
+  aliases: [variance, variances]
+  short: >-
+    The average squared distance of values from their mean. Its square root is the standard deviation.
+  full: >-
+    Variance is in squared units (visits², °C²), which makes it hard to interpret directly, but it
+    adds up neatly: the variance of a sum of independent quantities is the sum of their variances.
+    That is why it appears throughout statistical theory.
+  formal: >-
+    Population: $\mathrm{Var}(X) = E[(X - \mu)^2]$. Sample:
+    $$s^2 = \frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2$$ The divisor $n-1$ makes $s^2$ an
+    unbiased estimator of $\mathrm{Var}(X)$.
+  r: "var(x)"
+  related: [sd, mean]
+  lessons: [1, 3, 4]
+
+- id: sd
+  term: Standard deviation (SD)
+  category: Describing data
+  aliases: [standard deviation, standard deviations, SD, SDs]
+  short: >-
+    A measure of how far values typically lie from the mean, in the units of the data.
+  full: >-
+    For roughly normal data, about 68% of values lie within one SD of the mean and 95% within
+    about two. Like the mean, the SD is sensitive to extreme values, so for skewed data the [[iqr]]
+    is preferred.
+  formal: >-
+    $$s = \sqrt{\frac{1}{n-1}\sum_{i=1}^{n}(x_i - \bar{x})^2}$$ the square root of the sample
+    [[variance]].
+  r: "sd(x)"
+  report: >-
+    "mean 28.5 µg/m³ (SD 10.0)"
+  confusion: >-
+    The SD describes the spread of the data. The [[standard-error]] describes the spread of an
+    estimate across repeated samples, and shrinks with sample size: $SE = SD/\sqrt{n}$ for a mean.
+  related: [variance, standard-error, iqr]
+  lessons: [1, 4]
+
+- id: quantile
+  term: Quantile (percentile, quartile)
+  category: Describing data
+  aliases: [quantile, quantiles, percentile, percentiles, quartile, quartiles]
+  short: >-
+    The value below which a given fraction of the data lies. The 25th percentile is the first quartile.
+  full: >-
+    Percentiles describe a distribution at any point: the median is the 50th, and the quartiles
+    Q1 and Q3 are the 25th and 75th. In temperature studies, effects are often reported at the
+    1st and 99th percentiles of temperature.
+  formal: >-
+    The $p$-quantile is $Q(p) = \inf\{x : F(x) \ge p\}$, where $F$ is the [[cdf]]. Sample
+    quantiles interpolate between ordered observations; software uses several conventions.
+  r: "quantile(x, c(0.25, 0.5, 0.75))"
+  related: [median, iqr, cdf]
+  lessons: [1, 16]
+
+- id: iqr
+  term: Interquartile range (IQR)
+  category: Describing data
+  aliases: [interquartile range, IQR, IQRs]
+  short: >-
+    The range covered by the middle 50% of values, from the first to the third quartile.
+  full: >-
+    The IQR is robust to extreme values, so it pairs with the [[median]] for skewed data. In
+    publications it is usually reported as the two quartiles, "Q1–Q3", rather than their difference.
+    Air pollution effects are sometimes expressed "per IQR increase" in exposure.
+  formal: >-
+    $\mathrm{IQR} = Q(0.75) - Q(0.25)$.
+  r: "IQR(x); quantile(x, c(0.25, 0.75))"
+  report: >-
+    "median 12.4 (IQR 9.8–15.9)"
+  related: [median, quantile, sd]
+  lessons: [1]
+
+- id: range
+  term: Range
+  category: Describing data
+  aliases: [range]
+  pre: [the, a, its]
+  auto: false
+  short: >-
+    The difference between the largest and the smallest value.
+  full: >-
+    The range depends entirely on the two most extreme observations, and it tends to grow as more
+    data are collected, so it is a poor summary of spread. It is useful to report the minimum and
+    maximum to show the extent of the data.
+  formal: >-
+    $\max_i x_i - \min_i x_i$.
+  related: [iqr, sd]
+  lessons: [1]
+
+- id: skewness
+  term: Skewness
+  category: Describing data
+  aliases: [skewness, skewed, right-skewed, left-skewed, skew]
+  short: >-
+    Asymmetry of a distribution. Right-skewed data have a long tail of high values.
+  full: >-
+    In right-skewed data such as PM2.5 concentrations, the tail pulls the [[mean]] above the
+    [[median]]. Skewed data are summarized with the median and [[iqr]], and are often analyzed on
+    the log scale.
+  formal: >-
+    The standardized third moment, $\gamma_1 = E\left[\left(\frac{X-\mu}{\sigma}\right)^3\right]$,
+    estimated by $\frac{1}{n}\sum_i \left(\frac{x_i - \bar{x}}{s}\right)^3$. It is 0 for symmetric
+    distributions, positive for a long right tail.
+  related: [mean, median, histogram]
+  lessons: [1]
+
+- id: outlier
+  term: Outlier
+  category: Describing data
+  aliases: [outlier, outliers, extreme value, extreme values]
+  short: >-
+    An observation far from the bulk of the data.
+  full: >-
+    An outlier may be an error, or a real but unusual value, like a heat-wave day. Never delete
+    one just because it is extreme. Check it, report it, and use summaries and models that are not
+    driven by a single point. In regression, the related ideas are [[leverage]] and
+    [[influential-observation|influence]].
+  formal: >-
+    There is no single formal definition. A common rule flags values below $Q_1 - 1.5\,\mathrm{IQR}$
+    or above $Q_3 + 1.5\,\mathrm{IQR}$.
+  related: [iqr, influential-observation, robust-statistic]
+  lessons: [1, 10]
+
+- id: robust-statistic
+  term: Robust statistic
+  category: Describing data
+  aliases: [robust statistic, robust summary, robust to outliers]
+  short: >-
+    A summary that changes little when a few values are extreme or wrong, like the median or IQR.
+  full: >-
+    Robustness is measured by how many observations must be corrupted before the summary can be
+    made arbitrarily wrong. The mean breaks down with a single bad value; the median tolerates up
+    to half the data being bad.
+  formal: >-
+    The breakdown point is the smallest fraction of contaminated observations that can make the
+    estimate arbitrarily large: $1/n$ for the mean, about 0.5 for the median.
+  related: [median, iqr, outlier]
+  lessons: [1]
+
+- id: dichotomization
+  term: Dichotomization
+  category: Describing data
+  aliases: [dichotomization, dichotomizing, dichotomize, dichotomized, categorization, categorizing]
+  short: >-
+    Splitting a continuous variable into two groups at a cut-off.
+  full: >-
+    Dichotomizing throws away information, reduces power, and makes results depend on an
+    arbitrary cut-off. Children just above and just below 30 µg/m³ are treated as completely
+    different, while children at 31 and 60 µg/m³ are treated as the same. Prefer keeping the
+    variable continuous, with [[spline|splines]] if the relation is not linear.
+  epi: >-
+    Common in older papers ("high vs low exposure"). When cut-offs are chosen after looking at the
+    data, the results are biased toward finding an effect.
+  related: [continuous, spline]
+  lessons: [1, 11]
+
+- id: risk
+  term: Risk (cumulative incidence)
+  category: Epidemiological measures
+  aliases: [risk, risks, cumulative incidence, incidence proportion, absolute risk]
+  short: >-
+    The proportion of an initially outcome-free group who develop the outcome over a stated period.
+  full: >-
+    A risk always needs a time frame: "14% of children were diagnosed with asthma by age 8". It is
+    a probability for an individual and a proportion for a group. It assumes everyone is followed
+    for the whole period; when follow-up differs, use an [[incidence-rate]].
+  formal: >-
+    $R = D / N$, where $D$ is the number of new cases and $N$ the number at risk at the start. It
+    estimates $P(\text{event in } (0, t] \mid \text{event-free at } 0)$.
+  epi: >-
+    Also called cumulative incidence or incidence proportion. Not the same as [[prevalence]],
+    which counts existing cases at one point in time.
+  r: "mean(cohort$asthma)"
+  report: >-
+    "The cumulative incidence of asthma by age 8 was 13.7% (95% CI 12.8 to 14.7)."
+  related: [prevalence, odds, incidence-rate, risk-ratio]
+  lessons: [1]
+
+- id: prevalence
+  term: Prevalence
+  category: Epidemiological measures
+  aliases: [prevalence, prevalent]
+  short: >-
+    The proportion of a population who have a condition at a given time.
+  full: >-
+    Prevalence counts existing cases, new and old. It depends on both how often the condition
+    starts (incidence) and how long it lasts: for a stable population, prevalence ≈ incidence rate
+    × average duration.
+  formal: >-
+    Point prevalence $P = C_t / N_t$, the number of cases at time $t$ divided by the population at
+    time $t$.
+  epi: >-
+    Cross-sectional studies measure prevalence. Because it mixes onset and duration, a risk factor
+    can be associated with prevalence simply by making the disease last longer.
+  related: [risk, incidence-rate, cross-sectional-study]
+  lessons: [1]
+
+- id: odds
+  term: Odds
+  category: Epidemiological measures
+  aliases: [odds]
+  short: >-
+    The number with the outcome divided by the number without it.
+  full: >-
+    Odds of 0.15 mean 15 cases for every 100 people without the outcome. For a rare outcome, the
+    odds and the [[risk]] are nearly equal. For a common one, the odds are much larger. Odds appear
+    because [[logistic-regression]] models the log of the odds.
+  formal: >-
+    $$O = \frac{R}{1 - R} = \frac{D}{N - D}$$ and conversely $R = O / (1 + O)$.
+  r: "with(cohort, sum(asthma) / sum(1 - asthma))"
+  related: [risk, odds-ratio, logit]
+  lessons: [1, 8]
+
+- id: incidence-rate
+  term: Incidence rate
+  category: Epidemiological measures
+  aliases: [incidence rate, incidence rates, rate, rates, event rate]
+  short: >-
+    The number of events per unit of person-time, such as visits per 1,000 person-years.
+  full: >-
+    Rates are used when people can have repeated events, or are observed for different lengths of
+    time. The denominator is the total [[person-time]] at risk. A rate has units (per year) and can
+    exceed 1.
+  formal: >-
+    $I = D / PT$, an estimate of the hazard averaged over the period. Under a Poisson model the
+    number of events is $D \sim \mathrm{Poisson}(I \cdot PT)$.
+  epi: >-
+    Also called incidence density. Emergency visit rates in Example A are rates of (possibly
+    repeated) events, not risks.
+  r: |-
+    visits |> summarise(rate = 1000 * sum(visits) / (sum(population) / 365.25))
+  report: >-
+    "240 emergency visits per 1,000 person-years"
+  related: [person-time, rate-ratio, risk, poisson-regression]
+  lessons: [1, 8]
+
+- id: person-time
+  term: Person-time
+  category: Epidemiological measures
+  aliases: [person-time, person-years, person-year, person-days]
+  short: >-
+    The total time contributed by all individuals while at risk, such as person-years.
+  full: >-
+    1,000 people followed for 5 years contribute 5,000 person-years, and so do 5,000 people followed
+    for one year. In Poisson regression, person-time enters as an [[offset]].
+  formal: >-
+    $PT = \sum_i t_i$, where $t_i$ is the time individual $i$ spent at risk.
+  r: "sum(visits$population) / 365.25   # person-days to person-years"
+  related: [incidence-rate, offset]
+  lessons: [1, 8]
+
+- id: risk-difference
+  term: Risk difference (RD)
+  category: Epidemiological measures
+  aliases: [risk difference, risk differences, RD, excess risk, absolute risk difference]
+  short: >-
+    The difference between the risk in the exposed and the unexposed: extra cases per person.
+  full: >-
+    An absolute measure, often given per 100 or per 1,000 people. It speaks directly to public
+    health impact: how many cases would be avoided if the exposure were removed. Its reciprocal is
+    the [[nnt]].
+  formal: >-
+    $RD = R_1 - R_0$, estimating $P(Y=1 \mid X=1) - P(Y=1 \mid X=0)$.
+  epi: >-
+    Sometimes called the attributable risk or excess risk. Effect modification on the RD scale
+    (additive) can differ from effect modification on the RR scale ([[interaction-scale]]).
+  report: >-
+    "3.1 additional cases per 100 children (95% CI 1.2 to 5.0)"
+  related: [risk-ratio, nnt, interaction-scale]
+  lessons: [1, 9]
+
+- id: risk-ratio
+  term: Risk ratio (RR)
+  category: Epidemiological measures
+  aliases: [risk ratio, risk ratios, relative risk, relative risks, RR, RRs]
+  short: >-
+    The risk in the exposed divided by the risk in the unexposed.
+  full: >-
+    An RR of 1.25 means the risk is 25% higher in the exposed. It is a relative measure, so the
+    same RR can mean many or few extra cases depending on the baseline risk. In time-series
+    studies, "RR" usually refers to a [[rate-ratio]].
+  formal: >-
+    $RR = R_1 / R_0$. Confidence intervals are computed on the log scale:
+    $\mathrm{SE}(\log \widehat{RR}) = \sqrt{1/a - 1/n_1 + 1/c - 1/n_0}$.
+  epi: >-
+    Estimated from cohort studies, trials and log-binomial or modified Poisson regression. An
+    adjusted RR (aRR) comes from a model that includes confounders.
+  r: "with(cohort, mean(asthma[no2_modeled >= 30]) / mean(asthma[no2_modeled < 30]))"
+  report: >-
+    "RR 1.21 (95% CI 1.06 to 1.38)"
+  confusion: >-
+    Not interchangeable with the [[odds-ratio]] unless the outcome is rare.
+  related: [odds-ratio, rate-ratio, risk-difference, adjusted-estimate]
+  lessons: [1, 8]
+
+- id: rate-ratio
+  term: Rate ratio (incidence rate ratio, IRR)
+  category: Epidemiological measures
+  aliases: [rate ratio, rate ratios, incidence rate ratio, IRR]
+  short: >-
+    The incidence rate in one group divided by the rate in another.
+  full: >-
+    The natural effect measure for counts and person-time data. Poisson regression coefficients
+    are log rate ratios, so $e^{\beta}$ is the rate ratio per unit of the predictor. Temperature
+    studies report rate ratios relative to the [[mmt]], often just called RR.
+  formal: >-
+    $IRR = I_1 / I_0 = (D_1/PT_1)/(D_0/PT_0)$. In a Poisson model with $\log \mu = \alpha + \beta x
+    + \log PT$, $IRR = e^{\beta}$ per unit of $x$.
+  epi: >-
+    For heat effects, often reported as % change in rate per °C: $100(e^{\beta}-1)$.
+  r: "exp(coef(glm(visits ~ temp + offset(log(population)), family = poisson, data = visits)))"
+  report: >-
+    "a 2.5% increase in emergency visits per 1°C (IRR 1.025, 95% CI 1.018 to 1.032)"
+  related: [incidence-rate, risk-ratio, poisson-regression]
+  lessons: [1, 8, 16]
+
+- id: odds-ratio
+  term: Odds ratio (OR)
+  category: Epidemiological measures
+  aliases: [odds ratio, odds ratios, OR, ORs]
+  short: >-
+    The odds of the outcome in the exposed divided by the odds in the unexposed.
+  full: >-
+    Odds ratios come from [[logistic-regression]] ($e^{\beta}$) and from case-control studies,
+    where risks cannot be estimated. For a rare outcome, the OR approximates the [[risk-ratio]].
+    For a common outcome it is further from 1 than the RR, and reading it as "times the risk"
+    exaggerates the effect.
+  formal: >-
+    $$OR = \frac{R_1/(1-R_1)}{R_0/(1-R_0)} = \frac{ad}{bc}$$ for a 2×2 table with cells $a, b$
+    (exposed cases, non-cases) and $c, d$ (unexposed). $\mathrm{SE}(\log \widehat{OR}) =
+    \sqrt{1/a + 1/b + 1/c + 1/d}$.
+  epi: >-
+    The OR is non-collapsible: adjusting for a variable that is not a confounder can still change
+    it ([[non-collapsibility]]).
+  r: "exp(coef(glm(asthma ~ I(no2_modeled / 10), family = binomial, data = cohort)))"
+  report: >-
+    "OR 1.15 per 10 µg/m³ NO₂ (95% CI 1.04 to 1.27)"
+  confusion: >-
+    An OR of 2.3 can correspond to a risk only 1.5 times higher when the outcome is common.
+  related: [risk-ratio, odds, logistic-regression, adjusted-odds-ratio, non-collapsibility]
+  lessons: [1, 8, 12]
+
+- id: adjusted-odds-ratio
+  term: Adjusted odds ratio (aOR)
+  category: Epidemiological measures
+  aliases: [adjusted odds ratio, adjusted odds ratios, aOR, aORs]
+  short: >-
+    An odds ratio from a model that includes other variables, usually confounders.
+  full: >-
+    The aOR compares the odds of the outcome between people who differ in the exposure but have
+    the same values of the adjustment variables. It is a conditional effect: it applies within
+    levels of the covariates, not to the population as a whole.
+  formal: >-
+    In $\mathrm{logit}\,\pi_i = \alpha + \beta x_i + \gamma^\top z_i$, $aOR = e^{\beta}$, the OR for a
+    one-unit increase in $x$ holding $z$ fixed.
+  epi: >-
+    Always state which variables were adjusted for. An aOR is only as good as the adjustment set
+    ([[dag]]), and because of [[non-collapsibility]] it can differ from the crude OR even without
+    confounding.
+  r: "glm(asthma ~ I(no2_modeled / 10) + ses + parent_smoke + green + sex, family = binomial, data = cohort)"
+  report: >-
+    "aOR 1.12 per 10 µg/m³ (95% CI 1.01 to 1.24), adjusted for socio-economic position, parental
+    smoking, green space and sex"
+  related: [odds-ratio, adjusted-estimate, confounding, non-collapsibility]
+  lessons: [8, 9, 12]
+
+- id: adjusted-estimate
+  term: Crude and adjusted estimates
+  category: Epidemiological measures
+  aliases: [adjusted estimate, adjusted estimates, crude estimate, crude estimates, adjusted RR, aRR, adjusted rate ratio, crude association]
+  short: >-
+    A crude estimate ignores other variables. An adjusted estimate accounts for them, usually to
+    remove confounding.
+  full: >-
+    Comparing crude and adjusted estimates shows how much the adjustment variables changed the
+    picture. A large change suggests confounding, but the right adjustment set comes from causal
+    reasoning ([[dag]]), not from watching estimates move.
+  formal: >-
+    Crude: $E[Y \mid X]$. Adjusted (conditional): $E[Y \mid X, Z]$, estimated by including $Z$ in the
+    regression model or by [[direct-standardization|standardization]].
+  epi: >-
+    aOR, aRR and aHR denote adjusted odds, risk and hazard ratios.
+  related: [adjusted-odds-ratio, confounding, adjustment-set]
+  lessons: [1, 9]
+
+- id: hazard-ratio
+  term: Hazard ratio (HR)
+  category: Epidemiological measures
+  aliases: [hazard ratio, hazard ratios, HR, aHR]
+  short: >-
+    The ratio of instantaneous event rates between two groups, from survival analysis.
+  full: >-
+    Hazard ratios come from Cox proportional hazards models. They resemble rate ratios and are
+    interpreted similarly, but they compare event rates at each moment among those still at risk.
+    This course does not cover survival analysis, but you will meet HRs in cohort papers.
+  formal: >-
+    $HR = h_1(t)/h_0(t)$, assumed constant over time under proportional hazards, where
+    $h(t) = \lim_{\Delta t \to 0} P(t \le T < t + \Delta t \mid T \ge t)/\Delta t$.
+  related: [rate-ratio, risk-ratio]
+  lessons: []
+
+- id: nnt
+  term: Number needed to treat or harm (NNT, NNH)
+  category: Epidemiological measures
+  aliases: [number needed to treat, number needed to harm, NNT, NNH]
+  short: >-
+    The number of people who need to be exposed (or treated) for one extra case to occur (or be prevented).
+  full: >-
+    The reciprocal of the [[risk-difference]]. An RD of 3 extra cases per 100 children means an NNH
+    of about 33: for every 33 children living with high NO₂, one extra child develops asthma by age 8.
+  formal: >-
+    $NNT = 1 / |RD|$, for a stated time period.
+  related: [risk-difference]
+  lessons: [1]
+
+- id: crude-rate
+  term: Crude rate
+  category: Standardization
+  aliases: [crude rate, crude rates]
+  short: >-
+    A rate for a whole population without adjustment for its age structure.
+  full: >-
+    The crude rate mixes two things: the age-specific rates and the population's age structure. A
+    district with many older residents has a high crude rate even if every age group there does
+    as well as elsewhere.
+  formal: >-
+    $$\text{crude}_j = \frac{\sum_k D_{jk}}{\sum_k PT_{jk}} = \sum_k \frac{PT_{jk}}{PT_j} r_{jk}$$
+    a weighted average of age-specific rates $r_{jk}$, weighted by district $j$'s own age structure.
+  related: [age-specific-rate, direct-standardization]
+  lessons: [1]
+
+- id: age-specific-rate
+  term: Age-specific rate
+  category: Standardization
+  aliases: [age-specific rate, age-specific rates, stratum-specific rate]
+  short: >-
+    A rate calculated separately within one age group.
+  full: >-
+    Age-specific rates remove age structure from the comparison within each group. Standardization
+    combines them into one number using common weights.
+  formal: >-
+    $r_{jk} = D_{jk} / PT_{jk}$ for district $j$ and age group $k$.
+  related: [crude-rate, direct-standardization]
+  lessons: [1]
+
+- id: direct-standardization
+  term: Direct standardization (age-standardized rate, ASR)
+  category: Standardization
+  aliases: [direct standardization, direct age standardization, age standardization, age-standardized rate, age-standardized rates, age-standardized, standardized rate, standardized rates, ASR, standardization]
+  short: >-
+    Applying each population's age-specific rates to a common standard age structure, so rates can
+    be compared without age differences.
+  full: >-
+    The age-standardized rate answers: what would this population's rate be if it had the age
+    structure of the standard? It requires age-specific rates in each population, which can be
+    unstable for small populations; then [[indirect-standardization]] is used.
+  formal: >-
+    $$ASR_j = \sum_k w_k\, r_{jk}, \qquad w_k = \frac{N_k^{\mathrm{std}}}{\sum_{k'} N_{k'}^{\mathrm{std}}}$$
+  epi: >-
+    Common standards include the WHO world standard population and the European standard population.
+    Standardized rates are only comparable when they use the same standard.
+  r: |-
+    age_rates |> left_join(std_w, by = "age_group") |> group_by(district) |> summarise(asr = sum(w * r))
+  report: >-
+    "age-standardized rate 236 per 1,000 person-years (direct method, city standard population)"
+  related: [crude-rate, standard-population, indirect-standardization, smr]
+  lessons: [1]
+
+- id: indirect-standardization
+  term: Indirect standardization
+  category: Standardization
+  aliases: [indirect standardization, indirectly standardized]
+  short: >-
+    Applying standard age-specific rates to a population's age structure to get the number of
+    expected events, then comparing observed with expected.
+  full: >-
+    Used when a population is too small for reliable age-specific rates. The result is the [[smr]],
+    observed divided by expected. Indirect standardization is the basis of disease mapping in
+    Lesson 17.
+  formal: >-
+    $E_j = \sum_k r_k^{\mathrm{std}}\, PT_{jk}$ and $SMR_j = O_j / E_j$.
+  related: [smr, direct-standardization, disease-mapping]
+  lessons: [1, 17]
+
+- id: smr
+  term: Standardized morbidity or mortality ratio (SMR)
+  category: Standardization
+  aliases: [standardized morbidity ratio, standardized mortality ratio, standardized incidence ratio, SMR, SMRs, SIR]
+  short: >-
+    Observed events divided by the number expected if the population had standard age-specific rates.
+  full: >-
+    An SMR of 1.2 means 20% more events than expected given the population's age structure. SMRs
+    for small areas are very noisy, which is why disease maps use Bayesian smoothing
+    ([[bym2]], Lesson 25).
+  formal: >-
+    $SMR_j = O_j / E_j$ with $E_j = \sum_k r_k^{\mathrm{std}} PT_{jk}$. Under a Poisson model
+    $O_j \sim \mathrm{Poisson}(E_j\, \theta_j)$ and $\widehat{\theta}_j = SMR_j$.
+  related: [indirect-standardization, disease-mapping, small-area-estimation]
+  lessons: [17, 25]
+
+- id: standard-population
+  term: Standard population
+  category: Standardization
+  aliases: [standard population, standard populations, reference population]
+  short: >-
+    The age structure used as weights in direct standardization.
+  full: >-
+    The choice of standard changes the standardized rates (though usually not their ranking). Always
+    state which standard was used.
+  related: [direct-standardization]
+  lessons: [1]
+
+- id: cohort-study
+  term: Cohort study
+  category: Study designs
+  aliases: [cohort study, cohort studies, birth cohort, prospective cohort]
+  short: >-
+    A study that follows people over time, starting from their exposure, and records who develops the outcome.
+  full: >-
+    Cohorts estimate risks, rates and their ratios directly. Example B is a birth cohort. Cohorts
+    can be prospective or use existing records (retrospective), and are vulnerable to loss to
+    follow-up and confounding.
+  related: [case-control-study, risk, risk-ratio]
+  lessons: [1]
+
+- id: case-control-study
+  term: Case-control study
+  category: Study designs
+  aliases: [case-control study, case-control studies, case-control]
+  short: >-
+    A study that compares the past exposure of people with the outcome (cases) and without it (controls).
+  full: >-
+    Efficient for rare outcomes. Because the proportion of cases is set by the design, risks
+    cannot be estimated, but the [[odds-ratio]] can, and with appropriate control sampling it
+    estimates the rate ratio.
+  related: [odds-ratio, cohort-study, case-crossover]
+  lessons: [8]
+
+- id: cross-sectional-study
+  term: Cross-sectional study
+  category: Study designs
+  aliases: [cross-sectional study, cross-sectional studies, cross-sectional]
+  short: >-
+    A study that measures exposure and outcome at the same time.
+  full: >-
+    Cross-sectional studies estimate [[prevalence]]. Because exposure and outcome are measured
+    together, they often cannot show which came first.
+  related: [prevalence, cohort-study]
+  lessons: [1]
+
+- id: ecological-study
+  term: Ecological study
+  category: Study designs
+  aliases: [ecological study, ecological studies, ecological analysis]
+  short: >-
+    A study whose units are groups, such as districts, rather than individuals.
+  full: >-
+    Associations between group averages need not hold for individuals ([[ecological-fallacy]]).
+    Time-series studies of daily counts are ecological in a sense, but they compare the same
+    population with itself over time, which limits confounding.
+  related: [ecological-fallacy, time-series]
+  lessons: [17]
+
+- id: paf
+  term: Population attributable fraction (PAF)
+  category: Disease burden
+  aliases: [population attributable fraction, population attributable fractions, PAF, PAFs, attributable fraction, attributable fractions, population attributable risk]
+  short: >-
+    The fraction of all cases in a population that would not occur if an exposure were reduced to a
+    counterfactual level.
+  full: >-
+    The PAF combines how common the exposure is with how strongly it raises risk. It assumes the
+    relationship is causal, and it depends on the counterfactual exposure chosen ([[tmrel]]).
+    PAFs for different risk factors can add up to more than 100%, because cases can be caused by
+    several factors together.
+  formal: >-
+    For a binary exposure (Levin's formula): $$PAF = \frac{p_e (RR - 1)}{1 + p_e(RR - 1)}$$ For a
+    continuous exposure $x$ with distribution $f$ and counterfactual $x^*$:
+    $PAF = \frac{\int RR(x) f(x)\,dx - RR(x^*)}{\int RR(x) f(x)\,dx}$.
+  epi: >-
+    With confounding, Levin's formula with an adjusted RR is biased. Use Miettinen's formula,
+    $PAF = p_c (RR - 1)/RR$, where $p_c$ is the proportion of cases exposed, or model-based
+    standardization.
+  report: >-
+    "An estimated 9% (95% CI 4 to 14%) of childhood asthma cases were attributable to NO₂ above 10 µg/m³."
+  related: [attributable-number, afe, tmrel, daly]
+  lessons: [14, 16]
+
+- id: afe
+  term: Attributable fraction among the exposed (AFe)
+  category: Disease burden
+  aliases: [attributable fraction among the exposed, AFe, etiologic fraction]
+  short: >-
+    The fraction of cases among exposed people that is due to the exposure.
+  full: >-
+    If the exposure doubles the risk, half the exposed cases would not have occurred without it.
+  formal: >-
+    $AF_e = (RR - 1) / RR$.
+  related: [paf, risk-ratio]
+  lessons: [14]
+
+- id: attributable-number
+  term: Attributable number (AN)
+  category: Disease burden
+  aliases: [attributable number, attributable numbers, attributable cases, attributable deaths, attributable visits, AN]
+  short: >-
+    The number of cases attributable to an exposure: the PAF times the total number of cases.
+  full: >-
+    For time-varying exposures like temperature, attributable numbers are computed day by day and
+    summed, with uncertainty obtained by simulation.
+  formal: >-
+    $AN = PAF \times D$. For daily data, $AN = \sum_t D_t \left(1 - 1/RR(x_t)\right)$, the backward
+    perspective used in DLNM studies.
+  related: [paf, dlnm]
+  lessons: [14, 16]
+
+- id: daly
+  term: Disability-adjusted life year (DALY)
+  category: Disease burden
+  aliases: [disability-adjusted life year, disability-adjusted life years, DALY, DALYs]
+  short: >-
+    A measure of disease burden that adds years of life lost to early death and years lived with disability.
+  full: >-
+    One DALY is one lost year of healthy life. DALYs let burden be compared across diseases that
+    kill and diseases that disable, such as childhood asthma, which mostly contributes years lived
+    with disability.
+  formal: >-
+    $DALY = YLL + YLD$.
+  epi: >-
+    Used by the Global Burden of Disease study. Results depend on the disability weights, the
+    reference life table and, in older versions, on age weighting and discounting.
+  related: [yll, yld, disability-weight, paf]
+  lessons: [14]
+
+- id: yll
+  term: Years of life lost (YLL)
+  category: Disease burden
+  aliases: [years of life lost, YLL, YLLs]
+  short: >-
+    The years of life lost through deaths before a reference life expectancy.
+  formal: >-
+    $YLL = \sum_a D_a \cdot L_a$, where $D_a$ is deaths at age $a$ and $L_a$ the reference remaining
+    life expectancy at that age.
+  related: [daly, yld]
+  lessons: [14]
+
+- id: yld
+  term: Years lived with disability (YLD)
+  category: Disease burden
+  aliases: [years lived with disability, YLD, YLDs]
+  short: >-
+    The years lived in less than full health, weighted by the severity of the condition.
+  formal: >-
+    Prevalence-based: $YLD = \text{prevalent cases} \times DW$ per year. Incidence-based:
+    $YLD = I \times DW \times L$, with $L$ the average duration.
+  related: [daly, disability-weight]
+  lessons: [14]
+
+- id: disability-weight
+  term: Disability weight
+  category: Disease burden
+  aliases: [disability weight, disability weights]
+  short: >-
+    A number between 0 (full health) and 1 (equivalent to death) expressing the severity of a health state.
+  full: >-
+    Disability weights come from population surveys in which people compare health states. They
+    are a value judgment as much as a measurement.
+  related: [yld, daly]
+  lessons: [14]
+
+- id: tmrel
+  term: Counterfactual exposure (TMREL)
+  category: Disease burden
+  aliases: [theoretical minimum risk exposure level, TMREL, counterfactual exposure, counterfactual exposure level]
+  short: >-
+    The exposure level that burden is compared against: the attributable cases are those that would
+    not occur at this level.
+  full: >-
+    The theoretical minimum risk exposure level is the lowest level considered achievable or
+    biologically relevant. Choosing zero NO₂ versus a guideline value of 10 µg/m³ can change the
+    attributable burden more than any statistical choice.
+  related: [paf, comparative-risk-assessment]
+  lessons: [14]
+
+- id: comparative-risk-assessment
+  term: Comparative risk assessment (CRA)
+  category: Disease burden
+  aliases: [comparative risk assessment, CRA, health impact assessment]
+  short: >-
+    A framework for estimating the burden attributable to risk factors by combining exposure
+    distributions, exposure–response functions and a counterfactual.
+  full: >-
+    The ingredients are an exposure distribution, a relative risk function, a counterfactual
+    exposure ([[tmrel]]), and baseline burden. Uncertainty in each should be propagated, usually by
+    Monte Carlo simulation.
+  related: [paf, tmrel, daly, exposure-response-function]
+  lessons: [14]
+
+- id: simulated-data
+  term: Simulated data
+  category: About the course
+  aliases: [simulated data, simulated dataset, simulated]
+  auto: false
+  short: >-
+    Data generated by a computer from a known model.
+  full: >-
+    This course uses simulated data so that every estimate can be compared with the truth. The
+    simulation includes realistic complications: overdispersion, confounding, measurement error,
+    lags and spatial correlation.
+  related: [three-way-notation]
+  lessons: [0]
+
+- id: three-way-notation
+  term: Three-way notation
+  category: About the course
+  aliases: [three-way notation]
+  short: >-
+    The course's way of showing every model: standard notation, a model list with R, and
+    epidemiological reporting, side by side.
+  full: >-
+    **A, standard notation** is how models appear in papers and textbooks. **B, the model list and
+    R** writes one line per assumption, as software does. **C, epidemiological reporting** shows
+    how the result would appear in a results section.
+  related: [simulated-data]
+  lessons: [0]

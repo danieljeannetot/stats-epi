@@ -1,0 +1,1020 @@
+# Glossary source, part 3: regression, causal inference and measurement error.
+
+- id: linear-regression
+  term: Linear regression
+  category: Regression
+  aliases: [linear regression, linear model, linear models, ordinary least squares regression]
+  short: >-
+    A model in which the mean of a continuous outcome is a linear function of the predictors.
+  full: >-
+    Each coefficient is the expected change in the outcome per unit change in a predictor, holding
+    the others fixed. It assumes linearity, independent errors, constant variance
+    ([[homoskedasticity]]) and, for small-sample inference, normally distributed errors.
+  formal: >-
+    $$Y_i = \beta_0 + \beta_1 x_{1i} + \dots + \beta_p x_{pi} + \varepsilon_i, \quad
+    \varepsilon_i \sim \mathrm{Normal}(0, \sigma^2)$$ or in matrix form $Y = X\beta + \varepsilon$.
+  r: "lm(outcome ~ x1 + x2, data = d)"
+  related: [least-squares, residual, glm, homoskedasticity]
+  lessons: [7]
+
+- id: least-squares
+  term: Least squares (OLS)
+  category: Regression
+  aliases: [least squares, ordinary least squares, OLS, sum of squared residuals]
+  short: >-
+    Estimating a regression by choosing the coefficients that minimize the sum of squared residuals.
+  formal: >-
+    $\hat{\beta} = \arg\min_\beta \sum_i (y_i - x_i^\top\beta)^2 = (X^\top X)^{-1}X^\top y$. With normal
+    errors, this is also the [[mle]].
+  related: [linear-regression, residual, mle]
+  lessons: [7]
+
+- id: residual
+  term: Residual
+  category: Regression
+  aliases: [residual, residuals, Pearson residual, Pearson residuals]
+  short: >-
+    The difference between an observed value and the value the model predicts for it.
+  full: >-
+    Residuals are the raw material of model checking. Patterns in them (curves, trends over time,
+    funnels) reveal what the model misses. For counts, Pearson residuals divide by the expected
+    standard deviation.
+  formal: >-
+    $e_i = y_i - \hat{y}_i$. Pearson residual for a GLM: $r_i = (y_i - \hat{\mu}_i)/\sqrt{V(\hat{\mu}_i)}$,
+    e.g. $\sqrt{\hat{\mu}_i}$ for Poisson.
+  r: "residuals(fit, type = \"pearson\")"
+  related: [least-squares, heteroskedasticity, autocorrelation]
+  lessons: [7, 10]
+
+- id: regression-coefficient
+  term: Regression coefficient
+  category: Regression
+  aliases: [regression coefficient, regression coefficients, coefficient, coefficients]
+  short: >-
+    The number multiplying a predictor in a regression equation: its estimated effect per unit.
+  full: >-
+    In linear regression, a coefficient is a difference in mean outcome per unit. In logistic and
+    Poisson regression, it is a difference on the log-odds or log-rate scale, so $e^{\beta}$ is an
+    odds ratio or a rate ratio.
+  formal: >-
+    $\beta_j = \partial E[Y \mid x] / \partial x_j$ on the scale of the [[link-function]], holding
+    other predictors fixed.
+  related: [intercept, slope, link-function]
+  lessons: [7, 8]
+
+- id: intercept
+  term: Intercept
+  category: Regression
+  aliases: [intercept, intercepts]
+  short: >-
+    The model's prediction when all predictors equal zero. Often written α.
+  full: >-
+    It is meaningful only if zero is a sensible value for every predictor, which is why predictors
+    are often centered (temperature − 20°C).
+  related: [regression-coefficient, slope]
+  lessons: [7]
+
+- id: slope
+  term: Slope
+  category: Regression
+  aliases: [slope, slopes]
+  short: >-
+    The change in the predicted outcome per unit increase in a predictor.
+  related: [regression-coefficient, intercept]
+  lessons: [7]
+
+- id: r-squared
+  term: R² (coefficient of determination)
+  category: Regression
+  aliases: [R-squared, R², coefficient of determination]
+  short: >-
+    The proportion of variation in the outcome explained by the model.
+  full: >-
+    A low R² does not mean an exposure effect is unimportant: individual outcomes are noisy, while
+    the effect on the population mean can be substantial.
+  formal: >-
+    $R^2 = 1 - \frac{\sum_i (y_i - \hat{y}_i)^2}{\sum_i (y_i - \bar{y})^2}$.
+  related: [linear-regression]
+  lessons: [7]
+
+- id: prediction-interval
+  term: Prediction interval
+  category: Regression
+  aliases: [prediction interval, prediction intervals]
+  short: >-
+    A range likely to contain a new individual observation, wider than a confidence interval for the mean.
+  formal: >-
+    In linear regression, $\hat{y}_0 \pm t \sqrt{\hat{\sigma}^2 + \widehat{\mathrm{Var}}(\hat{y}_0)}$: it
+    adds the residual variance to the uncertainty of the mean.
+  related: [confidence-interval, linear-regression]
+  lessons: [7]
+
+- id: homoskedasticity
+  term: Homoskedasticity
+  category: Regression
+  aliases: [homoskedasticity, homoscedasticity, homoskedastic, homoscedastic, constant variance]
+  short: >-
+    Constant variance of the errors across all values of the predictors.
+  full: >-
+    An assumption of standard linear regression. Counts usually violate it, because their variance
+    grows with their mean, which is one reason to use Poisson or negative binomial models.
+  formal: >-
+    $\mathrm{Var}(\varepsilon_i \mid x_i) = \sigma^2$ for all $i$.
+  related: [heteroskedasticity, linear-regression]
+  lessons: [7]
+
+- id: heteroskedasticity
+  term: Heteroskedasticity
+  category: Regression
+  aliases: [heteroskedasticity, heteroscedasticity, heteroskedastic, heteroscedastic, non-constant variance]
+  short: >-
+    Error variance that changes with the predictors or the fitted values.
+  full: >-
+    Coefficient estimates remain unbiased, but standard errors are wrong. It shows as a funnel in a
+    plot of residuals against fitted values. Remedies: model the variance (GLMs), transform the
+    outcome, or use [[robust-standard-error|robust standard errors]].
+  formal: >-
+    $\mathrm{Var}(\varepsilon_i \mid x_i) = \sigma_i^2$, not constant. Not to be confused with
+    [[heterogeneity]], which concerns effects, not error variance.
+  confusion: >-
+    Heteroskedasticity is about unequal error variance within one model. Heterogeneity is about
+    different effects across studies, groups or places.
+  related: [homoskedasticity, robust-standard-error, heterogeneity]
+  lessons: [7, 8]
+
+- id: multicollinearity
+  term: Multicollinearity
+  category: Regression
+  aliases: [multicollinearity, collinearity, collinear, highly correlated exposures, correlated exposures]
+  short: >-
+    Strong correlation among predictors, which makes their separate effects hard to estimate.
+  full: >-
+    The model can estimate the combined effect but not how to split it, so individual coefficients
+    get large standard errors and maximum likelihood may fail to converge. Lagged temperatures and
+    multiple pollutants are typical examples. Hierarchical priors and penalization stabilize them.
+  formal: >-
+    Measured by the variance inflation factor, $VIF_j = 1/(1 - R_j^2)$, where $R_j^2$ comes from
+    regressing $x_j$ on the other predictors. $\mathrm{Var}(\hat{\beta}_j)$ is multiplied by $VIF_j$.
+  related: [hierarchical-model, penalized-spline, dlm]
+  lessons: [7, 16, 24]
+
+- id: glm
+  term: Generalized linear model (GLM)
+  category: Regression
+  aliases: [generalized linear model, generalized linear models, GLM, GLMs]
+  short: >-
+    A regression model made of a distribution for the outcome, a link function, and a linear predictor.
+  full: >-
+    Logistic regression (binomial distribution, logit link) and Poisson regression (Poisson
+    distribution, log link) are GLMs. Linear regression is the special case with a normal
+    distribution and identity link.
+  formal: >-
+    $$Y_i \sim \text{exponential family}(\mu_i), \quad g(\mu_i) = \eta_i = x_i^\top\beta$$ where $g$ is
+    the [[link-function]] and $\eta_i$ the linear predictor.
+  r: "glm(y ~ x, family = poisson(link = \"log\"), data = d)"
+  related: [link-function, logistic-regression, poisson-regression]
+  lessons: [8]
+
+- id: link-function
+  term: Link function
+  category: Regression
+  aliases: [link function, link functions, log link, identity link]
+  short: >-
+    The transformation that connects the mean of the outcome to the linear predictor.
+  full: >-
+    The log link keeps expected counts positive and makes effects multiplicative (rate ratios). The
+    logit link keeps probabilities between 0 and 1 and makes effects odds ratios.
+  formal: >-
+    $g(\mu) = \eta$; log link $g(\mu) = \log\mu$; logit link $g(\pi) = \log\frac{\pi}{1-\pi}$.
+  related: [glm, logit]
+  lessons: [8]
+
+- id: logit
+  term: Logit (log-odds)
+  category: Regression
+  aliases: [logit, log-odds, log odds]
+  short: >-
+    The logarithm of the odds, the scale on which logistic regression is linear.
+  formal: >-
+    $\mathrm{logit}(\pi) = \log\frac{\pi}{1 - \pi}$, with inverse $\mathrm{expit}(\eta) = \frac{1}{1 + e^{-\eta}}$.
+  related: [odds, logistic-regression, link-function]
+  lessons: [8]
+
+- id: logistic-regression
+  term: Logistic regression
+  category: Regression
+  aliases: [logistic regression, logistic model, logistic models]
+  short: >-
+    A GLM for binary outcomes, whose coefficients are log odds ratios.
+  formal: >-
+    $$Y_i \sim \mathrm{Bernoulli}(\pi_i), \quad \mathrm{logit}(\pi_i) = \alpha + \beta x_i + \gamma^\top z_i$$
+    so $e^{\beta}$ is the (adjusted) odds ratio per unit of $x$.
+  r: "glm(asthma ~ I(no2_modeled / 10) + ses, family = binomial, data = cohort)"
+  report: >-
+    "aOR 1.12 per 10 µg/m³ (95% CI 1.01 to 1.24)"
+  related: [odds-ratio, adjusted-odds-ratio, logit, glm]
+  lessons: [8]
+
+- id: poisson-regression
+  term: Poisson regression
+  category: Regression
+  aliases: [Poisson regression, Poisson GLM, log-linear model, log-linear regression]
+  short: >-
+    A GLM for counts, whose coefficients are log rate ratios.
+  formal: >-
+    $$Y_i \sim \mathrm{Poisson}(\mu_i), \quad \log\mu_i = \log PT_i + \alpha + \beta x_i$$ with
+    $\log PT_i$ an [[offset]]; $e^{\beta}$ is the rate ratio.
+  r: "glm(visits ~ temp + offset(log(population)), family = poisson, data = visits)"
+  report: >-
+    "IRR 1.025 per °C (95% CI 1.018 to 1.032)"
+  related: [rate-ratio, offset, overdispersion, quasi-poisson]
+  lessons: [8, 15]
+
+- id: offset
+  term: Offset
+  category: Regression
+  aliases: [offset, offsets]
+  short: >-
+    A term with a coefficient fixed at 1, used to put person-time or population into a Poisson model.
+  full: >-
+    With log(population) as an offset, the model describes rates rather than raw counts, so a large
+    district doesn't look worse just because it is large.
+  formal: >-
+    $\log \mu_i = \log PT_i + x_i^\top\beta \iff \log(\mu_i / PT_i) = x_i^\top\beta$.
+  r: "glm(visits ~ x + offset(log(population)), family = poisson, data = d)"
+  related: [poisson-regression, person-time]
+  lessons: [8]
+
+- id: deviance
+  term: Deviance
+  category: Regression
+  aliases: [deviance, residual deviance]
+  short: >-
+    A measure of lack of fit for GLMs: twice the gap in log-likelihood between a perfect model and yours.
+  formal: >-
+    $D = 2[\ell(\text{saturated}) - \ell(\hat{\beta})]$. Differences in deviance between nested models
+    give the [[likelihood-ratio-test]].
+  related: [log-likelihood, likelihood-ratio-test]
+  lessons: [8, 10]
+
+- id: quasi-poisson
+  term: Quasi-Poisson model (dispersion parameter)
+  category: Regression
+  aliases: [quasi-Poisson, quasipoisson, quasi-likelihood, dispersion parameter, scale parameter]
+  short: >-
+    A Poisson-type model that estimates how much more variable the counts are than Poisson, and
+    widens the standard errors accordingly.
+  full: >-
+    The estimates are the same as Poisson; only the standard errors change. It is the standard choice
+    in time-series studies of environmental exposures. Because there is no true likelihood, AIC is
+    replaced by [[qaic]].
+  formal: >-
+    $\mathrm{Var}(Y_i) = \phi\,\mu_i$, with $\hat{\phi} = \frac{1}{n-p}\sum_i \frac{(y_i - \hat{\mu}_i)^2}{\hat{\mu}_i}$
+    and $SE_{\text{quasi}} = \sqrt{\hat{\phi}}\, SE_{\text{Poisson}}$.
+  r: "glm(visits ~ temp, family = quasipoisson, data = d)"
+  related: [overdispersion, negative-binomial, qaic]
+  lessons: [8, 15]
+
+- id: robust-standard-error
+  term: Robust (sandwich) standard errors
+  category: Regression
+  aliases: [robust standard error, robust standard errors, sandwich estimator, sandwich standard errors, Huber-White]
+  short: >-
+    Standard errors that remain valid when the variance assumption of a model is wrong.
+  full: >-
+    Used with "modified Poisson" regression to estimate risk ratios for binary outcomes, and with
+    clustered data (cluster-robust versions).
+  formal: >-
+    $\widehat{\mathrm{Var}}(\hat{\beta}) = A^{-1} B A^{-1}$, where $A$ is the information (the "bread") and
+    $B = \sum_i U_i U_i^\top$ the empirical variance of the score contributions (the "meat").
+  r: "sandwich::vcovHC(fit); lmtest::coeftest(fit, vcov = sandwich::vcovHC)"
+  related: [heteroskedasticity, risk-ratio, clustering]
+  lessons: [8, 18]
+
+- id: confounding
+  term: Confounding
+  category: Causal inference
+  aliases: [confounding, confounded]
+  short: >-
+    Distortion of an exposure–outcome association by a third factor that causes both.
+  full: >-
+    In Example B, deprived districts have more traffic (so more NO₂) and children with more asthma
+    risk factors. Part of the crude NO₂–asthma association reflects socio-economic position. In DAG
+    terms, confounding is an open [[backdoor-path]].
+  formal: >-
+    In potential-outcome terms, confounding means the exposed and unexposed are not
+    [[exchangeability|exchangeable]]: $Y^{x} \not\perp\!\!\!\perp X$, so
+    $E[Y \mid X = x] \ne E[Y^x]$.
+  epi: >-
+    Controlled by design (randomization, restriction, matching) or analysis (stratification,
+    regression, standardization, propensity scores).
+  related: [confounder, dag, backdoor-path, exchangeability, residual-confounding]
+  lessons: [9, 12]
+
+- id: confounder
+  term: Confounder
+  category: Causal inference
+  aliases: [confounder, confounders, confounding variable]
+  short: >-
+    A variable that causes, or shares a cause with, both the exposure and the outcome, and is not on
+    the causal path between them.
+  full: >-
+    The classic three criteria (associated with exposure, associated with outcome, not a mediator)
+    are necessary but not sufficient. A [[dag]] decides what needs adjusting for.
+  related: [confounding, mediator, collider, dag]
+  lessons: [9]
+
+- id: mediator
+  term: Mediator
+  category: Causal inference
+  aliases: [mediator, mediators, mediation, intermediate variable]
+  short: >-
+    A variable on the causal path from exposure to outcome.
+  full: >-
+    Adjusting for a mediator removes part of the effect you want to estimate. Green space may reduce
+    asthma partly by lowering NO₂; if NO₂ is the exposure, green space is a confounder, but if green
+    space is the exposure, NO₂ is a mediator.
+  related: [confounder, collider, dag]
+  lessons: [9, 12]
+
+- id: collider
+  term: Collider
+  category: Causal inference
+  aliases: [collider, colliders]
+  short: >-
+    A variable caused by two others on a path. Conditioning on it creates a spurious association.
+  full: >-
+    If both NO₂ and a genetic predisposition lead to a hospital visit, studying only hospitalized
+    children can make NO₂ and the predisposition look related. See [[collider-bias]].
+  related: [collider-bias, dag, selection-bias]
+  lessons: [9]
+
+- id: collider-bias
+  term: Collider bias
+  category: Causal inference
+  aliases: [collider bias, collider stratification bias]
+  short: >-
+    Bias from conditioning on a collider, by adjustment, stratification or selection.
+  related: [collider, selection-bias]
+  lessons: [9, 12]
+
+- id: dag
+  term: Directed acyclic graph (DAG)
+  category: Causal inference
+  aliases: [directed acyclic graph, directed acyclic graphs, DAG, DAGs, causal diagram, causal diagrams]
+  short: >-
+    A diagram of assumed causal relations, with arrows from causes to effects and no loops.
+  full: >-
+    A DAG makes your assumptions explicit and tells you which variables to adjust for (an
+    [[adjustment-set]]) to block confounding without opening bias through colliders or mediators.
+  formal: >-
+    A graph $G = (V, E)$ of variables and directed edges with no directed cycles. The backdoor
+    criterion identifies $E[Y^x]$ when a set $Z$ blocks every path from $X$ to $Y$ that starts with an
+    arrow into $X$, and $Z$ contains no descendant of $X$.
+  r: "dagitty::adjustmentSets(dag, exposure = \"no2\", outcome = \"asthma\")"
+  related: [backdoor-path, adjustment-set, confounder, collider]
+  lessons: [9, 12]
+
+- id: backdoor-path
+  term: Backdoor path
+  category: Causal inference
+  aliases: [backdoor path, backdoor paths, back-door path, backdoor criterion]
+  short: >-
+    A non-causal path from exposure to outcome that starts with an arrow into the exposure.
+  full: >-
+    Open backdoor paths create confounding. They are blocked by adjusting for a non-collider on the path.
+  related: [dag, confounding, adjustment-set]
+  lessons: [9]
+
+- id: adjustment-set
+  term: Adjustment set
+  category: Causal inference
+  aliases: [adjustment set, adjustment sets, minimal adjustment set, sufficient adjustment set]
+  short: >-
+    A set of variables that, when adjusted for, blocks all backdoor paths and opens no new ones.
+  related: [dag, backdoor-path, confounder]
+  lessons: [9]
+
+- id: residual-confounding
+  term: Residual confounding
+  category: Causal inference
+  aliases: [residual confounding, unmeasured confounding, uncontrolled confounding]
+  short: >-
+    Confounding that remains after adjustment, because a confounder was unmeasured, mismeasured or
+    modeled too crudely.
+  full: >-
+    Adjusting for a coarse or error-prone measure of socio-economic position leaves residual
+    confounding. Its possible impact can be assessed with an [[e-value]] or a
+    [[quantitative-bias-analysis]].
+  related: [confounding, e-value, quantitative-bias-analysis]
+  lessons: [9, 12, 13]
+
+- id: effect-modification
+  term: Effect modification
+  category: Causal inference
+  aliases: [effect modification, effect modifier, effect modifiers, effect measure modification]
+  short: >-
+    When the effect of an exposure differs across levels of another variable.
+  full: >-
+    Heat harms older people more than younger: age modifies the heat effect. Effect modification
+    depends on the scale: an effect can be constant on the ratio scale but differ on the difference
+    scale ([[interaction-scale]]).
+  epi: >-
+    Assess it by comparing stratum-specific estimates with a formal test or interval for their
+    difference, never by comparing their p-values.
+  confusion: >-
+    "Significant in the elderly, not significant in the young" is not evidence of effect modification.
+  related: [interaction, interaction-scale, heterogeneity]
+  lessons: [9, 23]
+
+- id: interaction
+  term: Interaction
+  category: Causal inference
+  aliases: [interaction, interactions, interaction term, interaction terms, product term]
+  short: >-
+    A model term that lets the effect of one variable depend on the value of another.
+  formal: >-
+    $g(\mu) = \alpha + \beta_1 x + \beta_2 z + \beta_3 xz$. The effect of $x$ is $\beta_1 + \beta_3 z$, and
+    $H_0: \beta_3 = 0$ tests for interaction on the scale of the link.
+  r: "glm(visits ~ temp * age_group, family = quasipoisson, data = visits)"
+  related: [effect-modification, interaction-scale]
+  lessons: [9]
+
+- id: interaction-scale
+  term: Additive and multiplicative interaction (RERI)
+  category: Causal inference
+  aliases: [additive interaction, multiplicative interaction, additive scale, multiplicative scale, RERI, relative excess risk due to interaction]
+  short: >-
+    Interaction can be present on the risk-difference (additive) scale and absent on the ratio
+    (multiplicative) scale, or the reverse.
+  full: >-
+    Additive interaction is usually more relevant for public health, because it tells you where an
+    intervention prevents the most cases. Logistic and Poisson models test multiplicative interaction.
+  formal: >-
+    $RERI = RR_{11} - RR_{10} - RR_{01} + 1$; additive interaction when $RERI \ne 0$, multiplicative
+    when $RR_{11} \ne RR_{10} RR_{01}$.
+  related: [effect-modification, interaction, risk-difference]
+  lessons: [9]
+
+- id: influential-observation
+  term: Influential observation (Cook's distance)
+  category: Model building
+  aliases: [influential observation, influential observations, Cook's distance]
+  short: >-
+    An observation whose removal would change the fitted model substantially.
+  full: >-
+    Influence combines an unusual outcome (a large residual) with an unusual predictor value (high
+    [[leverage]]). A single extreme heat-wave day can be influential in a temperature model.
+  formal: >-
+    $D_i = \frac{\sum_j(\hat{y}_j - \hat{y}_{j(i)})^2}{p\,\hat{\sigma}^2}$, where $\hat{y}_{j(i)}$ is
+    the fit without observation $i$.
+  r: "cooks.distance(fit)"
+  related: [leverage, outlier, residual]
+  lessons: [10]
+
+- id: leverage
+  term: Leverage
+  category: Model building
+  aliases: [leverage, hat value, hat values]
+  auto: false
+  short: >-
+    How unusual an observation's predictor values are, and so how strongly it can pull the fit.
+  formal: >-
+    The diagonal element $h_{ii}$ of the hat matrix $H = X(X^\top X)^{-1}X^\top$.
+  related: [influential-observation]
+  lessons: [10]
+
+- id: overfitting
+  term: Overfitting
+  category: Model building
+  aliases: [overfitting, overfit, overfitted]
+  short: >-
+    A model that fits the noise in the data as well as the signal, so it predicts new data poorly.
+  full: >-
+    Flexible models with many parameters (wiggly splines, many lags) fit the observed data ever
+    better while getting worse on new data. Cross-validation and penalization guard against it.
+  related: [cross-validation, aic, penalized-spline]
+  lessons: [10, 11]
+
+- id: cross-validation
+  term: Cross-validation
+  category: Model building
+  aliases: [cross-validation, cross validation, k-fold cross-validation, out-of-sample]
+  short: >-
+    Assessing a model by fitting it on part of the data and testing its predictions on the rest.
+  full: >-
+    In k-fold cross-validation, the data are split into k parts and each takes a turn as the test
+    set. For time series, the test set must come after the training set, or blocks must be used.
+  related: [overfitting, loo]
+  lessons: [10, 23]
+
+- id: aic
+  term: Akaike information criterion (AIC)
+  category: Model building
+  aliases: [Akaike information criterion, AIC, ΔAIC, Akaike weight, Akaike weights]
+  short: >-
+    A score for comparing models that rewards fit and penalizes complexity. Lower is better.
+  full: >-
+    Only differences matter: ΔAIC below about 2 means the models are similarly supported, above 10
+    means the worse one has essentially no support. Models must be fitted to the same data.
+  formal: >-
+    $AIC = -2\ell(\hat{\theta}) + 2k$, with $k$ parameters. It estimates relative out-of-sample
+    predictive performance.
+  r: "AIC(fit0, fit1, fit2)"
+  related: [qaic, bic, likelihood-ratio-test, waic]
+  lessons: [10]
+
+- id: qaic
+  term: Quasi-AIC (QAIC)
+  category: Model building
+  aliases: [quasi-AIC, QAIC, Q-AIC]
+  short: >-
+    A version of AIC for quasi-Poisson models, which accounts for overdispersion.
+  formal: >-
+    $QAIC = -2\ell(\hat{\theta})/\hat{\phi} + 2k$, with $\hat{\phi}$ the dispersion parameter.
+  epi: >-
+    Used to choose degrees of freedom for time trends and lag structures in DLNM studies.
+  related: [aic, quasi-poisson, dlnm]
+  lessons: [15, 16]
+
+- id: bic
+  term: Bayesian information criterion (BIC)
+  category: Model building
+  aliases: [Bayesian information criterion, BIC]
+  short: >-
+    A model comparison score like AIC, with a stronger penalty for complexity. Lower is better.
+  formal: >-
+    $BIC = -2\ell(\hat{\theta}) + k\log n$. Differences in BIC approximate $-2\log$ of a [[bayes-factor]]
+    under particular priors.
+  related: [aic, bayes-factor]
+  lessons: [10]
+
+- id: nested-models
+  term: Nested models
+  category: Model building
+  aliases: [nested models, nested model, non-nested, not nested]
+  short: >-
+    Two models where one is a special case of the other, obtained by fixing some parameters.
+  full: >-
+    A model without temperature is nested in one with temperature (β = 0). A linear and a threshold
+    model are not nested. Likelihood ratio tests need nested models; AIC and Bayes factors don't.
+  related: [likelihood-ratio-test, aic, bayes-factor]
+  lessons: [10, 23]
+
+- id: stepwise-selection
+  term: Stepwise selection
+  category: Model building
+  aliases: [stepwise selection, stepwise regression, stepwise, forward selection, backward elimination]
+  short: >-
+    Adding or removing variables one at a time based on p-values or AIC.
+  full: >-
+    Stepwise selection gives biased coefficients, standard errors that are too small and p-values
+    that are too small, because it ignores that the model was chosen from the data. Choose
+    confounders from a DAG instead.
+  related: [dag, overfitting]
+  lessons: [10]
+
+- id: polynomial
+  term: Polynomial terms
+  category: Nonlinear effects
+  aliases: [polynomial, polynomials, quadratic term, quadratic terms, cubic term]
+  short: >-
+    Adding powers of a predictor (x², x³) to model a curved relation.
+  full: >-
+    Polynomials are global: changing the data at one end changes the curve everywhere, and they
+    behave badly at the extremes. Splines are usually better.
+  formal: >-
+    $\eta = \beta_0 + \beta_1 x + \beta_2 x^2 + \dots + \beta_d x^d$.
+  related: [spline]
+  lessons: [11]
+
+- id: spline
+  term: Spline
+  category: Nonlinear effects
+  aliases: [spline, splines, regression spline, regression splines, basis function, basis functions]
+  short: >-
+    A flexible curve built from polynomial pieces joined smoothly at points called knots.
+  full: >-
+    A spline is a weighted sum of basis functions, so it fits into an ordinary regression as several
+    columns. Its flexibility is set by the number of [[knot|knots]] or [[degrees-of-freedom]].
+  formal: >-
+    $f(x) = \sum_{k=1}^{K} \beta_k B_k(x)$, with basis functions $B_k$ that are piecewise polynomials
+    continuous in value and derivatives at the knots.
+  r: "glm(asthma ~ splines::ns(no2_modeled, df = 4), family = binomial, data = cohort)"
+  related: [knot, natural-cubic-spline, penalized-spline, gam]
+  lessons: [11, 16]
+
+- id: knot
+  term: Knot
+  category: Nonlinear effects
+  aliases: [knot, knots]
+  short: >-
+    A point where the pieces of a spline join.
+  full: >-
+    More knots give more flexibility. They are usually placed at quantiles of the variable. Choosing
+    knots after looking at which gives the most striking result is a form of data dredging.
+  related: [spline, degrees-of-freedom]
+  lessons: [11]
+
+- id: natural-cubic-spline
+  term: Natural cubic spline
+  category: Nonlinear effects
+  aliases: [natural cubic spline, natural cubic splines, natural spline, natural splines, restricted cubic spline, restricted cubic splines]
+  short: >-
+    A cubic spline constrained to be linear beyond the outer knots, which tames behavior at the extremes.
+  r: "splines::ns(temp, df = 4)"
+  related: [spline, knot]
+  lessons: [11, 15, 16]
+
+- id: degrees-of-freedom
+  term: Degrees of freedom (df)
+  category: Nonlinear effects
+  aliases: [degrees of freedom, df]
+  short: >-
+    The number of independent pieces of information a quantity uses; for splines, a measure of flexibility.
+  full: >-
+    In time-series studies, "7 df per year" for the time spline sets how much seasonal and long-term
+    variation is absorbed. For penalized splines, the effective df is estimated from the data.
+  related: [spline, penalized-spline]
+  lessons: [11, 15]
+
+- id: penalized-spline
+  term: Penalized spline
+  category: Nonlinear effects
+  aliases: [penalized spline, penalized splines, P-spline, P-splines, smoothing spline, smoothing splines, penalization]
+  short: >-
+    A spline with many knots whose wiggliness is restrained by a penalty, with the penalty strength
+    estimated from the data.
+  full: >-
+    The penalty shrinks the curve toward a simpler shape. Mathematically, it is equivalent to a
+    random effect or a prior on the spline coefficients, which is a bridge to Bayesian smoothing.
+  formal: >-
+    Maximize $\ell(\beta) - \frac{\lambda}{2}\beta^\top S \beta$, where $S$ measures roughness (e.g.
+    $\int f''(x)^2\,dx$) and $\lambda$ controls smoothness.
+  r: "mgcv::gam(visits ~ s(temp), family = quasipoisson, data = d)"
+  related: [gam, spline, random-walk-prior, shrinkage]
+  lessons: [11, 16, 25]
+
+- id: gam
+  term: Generalized additive model (GAM)
+  category: Nonlinear effects
+  aliases: [generalized additive model, generalized additive models, GAM, GAMs]
+  short: >-
+    A GLM in which some predictors enter through smooth functions estimated from the data.
+  formal: >-
+    $g(\mu_i) = \alpha + f_1(x_{1i}) + f_2(x_{2i}) + z_i^\top\gamma$, with each $f_j$ a penalized spline.
+  r: "mgcv::gam(visits ~ s(temp) + s(doy, bs = \"cc\"), family = quasipoisson, data = d)"
+  related: [penalized-spline, glm]
+  lessons: [11]
+
+- id: potential-outcome
+  term: Potential outcomes
+  category: Causal inference
+  aliases: [potential outcome, potential outcomes, counterfactual outcome, counterfactual outcomes, counterfactual, counterfactuals]
+  short: >-
+    The outcomes a person would have under each possible exposure, of which only one is ever observed.
+  full: >-
+    A child's asthma status if exposed to high NO₂, and if exposed to low NO₂. The causal effect is
+    the contrast between them. Because only one is observed, causal inference needs assumptions:
+    [[exchangeability]], [[positivity]] and [[consistency]].
+  formal: >-
+    $Y_i^{x=1}$ and $Y_i^{x=0}$; the observed outcome is $Y_i = Y_i^{X_i}$. The average causal effect is
+    $E[Y^{1}] - E[Y^{0}]$ or $E[Y^1]/E[Y^0]$.
+  related: [ate, exchangeability, positivity, consistency]
+  lessons: [12]
+
+- id: ate
+  term: Average causal effect (ATE)
+  category: Causal inference
+  aliases: [average causal effect, average treatment effect, ATE, causal effect, causal effects, marginal causal effect]
+  short: >-
+    The difference (or ratio) in average outcome if everyone were exposed versus if no one were.
+  formal: >-
+    $ATE = E[Y^1] - E[Y^0]$; causal risk ratio $E[Y^1]/E[Y^0]$. The effect in the exposed (ATT)
+    averages over the exposed only.
+  related: [potential-outcome, g-computation, ipw]
+  lessons: [12]
+
+- id: exchangeability
+  term: Exchangeability
+  category: Causal inference
+  aliases: [exchangeability, exchangeable, conditional exchangeability, no unmeasured confounding]
+  short: >-
+    In causal inference: the exposed and unexposed would have had the same outcome risk had they
+    had the same exposure. In Bayesian modeling: units whose labels carry no information.
+  full: >-
+    Causal exchangeability means no confounding, possibly after conditioning on covariates.
+    Randomization guarantees it on average. In hierarchical models, exchangeability of districts
+    justifies giving them a common prior distribution.
+  formal: >-
+    Causal: $Y^x \perp\!\!\!\perp X \mid Z$ for all $x$. Bayesian: the joint distribution of
+    $(\theta_1, \dots, \theta_J)$ is invariant to permuting the indices.
+  related: [confounding, potential-outcome, hierarchical-model]
+  lessons: [12, 24]
+
+- id: positivity
+  term: Positivity
+  category: Causal inference
+  aliases: [positivity, positivity violation, positivity violations]
+  short: >-
+    Every type of person, defined by the confounders, has some chance of every exposure level.
+  full: >-
+    If no children in affluent green districts have high NO₂, the data cannot say what high NO₂
+    would do to them, and any estimate relies on model extrapolation. Check it with
+    [[propensity-score]] overlap plots.
+  formal: >-
+    $P(X = x \mid Z = z) > 0$ for all $x$ and all $z$ with $P(Z = z) > 0$.
+  related: [propensity-score, exchangeability]
+  lessons: [12]
+
+- id: consistency
+  term: Consistency (causal)
+  category: Causal inference
+  aliases: [consistency assumption]
+  auto: false
+  short: >-
+    The observed outcome of a person equals their potential outcome under the exposure they actually had.
+  full: >-
+    It requires the exposure to be well defined. "Living with high NO₂" can arise in many ways (a
+    busy road, a gas cooker), which may not have the same effect.
+  formal: >-
+    If $X_i = x$ then $Y_i = Y_i^x$.
+  confusion: >-
+    Unrelated to the statistical meaning of a consistent estimator (one that converges to the truth
+    as n grows).
+  related: [potential-outcome, target-trial]
+  lessons: [12]
+
+- id: target-trial
+  term: Target trial emulation
+  category: Causal inference
+  aliases: [target trial, target trial emulation, target trials]
+  short: >-
+    Designing an observational analysis by first specifying the randomized trial you would ideally run.
+  full: >-
+    Spelling out eligibility, the exposure strategies compared, the start of follow-up, outcomes and
+    the causal contrast prevents common errors such as immortal time bias.
+  related: [ate, consistency]
+  lessons: [12]
+
+- id: g-computation
+  term: G-computation (standardization)
+  category: Causal inference
+  aliases: [g-computation, g-formula, parametric g-formula, model-based standardization, outcome model standardization]
+  short: >-
+    Estimating a causal effect by predicting everyone's outcome under each exposure level and
+    averaging the predictions.
+  full: >-
+    Fit an outcome model, set everyone's exposure to high, predict, average; set it to low, predict,
+    average; then compare. It turns a conditional model into a marginal effect such as a risk ratio,
+    even from logistic regression.
+  formal: >-
+    $\widehat{E}[Y^x] = \frac{1}{n}\sum_i \widehat{E}[Y \mid X = x, Z = z_i]$.
+  r: |-
+    fit <- glm(asthma ~ high_no2 + ses + parent_smoke, family = binomial, data = cohort)
+    mean(predict(fit, mutate(cohort, high_no2 = TRUE), type = "response")) /
+      mean(predict(fit, mutate(cohort, high_no2 = FALSE), type = "response"))
+  related: [ate, ipw, marginal-conditional]
+  lessons: [12]
+
+- id: propensity-score
+  term: Propensity score
+  category: Causal inference
+  aliases: [propensity score, propensity scores, PS]
+  short: >-
+    The probability of being exposed given the confounders.
+  full: >-
+    People with the same propensity score have, on average, the same distribution of measured
+    confounders, so the score can be used for matching, weighting or stratification. It does nothing
+    for unmeasured confounders.
+  formal: >-
+    $e(z) = P(X = 1 \mid Z = z)$, usually estimated by logistic regression of exposure on confounders.
+  related: [ipw, positivity, exchangeability]
+  lessons: [12]
+
+- id: ipw
+  term: Inverse probability weighting (IPW)
+  category: Causal inference
+  aliases: [inverse probability weighting, inverse probability weights, IPW, IPTW]
+  short: >-
+    Weighting each person by the inverse of the probability of the exposure they received, to create
+    a pseudo-population without confounding.
+  formal: >-
+    Weights $w_i = 1/e(z_i)$ for the exposed and $1/(1 - e(z_i))$ for the unexposed, then
+    $\widehat{E}[Y^1] = \sum_i w_i X_i Y_i / \sum_i w_i X_i$. Stabilized weights multiply by $P(X = x)$.
+  r: "WeightIt::weightit(high_no2 ~ ses + parent_smoke + green, data = cohort)"
+  related: [propensity-score, g-computation]
+  lessons: [12]
+
+- id: marginal-conditional
+  term: Marginal and conditional effects
+  category: Causal inference
+  aliases: [marginal effect, marginal effects, conditional effect, conditional effects, population-averaged effect]
+  short: >-
+    A marginal effect compares the whole population under different exposures; a conditional effect
+    compares people with the same covariate values.
+  full: >-
+    For risk differences and risk ratios without effect modification they coincide. For odds ratios
+    they generally differ ([[non-collapsibility]]).
+  related: [non-collapsibility, g-computation, adjusted-odds-ratio]
+  lessons: [12]
+
+- id: non-collapsibility
+  term: Non-collapsibility
+  category: Causal inference
+  aliases: [non-collapsibility, non-collapsible, noncollapsibility]
+  short: >-
+    A property of the odds ratio: the marginal OR differs from the conditional OR even when there is
+    no confounding.
+  full: >-
+    Adding a strong predictor of the outcome that is unrelated to the exposure moves the OR away from
+    1. So a change in the OR after adjustment is not proof of confounding.
+  formal: >-
+    Because $\mathrm{logit}\,E_Z[\mathrm{expit}(\alpha + \beta x + \gamma z)] \ne \alpha' + \beta x$, the
+    marginal log-OR differs from $\beta$ when $\gamma \ne 0$.
+  related: [odds-ratio, marginal-conditional]
+  lessons: [12]
+
+- id: e-value
+  term: E-value
+  category: Causal inference
+  aliases: [E-value, E-values]
+  short: >-
+    The minimum strength of association an unmeasured confounder would need with both exposure and
+    outcome to explain away an observed effect.
+  formal: >-
+    For an observed $RR > 1$: $E = RR + \sqrt{RR(RR - 1)}$.
+  r: "EValue::evalues.RR(est = 1.21, lo = 1.06, hi = 1.38)"
+  related: [residual-confounding, quantitative-bias-analysis]
+  lessons: [12]
+
+- id: quantitative-bias-analysis
+  term: Quantitative bias analysis
+  category: Causal inference
+  aliases: [quantitative bias analysis, probabilistic bias analysis, bias analysis, sensitivity analysis for bias]
+  short: >-
+    Estimating how much an estimate would change under assumed amounts of confounding,
+    misclassification or selection bias.
+  full: >-
+    Simple bias analysis uses fixed bias parameters. Probabilistic bias analysis draws them from
+    distributions and repeats the correction many times, which gives an interval reflecting both
+    random and systematic error.
+  r: "episensr::probsens(table, type = \"exposure\", reps = 10000, ...)"
+  related: [e-value, misclassification, residual-confounding]
+  lessons: [12, 13]
+
+- id: selection-bias
+  term: Selection bias
+  category: Causal inference
+  aliases: [selection bias, loss to follow-up, informative censoring]
+  short: >-
+    Bias from the way people are selected into, or retained in, a study or analysis.
+  full: >-
+    Often a form of [[collider-bias]]: if both the exposure and the outcome affect who is studied,
+    restricting to participants creates a spurious association.
+  related: [collider-bias, bias]
+  lessons: [12]
+
+- id: measurement-error
+  term: Measurement error
+  category: Measurement error
+  aliases: [measurement error, measurement errors, exposure error, exposure measurement error, error-prone]
+  short: >-
+    The difference between a measured value and the true value of a variable.
+  full: >-
+    In air pollution epidemiology, exposure is always estimated (from monitors or models), never
+    measured perfectly. The type of error determines the direction of bias: [[classical-error]]
+    attenuates effects, [[berkson-error]] mostly widens intervals.
+  formal: >-
+    Measured $W$ and true $X$: classical $W = X + U$; Berkson $X = W + U$; with $U$ independent of $X$
+    (classical) or of $W$ (Berkson).
+  related: [classical-error, berkson-error, misclassification, regression-dilution]
+  lessons: [13]
+
+- id: classical-error
+  term: Classical measurement error
+  category: Measurement error
+  aliases: [classical error, classical measurement error]
+  short: >-
+    Error added to the true value, independent of it. It biases slopes toward zero.
+  full: >-
+    A noisy monitor measuring each child's exposure produces classical error. In Example B, modeled
+    NO₂ includes classical error, so naive estimates of the NO₂ effect are too small.
+  formal: >-
+    $W = X + U$, $U \perp X$, $E[U] = 0$. In linear regression, $\hat{\beta}_W \to \lambda\beta$ with
+    reliability ratio $\lambda = \mathrm{Var}(X)/(\mathrm{Var}(X) + \mathrm{Var}(U))$.
+  related: [regression-dilution, berkson-error, regression-calibration]
+  lessons: [13]
+
+- id: berkson-error
+  term: Berkson error
+  category: Measurement error
+  aliases: [Berkson error, Berkson measurement error]
+  short: >-
+    Error in which the true value varies around the assigned value, as when everyone in an area is
+    given the area average.
+  full: >-
+    Assigning each child their district's mean NO₂ creates Berkson error. In linear models it causes
+    little bias but wider confidence intervals; in nonlinear models it can bias.
+  formal: >-
+    $X = W + U$, $U \perp W$, $E[U] = 0$.
+  related: [classical-error, measurement-error]
+  lessons: [13]
+
+- id: misclassification
+  term: Misclassification
+  category: Measurement error
+  aliases: [misclassification, misclassified]
+  short: >-
+    Measurement error in a categorical variable: putting someone in the wrong category.
+  full: >-
+    Described by [[sensitivity]] and [[specificity]]. The wheeze questionnaire in Example B misclassifies
+    some children's asthma status.
+  related: [non-differential-misclassification, differential-misclassification, sensitivity, specificity]
+  lessons: [13]
+
+- id: non-differential-misclassification
+  term: Non-differential misclassification
+  category: Measurement error
+  aliases: [non-differential misclassification, nondifferential misclassification, non-differential error, non-differential]
+  short: >-
+    Misclassification whose rates are the same in all groups being compared.
+  full: >-
+    For a binary exposure with independent errors, it biases associations toward the null. For an
+    exposure with three or more categories, or with correlated errors, it can bias away from the null.
+  related: [differential-misclassification, misclassification]
+  lessons: [13]
+
+- id: differential-misclassification
+  term: Differential misclassification
+  category: Measurement error
+  aliases: [differential misclassification, differential error, recall bias]
+  short: >-
+    Misclassification whose rates differ between the groups compared, which can bias in either direction.
+  full: >-
+    Parents of children with asthma may report past exposures differently (recall bias).
+  related: [non-differential-misclassification, misclassification]
+  lessons: [13]
+
+- id: regression-dilution
+  term: Regression dilution (attenuation bias)
+  category: Measurement error
+  aliases: [regression dilution, regression dilution bias, attenuation, attenuation bias, attenuated, bias toward the null]
+  short: >-
+    The shrinking of an estimated effect toward zero caused by classical error in the exposure.
+  formal: >-
+    $\hat{\beta}_{\text{naive}} \approx \lambda\beta$, $0 < \lambda \le 1$, where $\lambda$ is the
+    reliability ratio.
+  related: [classical-error, regression-calibration]
+  lessons: [13]
+
+- id: validation-study
+  term: Validation study
+  category: Measurement error
+  aliases: [validation study, validation studies, validation subsample, validation data, reliability study]
+  short: >-
+    A subsample in which a better or gold-standard measurement is taken alongside the routine one.
+  full: >-
+    The 280 children with personal NO₂ monitors in Example B form a validation subsample. It allows
+    the error to be quantified and corrected.
+  related: [regression-calibration, measurement-error]
+  lessons: [13]
+
+- id: regression-calibration
+  term: Regression calibration
+  category: Measurement error
+  aliases: [regression calibration]
+  short: >-
+    Correcting for exposure measurement error by replacing the measured exposure with its predicted
+    true value, estimated in a validation study.
+  formal: >-
+    Estimate $E[X \mid W, Z]$ in the validation data, then fit the outcome model with $\widehat{E}[X \mid W, Z]$
+    in place of $W$; standard errors need bootstrapping.
+  related: [validation-study, simex, classical-error]
+  lessons: [13]
+
+- id: simex
+  term: SIMEX (simulation extrapolation)
+  category: Measurement error
+  aliases: [SIMEX, simulation extrapolation, simulation-extrapolation]
+  short: >-
+    Correcting measurement error by adding more error, watching the estimate shrink, and
+    extrapolating back to zero error.
+  formal: >-
+    Fit $\hat{\beta}(\lambda)$ with added error variance $\lambda\sigma_u^2$ for $\lambda = 0.5, 1, \dots$,
+    model $\hat{\beta}(\lambda)$, and extrapolate to $\lambda = -1$.
+  r: "simex::simex(fit, SIMEXvariable = \"no2_modeled\", measurement.error = 5)"
+  related: [regression-calibration, classical-error]
+  lessons: [13]
+
+- id: land-use-regression
+  term: Land-use regression (LUR)
+  category: Measurement error
+  aliases: [land-use regression, LUR, LUR model]
+  short: >-
+    A model that predicts air pollution at any address from nearby traffic, land use and other
+    geographic predictors, calibrated on monitoring data.
+  full: >-
+    The predictions are smoother than true exposure, which mixes classical and Berkson-type errors.
+  related: [measurement-error, berkson-error]
+  lessons: [13]

@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Course plan · Statistics for epidemiology, from probability to Bayesian hierarchical models</title>
+<style>
+:root{
+  --paper:#F5F7FA; --panel:#FFFFFF; --ink:#1C2733; --muted:#5B6878; --rule:#D6DCE4; --soft:#EBEFF4;
+  --p1:#2F6DB5; --p2:#C4501E; --p3:#9A45B8; --p4:#13866A; --p5:#B0731A; --prior:#6A5FD0;
+  --serif: Charter, "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root{--paper:#12181F;--panel:#19212A;--ink:#E6EBF0;--muted:#9AA6B3;--rule:#2D3844;--soft:#222C37;
+  --p1:#6AA6EE;--p2:#F07A45;--p3:#C77BE3;--p4:#3FC29E;--p5:#E2A84A;--prior:#9D94F0;}
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.55}
+.wrap{max-width:1040px;margin:0 auto;padding:30px 20px 70px}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(28px,4vw,40px);line-height:1.15;margin:0 0 10px}
+h2{font-family:var(--serif);font-weight:600;font-size:26px;margin:38px 0 10px;padding-top:6px;border-top:1px solid var(--rule)}
+h3{font-family:var(--serif);font-weight:600;font-size:20px;margin:22px 0 8px}
+.lede{font-family:var(--serif);font-size:18px;line-height:1.65;color:var(--muted);max-width:72ch;margin:0 0 18px}
+p,.prose{font-family:var(--serif);font-size:16.5px;line-height:1.7;max-width:80ch;margin:0 0 12px}
+.meta{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 24px}
+.pill{font-size:13px;padding:4px 10px;border-radius:999px;background:var(--soft);color:var(--muted)}
+nav.toc{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:14px 18px;margin:0 0 10px}
+nav.toc a{color:var(--ink);text-decoration:none;border-bottom:1px solid var(--rule)}
+nav.toc a:hover{border-color:var(--ink)}
+nav.toc ol{margin:6px 0 0;padding-left:22px;columns:2;column-gap:30px;font-size:14.5px}
+@media(max-width:700px){nav.toc ol{columns:1}}
+.cards{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:12px 0}
+@media(max-width:760px){.cards{grid-template-columns:1fr}}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:14px;padding:14px 16px}
+.card h4{margin:0 0 4px;font-size:15px;font-weight:600}
+.card p{font-family:var(--sans);font-size:14px;line-height:1.6;margin:0}
+.part{border-left:5px solid var(--c);padding-left:14px;margin:26px 0 8px}
+.part .lab{font-size:13px;font-weight:600;color:var(--c);text-transform:uppercase;letter-spacing:.06em}
+.part h3{margin:2px 0 6px}
+.part p{margin:0;font-size:15.5px;color:var(--muted)}
+details.mod{background:var(--panel);border:1px solid var(--rule);border-left:4px solid var(--c);border-radius:12px;margin:10px 0;overflow:hidden}
+details.mod>summary{cursor:pointer;padding:12px 16px;list-style:none;display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+details.mod>summary::-webkit-details-marker{display:none}
+details.mod>summary::before{content:"▸";color:var(--muted);transition:transform .2s;display:inline-block}
+details.mod[open]>summary::before{transform:rotate(90deg)}
+.num{font-family:var(--serif);font-size:20px;font-weight:600;color:var(--c);min-width:28px}
+.ttl{font-family:var(--serif);font-size:18px;font-weight:600;flex:1}
+.dur{font-size:12.5px;color:var(--muted)}
+.body{padding:0 18px 14px 18px}
+.field{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:8px 0;border-top:1px solid var(--rule)}
+@media(max-width:640px){.field{grid-template-columns:1fr;gap:2px}}
+.field .k{font-size:12.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.04em;padding-top:2px}
+.field .v{font-size:14.5px;line-height:1.65}
+.tag{display:inline-block;font-size:12px;padding:1px 8px;border-radius:999px;border:1px solid var(--rule);margin:0 4px 4px 0;color:var(--muted)}
+.tag.lik{border-color:var(--p1);color:var(--p1)}.tag.unc{border-color:var(--p2);color:var(--p2)}.tag.shr{border-color:var(--p3);color:var(--p3)}.tag.fb{border-color:var(--p4);color:var(--p4)}.tag.bias{border-color:var(--p5);color:var(--p5)}
+table.t{width:100%;border-collapse:collapse;background:var(--panel);border:1px solid var(--rule);border-radius:12px;overflow:hidden;font-size:14px;margin:10px 0}
+table.t th,table.t td{padding:9px 12px;border-bottom:1px solid var(--rule);text-align:left;vertical-align:top}
+table.t th{background:var(--soft);font-weight:600}
+.tw{overflow-x:auto}
+code{font-family:var(--mono);font-size:13px;background:var(--soft);padding:1px 5px;border-radius:4px}
+.decide{background:var(--panel);border:1px solid var(--prior);border-radius:14px;padding:6px 18px 14px}
+.decide h4{font-size:15.5px;margin:14px 0 4px}
+.decide p{font-family:var(--sans);font-size:14.5px;margin:0}
+.note{font-size:13.5px;color:var(--muted);font-family:var(--sans)}
+.controls{display:flex;gap:8px;margin:8px 0}
+button{font:inherit;font-size:13px;padding:6px 12px;border-radius:8px;border:1px solid var(--rule);background:var(--panel);color:var(--ink);cursor:pointer}
+button:hover{border-color:var(--muted)}
+@media print{details.mod{break-inside:avoid}details.mod .body{display:block}.controls{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>Statistics for epidemiology: from probability to Bayesian hierarchical models</h1>
+<p class="lede">Course plan, version 2. Twenty-five interactive lessons built around two running examples from environmental epidemiology: heat and emergency visits in a simulated city, and traffic-related air pollution and childhood asthma in the same city. The course starts with probability and finishes with Bayesian spatio-temporal hierarchical models.</p>
+<div class="meta"><span class="pill">Audience: MSc epidemiology and public health</span><span class="pill">25 lessons in 5 parts</span><span class="pill">About 2–3 hours per lesson</span><span class="pill">Concept-first, with optional R (tidyverse)</span><span class="pill">Standalone HTML, works offline</span></div>
+
+<nav class="toc" aria-label="Contents"><b>Contents</b>
+<ol>
+<li><a href="#approach">Approach and principles</a></li>
+<li><a href="#example">The two running examples and their data</a></li>
+<li><a href="#anatomy">What every lesson contains</a></li>
+<li><a href="#threads">Five threads through the course</a></li>
+<li><a href="#map">The course, lesson by lesson</a></li>
+<li><a href="#tech">Technical design</a></li>
+<li><a href="#build">Build plan and testing</a></li>
+<li><a href="#decisions">Decisions, and the notation proposal</a></li>
+</ol></nav>
+
+<h2 id="approach">1 · Approach and principles</h2>
+<p>The course teaches statistics the way the earlier walkthroughs did: by letting students change something and watch what happens, with a running narration that explains each change. Every idea is shown on the same epidemiological problem, so students never have to learn a new context and a new method at once. Mathematics is kept to what is needed to read a model equation and understand where an answer comes from.</p>
+<p>Frequentist methods are taught first and taught properly, because most of the literature students will read uses them. The Bayesian part then revisits the same models, so that students see one model through two lenses rather than two separate subjects. Parts I to IV include short "Bayesian preview" boxes. From Lesson 19 onward, lessons show both approaches side by side, in the same two-column format as the earlier pages.</p>
+<p>R code is optional throughout. Each concept can be followed fully without it. Code appears in collapsed panels, written in tidyverse style, for students who want to reproduce the analysis on the course dataset.</p>
+
+<h2 id="example">2 · The two running examples and their data</h2>
+<p>Both examples are set in the same simulated city with 12 districts, so students can see how one setting produces very different study designs and data structures. Because the data are simulated, every lesson can reveal the true values, so students can check whether a method recovers the truth. That's the most powerful teaching device in the earlier pages.</p>
+<h3>Example A · Heat and emergency visits (time series, counts)</h3>
+<p>Five years of daily data, aggregated by district and age group. This is the example from the earlier pages, and it carries the count models, time series, lagged effects, spatial models and the capstone.</p>
+<div class="tw"><table class="t">
+<tr><th>Variable</th><th>Level</th><th>Used from</th><th>Role in the course</th></tr>
+<tr><td>Daily emergency visits</td><td>District × day, by age group 0–14, 15–64, 65+</td><td>Lesson 1</td><td>Outcome. Counts, so Poisson and overdispersion arise naturally.</td></tr>
+<tr><td>Daily mean temperature</td><td>City × day, small district differences</td><td>Lesson 1</td><td>Main exposure. Nonlinear, U-shaped, with lags.</td></tr>
+<tr><td>PM2.5</td><td>City × day</td><td>Lesson 9</td><td>Confounder, correlated with heat.</td></tr>
+<tr><td>Population, age structure, deprivation</td><td>District</td><td>Lesson 1</td><td>Offsets, standardization, effect modification, spatial patterns.</td></tr>
+<tr><td>Public holidays, day of week</td><td>Day</td><td>Lesson 15</td><td>Time-series adjustment.</td></tr>
+<tr><td>District boundaries</td><td>12 polygons</td><td>Lesson 17</td><td>Spatial autocorrelation and spatial models.</td></tr>
+</table></div>
+<h3>Example B · Traffic-related air pollution and childhood asthma (cohort, binary outcome)</h3>
+<p>A birth cohort of about 5,000 children living in the same 12 districts, followed to age 8. This individual-level example carries the binary-outcome models, causal inference, measurement error and disease burden lessons. It suits them well: air pollution exposure is always estimated rather than measured, confounding by socio-economic position is the central threat, and the burden of asthma attributable to NO₂ is a standard policy question.</p>
+<div class="tw"><table class="t">
+<tr><th>Variable</th><th>Level</th><th>Used from</th><th>Role in the course</th></tr>
+<tr><td>Asthma diagnosis by age 8</td><td>Child (yes/no)</td><td>Lesson 2</td><td>Binary outcome: risks, odds, logistic regression.</td></tr>
+<tr><td>Modeled residential NO₂</td><td>Child, from a land-use regression model</td><td>Lesson 8</td><td>Exposure as used in most studies, with error built in.</td></tr>
+<tr><td>Personal NO₂ monitoring</td><td>Validation subsample of 300 children</td><td>Lesson 13</td><td>Reveals the measurement error and lets students correct for it.</td></tr>
+<tr><td>Family socio-economic position, parental smoking, green space</td><td>Child or district</td><td>Lesson 9</td><td>Confounders and a mediator, for DAGs and causal methods.</td></tr>
+<tr><td>Questionnaire-based wheeze screening</td><td>Child</td><td>Lesson 2</td><td>Diagnostic accuracy, misclassification of the outcome.</td></tr>
+<tr><td>School attended</td><td>Child (40 schools)</td><td>Lesson 18</td><td>Clustering and random effects.</td></tr>
+<tr><td>Asthma disability weights and duration</td><td>Population</td><td>Lesson 14</td><td>Inputs to DALY calculations.</td></tr>
+</table></div>
+<p>The browser generates both datasets from fixed seeds, so every student sees the same numbers. Lesson 0 also provides an R script (tidyverse) that generates the identical data, so code snippets run without downloads. The true data-generating models contain things students discover gradually: a U-shaped temperature effect with lags, stronger heat effects in the 65+ group, overdispersion, spatially correlated district effects, confounding of NO₂ by socio-economic position, and exposure error that biases naive estimates toward the null.</p>
+
+<h2 id="anatomy">3 · What every lesson contains</h2>
+<div class="cards">
+<div class="card"><h4>Header</h4><p>Lesson number, part, prerequisites, estimated time, and three to five learning objectives written as things the student will be able to do.</p></div>
+<div class="card"><h4>Why it matters</h4><p>A short epidemiological motivation: the question from the running example that this lesson answers, and what goes wrong without the method.</p></div>
+<div class="card"><h4>Concept sections</h4><p>Two to four sections, each with an interactive demonstration and a "What's happening" box that narrates every change the student makes.</p></div>
+<div class="card"><h4>Optional R code</h4><p>Collapsed panels with tidyverse code that reproduces the demonstration on the course data. Closed by default, with a copy button.</p></div>
+<div class="card"><h4>Bayesian preview</h4><p>In Parts I–IV, a short box showing how a Bayesian would see the same idea, and pointing to the lesson where it is developed. From Part V, full side-by-side columns.</p></div>
+<div class="card"><h4>Common pitfalls</h4><p>Two or three misinterpretations that appear in published papers, such as reading a p-value as the probability the null is true.</p></div>
+<div class="card"><h4>Check your understanding</h4><p>Five to eight concept questions mixing statistical and epidemiological reasoning, such as "which DAG justifies this adjustment?" or "what does this interval mean?". Instant feedback explains <i>why</i> each answer is right or wrong. Some ask students to predict what a demo will do before running it. No applied exercises.</p></div>
+<div class="card"><h4>Key takeaways and glossary</h4><p>A short summary, links to glossary terms used in the lesson, and links to the previous and next lessons.</p></div>
+</div>
+
+<h2 id="threads">4 · Five threads through the course</h2>
+<p>Five ideas recur across many lessons. Each lesson card below is tagged with the threads it advances, so the course has a visible spine rather than being a list of techniques.</p>
+<div class="cards">
+<div class="card"><h4><span class="tag lik">Likelihood</span></h4><p>From "how probable is this count?" in Lesson 3 to the full likelihood of a hierarchical model. Every model is "an equation plus a distribution".</p></div>
+<div class="card"><h4><span class="tag unc">Uncertainty</span></h4><p>Sampling variation, standard errors, confidence and credible intervals, and propagating uncertainty into derived quantities like the MMT or attributable fractions.</p></div>
+<div class="card"><h4><span class="tag shr">Shrinkage</span></h4><p>Penalized splines, mixed models, priors and hierarchical models are all ways of borrowing strength. This thread prepares the course's ending.</p></div>
+<div class="card"><h4><span class="tag bias">Bias</span></h4><p>Confounding, selection, misclassification and exposure measurement error: the ways an estimate can be precise and still wrong. Introduced with DAGs in Lesson 9, developed in Part III.</p></div>
+<div class="card"><h4><span class="tag fb">Frequentist ↔ Bayesian</span></h4><p>Where the two approaches agree, where they differ, and what each assumes. Previewed in every lesson of Parts I–IV and developed fully in Part V.</p></div>
+</div>
+
+<h2 id="map">5 · The course, lesson by lesson</h2>
+<div class="controls"><button id="openAll">Expand all lessons</button><button id="closeAll">Collapse all</button></div>
+
+<!-- PART I -->
+<div class="part" style="--c:var(--p1)"><div class="lab">Part I</div><h3>Foundations: data, probability and inference</h3><p>From describing data to the logic of estimation and testing. Light on code; heavy on simulation.</p></div>
+
+<details class="mod" style="--c:var(--p1)"><summary><span class="num">0</span><span class="ttl">Welcome: the city, the data and how to use the course</span><span class="dur">30 min</span></summary><div class="body">
+<div class="field"><div class="k">Purpose</div><div class="v">Introduces the simulated city, the questions the course will answer, how lessons work, and the four threads. Offers the R setup and the data-generation script.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A tour of the dataset: a district map, a daily time series, and an explorer that filters by age group and year.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v">Installing the packages, running the data script, a first look with <code>glimpse()</code> and <code>ggplot()</code>.</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p1)"><summary><span class="num">1</span><span class="ttl">Describing data and epidemiological measures</span><span class="dur">2 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Distinguish types of variables. Choose and interpret summaries of center and spread. Compute and interpret rates, risks and odds, and know why emergency visits need rates per population.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Distributions of data, mean vs median, SD and IQR, skewness, person-time, crude vs age-standardized rates.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A histogram where students drag an outlier and watch the mean and median react. A district comparison where crude rates mislead until age standardization is switched on.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>group_by()</code>, <code>summarise()</code>, <code>mutate()</code> for rates; histograms and boxplots in <code>ggplot2</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Comparing crude rates across districts with different age structures.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag unc">Uncertainty</span> (preview)</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p1)"><summary><span class="num">2</span><span class="ttl">Probability and conditional probability</span><span class="dur">2 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Use the rules of probability. Reason with conditional probability and independence. Apply Bayes' theorem to diagnostic tests and explain why positive predictive value depends on prevalence.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Events, joint and conditional probability, independence, sensitivity, specificity, PPV and NPV, Bayes' theorem as updating.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">An icon array of 1,000 people tested for heat stroke at triage: sliders for prevalence, sensitivity and specificity show the PPV changing. A natural-frequency tree that fills in as the student sets the numbers. A second version applies the same logic to a wheeze questionnaire used to screen for asthma in the cohort.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v">Building a 2×2 table with <code>count()</code> and computing PPV with <code>mutate()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Confusing P(positive | disease) with P(disease | positive), the same error that later appears with p-values.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag fb">Frequentist ↔ Bayesian</span> (first appearance of Bayes' rule)</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p1)"><summary><span class="num">3</span><span class="ttl">Random variables and probability distributions</span><span class="dur">2.5 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Describe a random variable by its distribution, expectation and variance. Recognize when binomial, Poisson and normal distributions apply. Explain overdispersion in count data.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Discrete vs continuous, probability mass and density (including why a density can exceed 1), expectation, variance, Poisson as the limit of binomial, mean–variance relationship, negative binomial.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A distribution explorer with parameter sliders. Comparing the course's real daily counts with a Poisson of the same mean to reveal extra spread. A "density vs probability" demo where area, not height, is the probability.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>dpois()</code>, <code>rpois()</code>, <code>rnbinom()</code>; simulating and plotting with <code>tibble()</code> and <code>ggplot()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Assuming counts are Poisson without checking the variance.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag lik">Likelihood</span> (the probability of one observed count)</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p1)"><summary><span class="num">4</span><span class="ttl">Sampling, sampling distributions and the central limit theorem</span><span class="dur">2 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Distinguish population, sample and estimate. Explain what a sampling distribution is and what a standard error measures. Describe what the central limit theorem guarantees and when it doesn't help.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Sampling variability, estimators, bias and variance, standard error, the central limit theorem, the bootstrap as resampling.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">Repeatedly sampling 30 days from the 5-year dataset and watching the histogram of sample means build up. A sample-size slider shows the standard error shrinking with √n. A bootstrap demo that resamples one sample.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>slice_sample()</code>, <code>map_dbl()</code> from purrr for repeated sampling, a simple bootstrap.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Confusing the standard deviation of the data with the standard error of an estimate.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag unc">Uncertainty</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p1)"><summary><span class="num">5</span><span class="ttl">Likelihood and estimation</span><span class="dur">2.5 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Write a likelihood for simple data. Find a maximum likelihood estimate graphically. Explain how the curvature of the likelihood gives the standard error.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Likelihood vs probability, log-likelihood, MLE, information and curvature, likelihood-based intervals.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">The likelihood for the city's daily visit rate, built one day at a time (adapted from step 2–3 of the earlier walkthrough). A days slider shows the curve narrowing. The optimizer climbing to the peak.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v">Computing a log-likelihood over a grid with <code>tibble()</code> and <code>mutate()</code>; <code>optimize()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Reading the likelihood as the probability that a parameter value is true.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag lik">Likelihood</span> <span class="tag unc">Uncertainty</span> <span class="tag fb">Frequentist ↔ Bayesian</span> (preview: the same likelihood feeds the posterior)</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p1)"><summary><span class="num">6</span><span class="ttl">Confidence intervals and hypothesis tests</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Interpret a confidence interval through its coverage. Explain what a p-value is and is not. Describe type I and type II errors, power and multiplicity. Know when an equivalence test is needed.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Coverage, null and alternative hypotheses, test statistics, p-values, α, power, multiple testing, one- vs two-sided tests, equivalence testing, "absence of evidence".</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A "dance of intervals": 100 simulated studies, with intervals that miss the truth highlighted. A p-value machine where the true effect is set to zero and p-values come out uniform. A power curve by sample size and effect size.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>t.test()</code>, <code>poisson.test()</code>, tidy output with <code>broom::tidy()</code>, simulation of coverage.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">"Not significant" read as "no effect". A 95% CI read as "95% probability the true value is in this interval".</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag unc">Uncertainty</span> <span class="tag fb">Frequentist ↔ Bayesian</span></div></div>
+</div></details>
+
+<!-- PART II -->
+<div class="part" style="--c:var(--p2)"><div class="lab">Part II</div><h3>Frequentist regression</h3><p>From the straight line to generalized linear models, adjustment, model checking and nonlinear effects.</p></div>
+
+<details class="mod" style="--c:var(--p2)"><summary><span class="num">7</span><span class="ttl">Linear regression</span><span class="dur">2.5 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Fit and interpret a linear regression. Explain least squares and its link to the normal likelihood. Check residuals and assumptions.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Model equation, intercept and slope, residuals, least squares, R², assumptions (linearity, independence, constant variance, normality), prediction vs confidence intervals.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">Drag data points and watch the line, residuals and squared-residual areas update. A residual plot that reveals a curved pattern when the true relation isn't linear.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>lm()</code>, <code>broom::tidy()</code>, <code>broom::augment()</code> for residuals, <code>geom_smooth()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Fitting a linear model to counts and getting negative predicted visits.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag lik">Likelihood</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p2)"><summary><span class="num">8</span><span class="ttl">Generalized linear models: logistic and Poisson regression</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Explain a GLM as "distribution + link + linear predictor". Interpret odds ratios and rate ratios. Use offsets for rates. Detect and handle overdispersion.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Link functions, logistic regression and ORs, Poisson regression and RRs, offsets and person-time, deviance, quasi-Poisson, negative binomial.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A link-function viewer that shows the same linear predictor mapped to a probability or a rate. Logistic regression of asthma on modeled NO₂ in the cohort, with odds ratios per 10 µg/m³ compared with risk ratios as asthma becomes more common. A district rate model where removing the population offset produces nonsense. A dispersion check comparing Poisson and negative binomial fits.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>glm(family = poisson)</code>, <code>offset(log(pop))</code>, <code>MASS::glm.nb()</code>, exponentiated coefficients via <code>broom::tidy(exponentiate = TRUE)</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Interpreting odds ratios as risk ratios when the outcome is common. Ignoring overdispersion and reporting intervals that are too narrow.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag lik">Likelihood</span> <span class="tag unc">Uncertainty</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p2)"><summary><span class="num">9</span><span class="ttl">Confounding, effect modification and interaction</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Use a DAG to decide what to adjust for. Distinguish confounders, mediators and colliders. Model and interpret effect modification. Avoid the "significant in one group, not in the other" error.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">DAGs, backdoor paths, adjustment, collider bias, effect modification vs interaction, additive vs multiplicative scale, testing differences between groups.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A DAG for heat, PM2.5 and visits: sliders for the strength of each arrow show crude and adjusted estimates diverging. A DAG for NO₂, socio-economic position, parental smoking, green space and asthma, where students choose an adjustment set and see the estimate change. A collider demo. Age-group heat effects with the interaction test next to the misleading separate p-values.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v">Adjusted <code>glm()</code> fits for both examples, interaction terms, <code>dagitty</code> for adjustment sets, comparing models with <code>anova()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Adjusting for a mediator or a collider. Inferring effect modification from one significant and one non-significant subgroup.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag bias">Bias</span> <span class="tag fb">Frequentist ↔ Bayesian</span> (preview: order-constrained hypotheses in Lesson 23)</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p2)"><summary><span class="num">10</span><span class="ttl">Model checking, comparison and selection</span><span class="dur">2.5 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Diagnose a fitted model. Compare nested models with likelihood-ratio tests and any models with AIC. Explain overfitting and use cross-validation.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Residual diagnostics, influence and leverage, LRT, AIC and QAIC (lower is better), overfitting, train/test splits, cross-validation.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A model-complexity slider showing training error falling while test error turns upward. An AIC table that updates as terms are added. An influence demo where one extreme heat day moves the estimate.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>anova(test = "LRT")</code>, <code>AIC()</code>, <code>broom::glance()</code>, simple k-fold cross-validation with <code>rsample</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Stepwise selection and then reporting p-values as if the model had been chosen in advance.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag fb">Frequentist ↔ Bayesian</span> (preview: LOO and Bayes factors in Lesson 23)</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p2)"><summary><span class="num">11</span><span class="ttl">Nonlinear effects: categories, polynomials, splines and GAMs</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Explain why categorizing a continuous exposure loses information. Fit and interpret splines. Explain penalized splines as controlled flexibility.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Categorization, polynomials, basis functions, natural cubic splines, knots and degrees of freedom, penalized splines, GAMs, fixed thresholds vs estimated shapes.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A spline builder that shows the individual basis functions adding up to the curve. A knots slider. A smoothing-penalty slider moving from wiggly to straight, previewing priors as penalties.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>splines::ns()</code>, <code>mgcv::gam()</code> with <code>s()</code>, plotting predictions with <code>broom::augment()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Choosing the number of knots by looking at which gives significant results.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag shr">Shrinkage</span> (penalties)</div></div>
+</div></details>
+
+<!-- PART CI -->
+<div class="part" style="--c:var(--p5)"><div class="lab">Part III</div><h3>Causal inference, measurement and disease burden</h3><p>Three topics that decide whether an estimate means what we want it to mean, and what it implies for population health. Mostly Example B.</p></div>
+
+<details class="mod" style="--c:var(--p5)"><summary><span class="num">12</span><span class="ttl">Causal inference: from association to effect</span><span class="dur">3.5 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">State a causal question as a contrast of potential outcomes. Explain exchangeability, positivity and consistency. Estimate an average causal effect with g-computation, propensity scores and inverse probability weighting. Assess sensitivity to unmeasured confounding.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Potential outcomes and counterfactuals, identification assumptions, the target trial framework, standardization and g-computation, propensity scores (matching, weighting), positivity violations, marginal vs conditional effects, non-collapsibility of the odds ratio, E-values and quantitative bias analysis.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A "two worlds" view of the cohort: every child's asthma outcome under high and low NO₂, with only one ever observed. A propensity-score overlap plot where students tighten exposure contrasts until positivity breaks. A comparison of the conditional OR, marginal OR and risk difference from the same data. An E-value slider for an unmeasured confounder.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v">G-computation with <code>glm()</code> and <code>mutate()</code> on counterfactual copies of the data, <code>WeightIt</code> or manual IPW, <code>cobalt</code> for balance, <code>EValue</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Interpreting an adjusted odds ratio as a population effect. Adjusting for everything available, including mediators.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag bias">Bias</span> <span class="tag unc">Uncertainty</span> <span class="tag fb">Frequentist ↔ Bayesian</span> (preview: g-computation on posterior draws)</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p5)"><summary><span class="num">13</span><span class="ttl">Measurement error and misclassification</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Distinguish classical from Berkson error and non-differential from differential misclassification. Predict the direction of bias each causes. Correct an estimate using validation data with regression calibration or simulation.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Classical vs Berkson error, regression dilution, error in confounders, misclassification of binary outcomes and exposures, sensitivity and specificity as error parameters, validation and reliability studies, regression calibration, SIMEX, probabilistic bias analysis.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">Modeled vs personal NO₂ in the validation subsample, with an error slider that flattens the exposure–response slope (classical) or leaves it unbiased but noisier (Berkson). A misclassification demo using the wheeze questionnaire. A regression-calibration walkthrough that recovers the true effect. A SIMEX plot extrapolating back to zero error.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v">Simulating both error types with <code>mutate()</code>, regression calibration with two <code>glm()</code> fits, the <code>simex</code> package, probabilistic bias analysis with <code>episensr</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Assuming non-differential error always biases toward the null. It doesn't for categorical exposures with more than two levels, or when errors in confounders are present.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag bias">Bias</span> <span class="tag unc">Uncertainty</span> <span class="tag fb">Frequentist ↔ Bayesian</span> (preview: error models as hierarchical models in Lesson 24)</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p5)"><summary><span class="num">14</span><span class="ttl">Measuring disease burden</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Compute and interpret attributable fractions and numbers. Explain YLL, YLD and DALYs. Carry out a simple comparative risk assessment for NO₂ and childhood asthma, including the choice of counterfactual exposure. Propagate uncertainty from relative risks and exposure into burden estimates.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Population attributable fraction (Levin's formula and its continuous-exposure version), attributable numbers, theoretical minimum risk exposure level, YLL, YLD, disability weights, DALYs, comparative risk assessment, Monte Carlo uncertainty propagation, why burden estimates across risk factors don't add up.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A PAF calculator with sliders for exposure prevalence and RR. A continuous-exposure version where the counterfactual NO₂ level is dragged and the attributable cases change. A DALY builder stacking YLL and YLD. An uncertainty panel that turns the RR's confidence interval into a distribution of attributable cases.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v">PAF and attributable numbers with <code>mutate()</code> and <code>summarise()</code>, Monte Carlo propagation with <code>rnorm()</code> on the log RR, DALY tables with <code>dplyr</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Using an adjusted odds ratio in Levin's formula, or ignoring the counterfactual exposure choice that drives the result.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag unc">Uncertainty</span> <span class="tag bias">Bias</span> <span class="tag fb">Frequentist ↔ Bayesian</span> (preview: burden as a derived quantity on posterior draws)</div></div>
+</div></details>
+
+<!-- PART III -->
+<div class="part" style="--c:var(--p3)"><div class="lab">Part IV</div><h3>Time, space and clustering</h3><p>Data where observations aren't independent: daily series, lagged effects, districts on a map, and clustered groups.</p></div>
+
+<details class="mod" style="--c:var(--p3)"><summary><span class="num">15</span><span class="ttl">Time-series regression for health data</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Identify trend, seasonality and autocorrelation. Control for them in a time-series regression of daily counts. Check residual autocorrelation.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Trend and seasonality, day-of-week and holiday effects, splines of time and Fourier terms, autocorrelation (ACF), quasi-Poisson time-series regression, the case-crossover design as an alternative.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A decomposition of the daily series into trend, season and residual. A degrees-of-freedom slider for the time spline, with the residual ACF updating. A demo showing the temperature estimate drifting when seasonality is under-controlled.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>lubridate</code> for dates, <code>ns(date, df = 7 * years)</code>, <code>glm(family = quasipoisson)</code>, <code>acf()</code> on residuals.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Confusing a seasonal pattern with a temperature effect.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag unc">Uncertainty</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p3)"><summary><span class="num">16</span><span class="ttl">Distributed lag and distributed lag non-linear models</span><span class="dur">3.5 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Explain lagged effects and harvesting. Build and interpret a DLNM: exposure–lag–response surface, cumulative ERF, MMT, RRs at percentiles and attributable fractions. Recognize the uncertainty in the MMT.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Unconstrained and constrained DLMs, cross-basis, lag–response and exposure–response, cumulative effects, MMT, RR relative to the MMT, attributable numbers and fractions, QAIC for specification.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A lag–response surface with slices: click a temperature to see its lag curve, or a lag to see its exposure curve. A cumulative ERF with the MMT and its simulated uncertainty. A heat-wave scenario showing harvesting.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>dlnm::crossbasis()</code>, <code>crosspred()</code>, <code>crossreduce()</code>, attributable fractions by simulation; plotting with <code>ggplot()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Treating the MMT as known, so that RR intervals pinch to zero width at the reference.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag unc">Uncertainty</span> <span class="tag shr">Shrinkage</span> <span class="tag fb">Frequentist ↔ Bayesian</span> (simulation-based CIs as "draws with a flat prior")</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p3)"><summary><span class="num">17</span><span class="ttl">Spatial data and spatial autocorrelation</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Distinguish point and areal data. Map standardized rates and explain why small areas give noisy maps. Measure spatial autocorrelation and fit a spatial regression.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Areal data, SMRs and expected counts, the small-numbers problem, neighbor definitions, Moran's I with a permutation test, ecological bias, spatially correlated residuals.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A district map of SMRs with a population slider: small populations make extreme, noisy SMRs. A neighbor-structure editor. A permutation demo for Moran's I, shuffling districts and building the null distribution.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>sf</code> for polygons, <code>spdep::poly2nb()</code> and <code>moran.test()</code>, maps with <code>geom_sf()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Interpreting the most extreme small districts as hot spots. Ecological fallacy.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag shr">Shrinkage</span> (motivates spatial smoothing)</div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p3)"><summary><span class="num">18</span><span class="ttl">Clustered data and mixed-effects models</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Explain why clustered data violate independence. Fit random-intercept and random-slope models. Describe no pooling, complete pooling and partial pooling. Know the two-stage multi-city approach.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Clustering and ICC, fixed vs random effects, random intercepts and slopes, shrinkage of district estimates (BLUPs), multi-location two-stage meta-analysis.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A pooling slider that moves each district's heat effect from its own estimate (no pooling) to the city average (complete pooling), with the mixed model's partial-pooling position marked. Small districts move furthest. The same idea for asthma risk in the cohort's 40 schools.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>lme4::glmer()</code> or <code>glmmTMB()</code>, extracting district effects with <code>broom.mixed::tidy()</code>, <code>mixmeta</code> for two-stage pooling.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Treating districts as independent units when their residuals are correlated, which gives over-confident intervals.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag shr">Shrinkage</span> <span class="tag fb">Frequentist ↔ Bayesian</span> (preview: a random effect is a prior whose variance is estimated)</div></div>
+</div></details>
+
+<!-- PART IV -->
+<div class="part" style="--c:var(--p4)"><div class="lab">Part V</div><h3>Bayesian modeling</h3><p>The same models through a second lens, ending with hierarchical and spatio-temporal models that bring every earlier thread together. Every lesson shows both approaches side by side.</p></div>
+
+<details class="mod" style="--c:var(--p4)"><summary><span class="num">19</span><span class="ttl">Bayesian thinking: from Bayes' rule to a model equation</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Apply Bayes' rule to parameters. Explain how the model equation builds the likelihood and what the prior and posterior are distributions of. Interpret credible intervals and posterior probabilities.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Prior, likelihood, posterior, grid approximation, conjugate Poisson–gamma updating, posterior summaries, credible vs confidence intervals.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">An extended version of the "from Bayes' rule to a model equation" page: the equation for one day, the likelihood map, prior × likelihood = posterior, and draws back into curves.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v">A grid posterior with <code>tidyr::expand_grid()</code> and <code>mutate()</code>, conjugate updating, summaries with <code>summarise()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Thinking Bayesian and frequentist models have different equations.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag lik">Likelihood</span> <span class="tag unc">Uncertainty</span> <span class="tag fb">Frequentist ↔ Bayesian</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p4)"><summary><span class="num">20</span><span class="ttl">Priors: choosing, eliciting and checking them</span><span class="dur">2.5 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Distinguish informative, weakly informative and vague priors. Translate expert knowledge, such as an expected heat-attributable fraction, into a prior on a parameter. Run prior predictive checks and sensitivity analyses.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Why "uninformative" priors don't exist, priors on the right scale, elicitation, prior predictive simulation, sensitivity analysis, penalization as a prior.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A prior predictive explorer: change the prior on β and see the curves and attributable fractions it implies before any data. A "vague isn't neutral" demo showing absurd heat-wave predictions from normal(0, 1).</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>brm(..., sample_prior = "only")</code>, prior predictive summaries with <code>tidybayes</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Using very wide priors by default and calling them objective.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag shr">Shrinkage</span> <span class="tag fb">Frequentist ↔ Bayesian</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p4)"><summary><span class="num">21</span><span class="ttl">Computing the posterior: MCMC and its diagnostics</span><span class="dur">2.5 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Explain why sampling is needed. Describe how Metropolis and Hamiltonian Monte Carlo explore a posterior. Diagnose chains with trace plots, R-hat, effective sample size and divergences.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Sampling in proportion to posterior height, warm-up, multiple chains, R-hat, ESS, divergent transitions, the intuition behind HMC and Stan.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">The step-by-step sampler from the earlier walkthrough. A two-parameter version on a correlated posterior, comparing Metropolis with an HMC-style sampler. A healthy vs problem-run diagnostics panel.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>brm()</code> settings (chains, iter, warmup), <code>summary()</code>, <code>bayesplot::mcmc_trace()</code>, <code>posterior::summarise_draws()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Ignoring divergence warnings or R-hat above 1.01.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag unc">Uncertainty</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p4)"><summary><span class="num">22</span><span class="ttl">Bayesian regression and GLMs</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Fit Bayesian Poisson and negative binomial regressions. Check them with posterior predictive checks. Answer substantive questions by computing derived quantities on draws.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Bayesian GLMs, posterior predictive checks, derived quantities (RRs, predictions, attributable fractions), propagating uncertainty, comparison with <code>glm()</code> results.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">The "ask the model questions" panel from the walkthrough, extended to adjusted models with PM2.5 and age groups. A posterior predictive check that catches overdispersion in a Poisson fit.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>brms::brm()</code>, <code>pp_check()</code>, <code>tidybayes::add_epred_draws()</code>, summarising draws with <code>median_qi()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Summarizing each coefficient separately and then combining the summaries, instead of computing on the draws.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag lik">Likelihood</span> <span class="tag unc">Uncertainty</span> <span class="tag fb">Frequentist ↔ Bayesian</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p4)"><summary><span class="num">23</span><span class="ttl">Bayesian hypothesis testing and model comparison</span><span class="dur">3 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Compute and interpret Bayes factors and posterior model probabilities. Explain Lindley's paradox and the role of the prior under the alternative. Test order-constrained hypotheses across subgroups. Compare models predictively with LOO.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Marginal likelihood, Bayes factors, Savage–Dickey, Lindley's paradox, ROPE, informative and order-constrained hypotheses (encompassing prior), LOO-CV and WAIC, Bayes factors vs predictive comparison.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">The two-part hypothesis page from earlier, plus a subgroup part: heat effects in two age groups, comparing the interaction test, the "significant vs non-significant" trap, and constrained Bayes factors. A threshold slider for "clinically meaningful".</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>brms::hypothesis()</code>, <code>bayes_factor()</code>, <code>post_prob()</code>, <code>loo()</code> and <code>loo_compare()</code>, <code>bain</code> for constrained hypotheses.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Computing Bayes factors with vague priors. Using Bayes factors to choose between spline specifications.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag fb">Frequentist ↔ Bayesian</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p4)"><summary><span class="num">24</span><span class="ttl">Bayesian hierarchical models</span><span class="dur">3.5 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Write a hierarchical model with group-level parameters and hyperpriors. Explain partial pooling and when it helps. Apply hierarchical priors to correlated exposures and to district-specific heat effects. Recognize computational issues and the non-centered parameterization.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Exchangeability, hyperpriors, shrinkage determined by the data, priors for variance parameters, hierarchical regression for many correlated exposures (fixed prior, estimated prior and a Dirichlet process overview, following the paper that started this project), Bayesian measurement-error models as hierarchical models, the funnel and non-centered parameterization.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">District heat effects shrinking as the between-district SD is learned, with a toggle between fixed and estimated hyperparameters. A correlated-exposures demo where maximum likelihood fails and hierarchical priors stabilize the estimates. A funnel visual showing why sampling can fail. A Bayesian measurement-error model for the asthma cohort, where true NO₂ is a latent parameter informed by the validation subsample.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>brm(visits ~ temp + (1 + temp | district))</code>, priors on SDs, <code>tidybayes::spread_draws()</code> for group effects, comparison with <code>lme4</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Inverse-gamma(0.001, 0.001) priors on variance parameters. Hierarchical models with too few groups to learn the variance.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag shr">Shrinkage</span> <span class="tag unc">Uncertainty</span> <span class="tag fb">Frequentist ↔ Bayesian</span></div></div>
+</div></details>
+
+<details class="mod" style="--c:var(--p4)"><summary><span class="num">25</span><span class="ttl">Capstone: Bayesian spatio-temporal hierarchical models</span><span class="dur">4 h</span></summary><div class="body">
+<div class="field"><div class="k">Objectives</div><div class="v">Combine temporal smoothing, lagged non-linear effects and spatially structured district effects in one hierarchical model. Interpret the results as derived quantities with full uncertainty. Report the analysis transparently.</div></div>
+<div class="field"><div class="k">Key concepts</div><div class="v">Random-walk priors for trends and lag curves (Bayesian smoothing), Bayesian DLNMs with propagated MMT uncertainty, CAR and BYM2 spatial priors, spatially varying heat effects, INLA as an alternative to MCMC, a reporting checklist.</div></div>
+<div class="field"><div class="k">Interactive</div><div class="v">A random-walk smoothing slider on the time trend. A district map moving from raw SMRs to spatially smoothed estimates as the spatial share in BYM2 changes. A final dashboard: district-specific heat ERFs, the posterior of each MMT, and heat-attributable visits and DALYs with full uncertainty, with every number traceable to the draws.</div></div>
+<div class="field"><div class="k">R (optional)</div><div class="v"><code>brms</code> with <code>car()</code> and <code>s()</code> terms, an <code>INLA</code> version of the same model, plotting maps of posterior summaries with <code>geom_sf()</code>.</div></div>
+<div class="field"><div class="k">Pitfall</div><div class="v">Over-interpreting district rankings without their uncertainty.</div></div>
+<div class="field"><div class="k">Threads</div><div class="v"><span class="tag lik">Likelihood</span> <span class="tag unc">Uncertainty</span> <span class="tag shr">Shrinkage</span> <span class="tag fb">Frequentist ↔ Bayesian</span></div></div>
+</div></details>
+
+<h2 id="tech">6 · Technical design</h2>
+<p>Each lesson is a single, self-contained HTML file that works offline in any modern browser, like the pages you've already used. All lessons share one design system (colors, typography, light and dark mode), so the course feels like one product. A home page, <code>index.html</code>, links the lessons and shows progress.</p>
+<div class="tw"><table class="t">
+<tr><th>Component</th><th>Design</th></tr>
+<tr><td>File structure</td><td>One folder: <code>index.html</code>, <code>lesson-00.html</code> to <code>lesson-25.html</code>, <code>glossary.html</code>, and <code>course-data.R</code> (both datasets). Relative links between files, so the folder can be zipped, emailed or put on a course website or Moodle.</td></tr>
+<tr><td>Interactives</td><td>Plain JavaScript and SVG or canvas, with no external libraries. The browser does real computation: likelihoods, Newton fits, MCMC, simulations.</td></tr>
+<tr><td>Optional R code</td><td>Collapsed panels (closed by default) with tidyverse-style code and a copy button. Packages named in each panel. A shared setup script in Lesson 0.</td></tr>
+<tr><td>Quizzes</td><td>Multiple choice and "predict, then reveal" questions with immediate explanations. Input is checked before feedback is shown. No grading or server.</td></tr>
+<tr><td>Progress</td><td>"Mark as complete" stored in the browser, so the home page shows which lessons are done. Kept on that device only.</td></tr>
+<tr><td>Accessibility</td><td>Keyboard-operable controls, text descriptions for plots, sufficient contrast in both color modes, reduced-motion support, printable layout.</td></tr>
+<tr><td>Glossary</td><td>One page of definitions, linked from terms in each lesson.</td></tr>
+</table></div>
+
+<h2 id="build">7 · Build plan and testing</h2>
+<p>The course is built in seven batches. Each batch is reviewed by you before the next one starts, so feedback on the first lessons shapes the rest.</p>
+<div class="tw"><table class="t">
+<tr><th>Batch</th><th>Contents</th><th>Why this order</th></tr>
+<tr><td>1</td><td>Home page, glossary skeleton, Lesson 0, Lesson 1</td><td>Sets the shared design, navigation, notation and both datasets. Small, so the template can be adjusted early.</td></tr>
+<tr><td>2</td><td>Lessons 2–6</td><td>Completes Part I.</td></tr>
+<tr><td>3</td><td>Lessons 7–11</td><td>Part II.</td></tr>
+<tr><td>4</td><td>Lessons 12–14</td><td>Part III: causal inference, measurement error, disease burden.</td></tr>
+<tr><td>5</td><td>Lessons 15–18</td><td>Part IV, the most technically demanding interactives (lag surfaces, maps).</td></tr>
+<tr><td>6</td><td>Lessons 19–22</td><td>Part V foundations, reusing and extending the earlier walkthroughs.</td></tr>
+<tr><td>7</td><td>Lessons 23–25, glossary completed</td><td>Model comparison, hierarchical models and the capstone.</td></tr>
+</table></div>
+<p>Every lesson will be opened and clicked through in a real browser before delivery, checking for errors, layout problems and that the numbers it reports are correct. <b>One limitation to be aware of:</b> R isn't available in the environment I build in, so the R snippets will be carefully written and reviewed but not executed. It would be worth having someone run them once, which Lesson 0's setup script makes straightforward, and I can fix anything that fails.</p>
+
+<h2 id="decisions">8 · Decisions, and the notation proposal</h2>
+<h3>Settled in this version</h3>
+<div class="tw"><table class="t">
+<tr><th>Question</th><th>Decision</th><th>What changed in the plan</th></tr>
+<tr><td>Scope</td><td>Add disease burden, measurement error and causal inference</td><td>New Part III with Lessons 12–14. A fifth thread, Bias. Measurement-error models added to Lesson 24 and burden to the capstone.</td></tr>
+<tr><td>Notation</td><td>All three forms side by side: A first, B next to it, C always</td><td>A three-column panel in every lesson.</td></tr>
+<tr><td>Bayesian previews</td><td>Keep them</td><td>A "Bayesian preview" box in every lesson of Parts I–IV.</td></tr>
+<tr><td>Exercises</td><td>Concept quizzes only, statistical and epidemiological</td><td>Five to eight concept questions per lesson. No applied exercises.</td></tr>
+<tr><td>Second example</td><td>Environmental, not heat</td><td>Example B: traffic-related NO₂ and childhood asthma in a birth cohort.</td></tr>
+</table></div>
+
+<h3>Notation: all three forms, side by side</h3>
+<p>Every model and measure is shown in three forms at once, in a three-column panel that stacks on narrow screens. <b>A, standard notation</b>, comes first, because students need to read papers and textbooks. <b>B, the model list with R</b>, sits right next to it, so the translation from symbols to code is line by line. <b>C, epidemiological reporting</b>, is always present, showing how the result would appear in a results section. Lessons 0 and 1 already use this panel.</p>
+<div class="tw"><table class="t">
+<tr><th>Form</th><th>Example</th></tr>
+<tr><td>A · Standard notation</td><td><code>Yᵢ ~ Bernoulli(πᵢ),  logit(πᵢ) = α + β·(NO₂ᵢ − 25)/10 + …</code></td></tr>
+<tr><td>B · Model list and R</td><td><code>asthma ~ bernoulli(p)</code> / <code>logit(p) = alpha + beta * (no2 - 25) / 10 + …</code>, then the <code>glm()</code>, <code>glmer()</code> or <code>brm()</code> call</td></tr>
+<tr><td>C · Epidemiological reporting</td><td>"OR 1.15 per 10 µg/m³ (95% CI …), adjusted for …"</td></tr>
+</table></div>
+<p>Fixed conventions, kept in the symbols table on the glossary page:</p>
+<div class="tw"><table class="t">
+<tr><th>Symbol or convention</th><th>Meaning</th></tr>
+<tr><td><code>α</code></td><td>Intercept or baseline (log or logit scale)</td></tr>
+<tr><td><code>β</code></td><td>Exposure effects; <code>β_ℓ</code> for lag ℓ</td></tr>
+<tr><td><code>γ</code></td><td>Confounder and adjustment terms</td></tr>
+<tr><td><code>u_j</code>, <code>σ</code>, <code>τ</code></td><td>Group effects for district or school j; residual and between-group standard deviations</td></tr>
+<tr><td>Indices</td><td><code>i</code> child, <code>t</code> day, <code>j</code> district or school, <code>k</code> age group, <code>ℓ</code> lag</td></tr>
+<tr><td>Effect scales</td><td>Heat: % change per °C and RR relative to the MMT. NO₂: OR and RR per 10 µg/m³. Burden: attributable cases, PAF and DALYs.</td></tr>
+<tr><td>Intervals</td><td>Always named in full: 95% confidence interval or 95% credible interval</td></tr>
+</table></div>
+<p><b>Language:</b> English, with R code and comments in English.</p>
+<p class="note" style="margin-top:20px">Batch 1 (home page, glossary, both datasets, Lessons 0 and 1) is built. Batch 2 covers Lessons 2–6.</p>
+</div>
+<script>
+document.getElementById("openAll").addEventListener("click",()=>document.querySelectorAll("details.mod").forEach(d=>d.open=true));
+document.getElementById("closeAll").addEventListener("click",()=>document.querySelectorAll("details.mod").forEach(d=>d.open=false));
+</script>
+</body>
+</html>

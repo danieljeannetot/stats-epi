@@ -1,0 +1,348 @@
+---
+title: "Lesson 16 · Distributed lag and distributed lag non-linear models"
+subtitle: "Part IV · Time, space and clustering"
+description: "Lagged effects and harvesting, distributed lag models, the cross-basis, exposure–lag–response surfaces, cumulative exposure–response curves, the minimum morbidity temperature, and attributable fractions."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3.5 hours]{} [Before this: Lessons 11 and 15]{} [Threads: uncertainty · shrinkage · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- explain why exposure effects can be spread over several days, and recognize harvesting;
+- fit a distributed lag model and explain why constraining the lag curve stabilizes it;
+- describe a DLNM as a cross-basis: a spline in exposure crossed with a spline in lag;
+- read an exposure–lag–response surface, its slices, and the cumulative exposure–response curve;
+- estimate the minimum morbidity temperature with its uncertainty, and heat- and cold-attributable fractions.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Heat acts within a day or two; cold acts over a week or more; and part of a heat effect may be visits brought forward by a few days. A model that uses only the same day's temperature underestimates cold effects and can exaggerate heat. DLNMs are now the standard approach in temperature–health research, including in large multi-country studies.
+
+:::
+
+## 16.1 Lagged effects and the distributed lag model {#s1}
+
+A hot day can raise visits on the same day, the next day and the day after. A **distributed lag model** includes the exposure on each of the previous L days, each with its own coefficient. Here the exposure is "degrees above 20°C" (heat only). Unconstrained, the lag coefficients are noisy, because temperatures on neighboring days are highly correlated. **Constraining** the lag curve to a smooth shape stabilizes it. Watch for negative coefficients a few days after a hot spell: that is **harvesting**.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="lL">Maximum lag (days)</label><input type="range" id="lL" min="3" max="21" value="10"><output id="lLO"></output></div>
+  <div class="btns" role="group" aria-label="Lag structure"><button type="button" id="lU" aria-pressed="true">Unconstrained: one coefficient per lag</button><button type="button" id="lC" aria-pressed="false">Constrained: smooth lag curve</button></div>
+  <svg id="lPlot" viewBox="0 0 520 280" role="img" aria-label="Lag-response coefficients"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="lStats"></div><div class="now" id="lNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\log\mu_t = \alpha + \sum_{\ell=0}^{L}\beta_\ell\, h_{t-\ell} + s(t) + \gamma^\top \mathrm{dow}_t, \qquad h_t = \max(0, T_t - 20)$$
+$$\text{constrained: } \beta_\ell = \sum_k \theta_k\, c_k(\ell), \qquad \text{cumulative} = \sum_\ell \beta_\ell$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+cb <- dlnm::crossbasis(pmax(city_daily$temp - 20, 0),
+        lag = 10,
+        argvar = list(fun = "lin"),
+        arglag = list(fun = "ns", df = 4))
+fit <- glm(visits ~ cb + splines::ns(t, df = 35) + dow,
+           family = quasipoisson, data = city_daily)
+```
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @schwartz2000distributed on distributed lag models and harvesting; @armstrong2006models on lagged temperature effects; @gasparrini2010distributed on constraining lag structures.
+
+:::
+
+## 16.2 The DLNM: an exposure–lag–response surface {#s2}
+
+Temperature effects are both **nonlinear** (a U shape) and **lagged**. A DLNM handles both at once with a **cross-basis**: a spline in temperature multiplied by a spline in lag. The result is a surface: the relative risk at every combination of temperature and lag, relative to a reference temperature. Read it through slices: pick a temperature to see how its effect unfolds over the following days, or pick a lag to see the exposure–response at that delay.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <svg id="sMap" viewBox="0 0 520 300" role="img" aria-label="Exposure-lag-response surface"></svg>
+  <div class="legend"><span><i style="background:var(--p1)"></i>lower risk than at the reference</span><span><i style="background:var(--p2)"></i>higher risk</span></div>
+  <div class="ctrl"><label for="sT">Temperature slice (°C)</label><input type="range" id="sT" min="-8" max="30" step="0.5" value="28"><output id="sTO"></output></div>
+  <div class="ctrl"><label for="sLg">Lag slice (days)</label><input type="range" id="sLg" min="0" max="21" value="0"><output id="sLgO"></output></div>
+</div>
+<div class="cpanel"><svg id="sLag" viewBox="0 0 520 200" role="img" aria-label="Lag-response at the chosen temperature"></svg><svg id="sExp" viewBox="0 0 520 200" role="img" aria-label="Exposure-response at the chosen lag"></svg><div class="now" id="sNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\log\mu_t = \alpha + \sum_{j}\sum_{k}\eta_{jk}\, w_{t,jk} + s(t) + \gamma^\top \mathrm{dow}_t$$
+$$w_{t,jk} = \sum_{\ell=0}^{L} b_j(T_{t-\ell})\, c_k(\ell)$$
+
+::: {.note}
+
+$b_j$: spline basis in temperature; $c_k$: spline basis in lag; the $\eta_{jk}$ define the whole surface.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+cb <- dlnm::crossbasis(city_daily$temp, lag = 21,
+  argvar = list(fun = "ns", knots = quantile(
+    city_daily$temp, c(.10, .50, .90))),
+  arglag = list(fun = "ns",
+    knots = dlnm::logknots(21, 3)))
+fit <- glm(visits ~ cb + splines::ns(t, df = 35) +
+             dow, family = quasipoisson,
+           data = city_daily)
+```
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @gasparrini2010distributed introduced DLNMs; @gasparrini2011distributed describe the dlnm package; @bhaskaran2013time place DLNMs in the time-series framework.
+
+:::
+
+## 16.3 The cumulative curve and the minimum morbidity temperature {#s3}
+
+Summing the surface over all lags gives the **cumulative exposure–response curve**: the total effect of a day's temperature over the following three weeks. Its lowest point is the **minimum morbidity temperature** (MMT), the usual reference. The MMT is itself an estimate, and often an uncertain one. Simulating from the fitted coefficients shows how uncertain, and what that uncertainty does to the relative risks reported against it.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <label class="small"><input type="checkbox" id="cTr" checked> show the true curve (simulation)</label>
+  <div class="btns"><button type="button" id="cSim">Simulate MMT uncertainty (500 draws)</button></div>
+  <svg id="cPlot" viewBox="0 0 520 300" role="img" aria-label="Cumulative exposure-response curve"></svg>
+  <svg id="cHist" viewBox="0 0 520 140" role="img" aria-label="Distribution of the simulated MMT"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="cStats"></div><div class="now" id="cNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\log RR_{\text{cum}}(x) = \sum_{\ell=0}^{L}\sum_{j,k}\eta_{jk}\,\big[b_j(x) - b_j(x_{\text{ref}})\big]\, c_k(\ell)$$
+$$\mathrm{MMT} = \arg\min_x \log RR_{\text{cum}}(x)$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+pred <- dlnm::crosspred(cb, fit, cen = 20,
+                        by = 0.1)
+mmt <- pred$predvar[which.min(pred$allRRfit)]
+pred2 <- dlnm::crosspred(cb, fit, cen = mmt,
+                         at = quantile(city_daily$temp,
+                                       c(.01, .99)))
+pred2$allRRfit; pred2$allRRlow; pred2$allRRhigh
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#cReport}
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Reporting relative risks against the MMT as if the MMT were known. Conventional intervals shrink to zero width at the reference, hiding its uncertainty. Report an interval for the MMT itself, obtained by simulation or bootstrap.
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): a DLNM for daily visits"}
+
+```{r}
+city_daily <- visits |>
+  group_by(date) |>
+  summarise(visits = sum(visits), temp = first(temp_city), dow = first(dow), .groups = "drop") |>
+  mutate(t = row_number())
+
+cb <- dlnm::crossbasis(city_daily$temp, lag = 21,
+        argvar = list(fun = "ns", knots = quantile(city_daily$temp, c(.10, .50, .90))),
+        arglag = list(fun = "ns", knots = dlnm::logknots(21, 3)))
+fit <- glm(visits ~ cb + splines::ns(t, df = 35) + dow, family = quasipoisson, data = city_daily)
+
+pred <- dlnm::crosspred(cb, fit, cen = 20, by = 0.1)
+mmt <- pred$predvar[which.min(pred$allRRfit)]
+pred <- dlnm::crosspred(cb, fit, cen = mmt, by = 0.1)
+plot(pred, "overall", xlab = "Temperature (°C)", ylab = "Cumulative RR (lags 0-21)")
+mmt
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @tobias2017investigating on estimating uncertainty in the minimum mortality temperature; @gasparrini2015mortality report cumulative temperature–mortality curves in 384 locations; @gasparrini2011distributed on predicting from a DLNM.
+
+:::
+
+## 16.4 Heat- and cold-attributable visits {#s4}
+
+From the cumulative curve, each day's visits can be split into those attributable to that day's temperature (relative to the MMT) and the rest. Summed over the period, this gives the **attributable fraction** for heat (days warmer than the MMT) and cold (days colder). Uncertainty is again obtained by simulating from the coefficients.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns"><button type="button" id="aRun">Compute attributable visits (500 simulations)</button></div>
+  <svg id="aPlot" viewBox="0 0 520 220" role="img" aria-label="Heat and cold attributable fractions"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="aStats"></div><div class="now" id="aNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$AF_t = 1 - \exp\{-\log RR_{\text{cum}}(T_t)\}, \qquad AN = \sum_t y_t\, AF_t$$
+$$AF_{\text{heat}} = \frac{\sum_{t: T_t > \mathrm{MMT}} y_t\, AF_t}{\sum_t y_t}$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+# attrdl() from the dlnm tutorial code
+# (Gasparrini & Leone 2014):
+# attrdl(city_daily$temp, cb, city_daily$visits,
+#        fit, type = "af", cen = mmt,
+#        range = c(mmt, 100), sim = TRUE)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#aReport}
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+A Bayesian DLNM gives the lag curve a smoothing prior instead of a fixed number of spline knots, and computes the MMT and attributable fractions on every posterior draw, so their uncertainty comes for free. Lesson 25 builds a district-level Bayesian DLNM in which each district's curve borrows strength from its neighbors.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gasparrini2014attributable define attributable risk from distributed lag models; @gasparrini2015mortality apply it across countries; @rockhill1998use on interpreting attributable fractions.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Exposure effects can be delayed and spread over days. Heat acts quickly; cold acts over a week or more.
+- Unconstrained lag coefficients are unstable; constraining the lag curve with a spline stabilizes them.
+- A DLNM crosses a spline in exposure with a spline in lag, giving an exposure–lag–response surface.
+- The cumulative curve sums effects over lags; its minimum, the MMT, is the usual reference, and it is uncertain.
+- Attributable fractions for heat and cold follow from the cumulative curve, with uncertainty from simulation.
+
+```{=html}
+<div class="done" data-lesson="lesson-16"><button type="button"></button><span></span></div>
+<script src="assets/lesson-16.js"></script>
+```

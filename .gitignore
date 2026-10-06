@@ -1,0 +1,9 @@
+/.quarto/
+/_site/
+.Rproj.user/
+.Rhistory
+.RData
+.DS_Store
+*_files/
+# keep _freeze/: it stores the results of expensive computations
+__pycache__/

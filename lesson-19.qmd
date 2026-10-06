@@ -1,0 +1,345 @@
+---
+title: "Lesson 19 · Bayesian thinking: from Bayes' rule to a model equation"
+subtitle: "Part V · Bayesian modeling"
+description: "Bayes' rule for a parameter, conjugate updating, how the model equation builds the likelihood, prior × likelihood = posterior, posterior draws, and credible intervals."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lessons 2, 5 and 8]{} [Threads: likelihood · uncertainty · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- apply Bayes' rule to a parameter, and update a prior for a risk with data;
+- explain how a regression's model equation, plus a distribution, builds the likelihood;
+- describe the prior and the posterior as distributions over the parameters of the model equation;
+- turn posterior draws back into fitted curves and answers to questions;
+- interpret a credible interval, and say when it differs from a confidence interval.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Bayesian analysis is often presented as a different kind of statistics. It isn't: it uses the same model equations and the same likelihood as the models in Parts II–IV. What it adds is a prior, and a different answer: not one best estimate, but a whole distribution of plausible parameter values. This lesson connects the two views step by step.
+
+:::
+
+## 19.1 Bayes' rule for a risk {#s1}
+
+Lesson 2 used Bayes' rule to update the probability of asthma after a test result. Here it updates beliefs about a **parameter**: the risk of asthma by age 8. Start from a **prior** distribution, observe some children, and get a **posterior**. With a beta prior and binomial data, the posterior is also a beta distribution, so the update is simple arithmetic: add the cases and non-cases to the prior's counts.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="bN">Children observed</label><input type="range" id="bN" min="0" max="2000" step="10" value="50"><output id="bNO"></output></div>
+  <div class="ctrl"><label for="bM">Prior mean of the risk</label><input type="range" id="bM" min="2" max="40" value="10"><output id="bMO"></output></div>
+  <div class="ctrl"><label for="bS">Prior strength (equivalent children)</label><input type="range" id="bS" min="1" max="500" value="20"><output id="bSO"></output></div>
+  <svg id="bPlot" viewBox="0 0 520 270" role="img" aria-label="Prior, likelihood and posterior for the risk"></svg>
+  <div class="legend"><span><i style="background:var(--c-prior)"></i>prior</span><span><i style="background:var(--c-lik)"></i>likelihood (scaled)</span><span><i style="background:var(--c-post)"></i>posterior</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="bStats"></div><div class="now" id="bNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\pi \sim \mathrm{Beta}(a, b), \qquad d \mid \pi \sim \mathrm{Binomial}(n, \pi)$$
+$$\pi \mid d \sim \mathrm{Beta}(a + d,\ b + n - d)$$
+
+::: {.note}
+
+$a + b$ is the prior's strength in "equivalent children"; $a/(a+b)$ its mean.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+d ~ binomial(n, p)
+p ~ beta(a, b)
+
+a_post <- a + d; b_post <- b + n - d
+qbeta(c(0.025, 0.5, 0.975), a_post, b_post)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#bReport}
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): conjugate updating and a grid posterior"}
+
+```{r}
+set.seed(19)
+smp <- cohort |> slice_sample(n = 50)
+d <- sum(smp$asthma); n <- nrow(smp)
+a <- 2; b <- 18                      # prior mean 10%, worth 20 children
+
+# exact conjugate answer
+qbeta(c(0.025, 0.5, 0.975), a + d, b + n - d)
+
+# the same posterior by brute force on a grid: prior x likelihood, rescaled
+grid <- tibble(p = seq(0.001, 0.999, by = 0.001)) |>
+  mutate(prior = dbeta(p, a, b), lik = dbinom(d, n, p),
+         post = prior * lik / sum(prior * lik))
+grid |> summarise(mean = sum(p * post),
+                  low = p[which(cumsum(post) >= 0.025)[1]],
+                  high = p[which(cumsum(post) >= 0.975)[1]])
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @greenland2006bayesian introduces Bayesian methods for epidemiologists; @gelman2013bayesian chapter-length treatments of conjugate models; @spiegelhalter2004bayesian on priors as "equivalent data" in health research.
+
+:::
+
+## 19.2 The model equation builds the likelihood {#s2}
+
+Now a regression. On summer days (June to August), how do emergency visits by Lakeside's older residents depend on temperature? The **model equation** gives each day's expected count from two parameters, α and β; the **Poisson distribution** turns that expectation into a probability for the count that actually happened. Multiply over days and you have the **likelihood** of that pair (α, β). Do it for every pair and you get a likelihood **map**. Click anywhere on it.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="lN">Summer days of data</label><input type="range" id="lN" min="10" max="460" step="5" value="150"><output id="lNO"></output></div>
+  <canvas id="lMap" width="520" height="380" style="width:100%;cursor:crosshair" aria-label="Likelihood map; click to choose a point"></canvas>
+  <p class="small">Across: β, the effect per °C. Up: the expected visits at 20°C, e<sup>α</sup>. Darker = more likely. The ring marks your choice.</p>
+</div>
+<div class="cpanel"><svg id="lCurve" viewBox="0 0 520 260" role="img" aria-label="The curve for the chosen point"></svg><div class="now" id="lNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$y_t \sim \mathrm{Poisson}(\mu_t), \qquad \log\mu_t = \alpha + \beta\,(T_t - 20)$$
+$$L(\alpha, \beta) = \prod_t \frac{\mu_t^{y_t} e^{-\mu_t}}{y_t!}$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+visits[t] ~ poisson(mu[t])
+log(mu[t]) = a + b * (temp[t] - 20)
+
+loglik <- function(a, b)
+  sum(dpois(d$visits,
+            exp(a + b * (d$temp - 20)), log = TRUE))
+```
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @mcelreath2020statistical builds Bayesian models from the model equation upward; @pawitan2001all on the likelihood as the shared ingredient; @held2020applied on likelihood and Bayesian inference together.
+
+:::
+
+## 19.3 Multiply by the prior: the posterior map {#s3}
+
+The **prior** is another map over the same (α, β) plane: how plausible each version of the equation seemed before the data. The **posterior** is the two maps multiplied point by point, then rescaled. That is all "likelihood × prior" means. Try a narrow prior centered on zero (a skeptic), then a narrow prior centered on a large effect, then add more days.
+
+```{=html}
+<div class="cw">
+<div class="grid2" style="margin-bottom:10px">
+<div class="cpanel">
+  <div class="ctrl"><label for="pM">Prior mean of β (% per °C)</label><input type="range" id="pM" min="-4" max="8" step="0.25" value="0"><output id="pMO"></output></div>
+  <div class="ctrl"><label for="pS">Prior SD of β (% per °C)</label><input type="range" id="pS" min="0.25" max="10" step="0.25" value="3"><output id="pSO"></output></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="pStats"></div></div>
+</div>
+<div class="grid3">
+<div class="cpanel"><h4 style="color:var(--c-prior)">Prior</h4><canvas id="mPr" width="360" height="300" style="width:100%"></canvas></div>
+<div class="cpanel"><h4 style="color:var(--c-lik)">× Likelihood</h4><canvas id="mLi" width="360" height="300" style="width:100%"></canvas></div>
+<div class="cpanel"><h4 style="color:var(--c-post)">= Posterior</h4><canvas id="mPo" width="360" height="300" style="width:100%"></canvas></div>
+</div>
+<div class="now" id="pNow"></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$p(\alpha, \beta \mid y) \propto p(y \mid \alpha, \beta)\; p(\alpha)\, p(\beta)$$
+$$\beta \sim \mathrm{Normal}(m, s^2), \qquad \alpha \sim \mathrm{Normal}(\log 8, 1)$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+visits[t] ~ poisson(mu[t])
+log(mu[t]) = a + b * (temp[t] - 20)
+a ~ normal(log(8), 1)
+b ~ normal(0, 0.03)
+
+brms::brm(visits ~ I(temp - 20), family = poisson,
+  prior = c(prior(normal(2.08, 1), class = Intercept),
+            prior(normal(0, 0.03), class = b)),
+  data = d)
+```
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @gelman2013bayesian on posterior computation by grid and simulation; @mcelreath2020statistical on grid approximation as a teaching device; @greenland2006bayesian on priors in epidemiological analysis.
+
+:::
+
+## 19.4 Back to the equation: posterior draws {#s4}
+
+Draw points from the posterior map, as MCMC does in practice, and plug each one into the model equation. Each draw gives one curve. The bundle of curves **is** the Bayesian answer, expressed in the language of the model. Any question, such as the effect per °C, the expected visits on a 30°C day, or the probability that heat increases visits, is answered by computing it on every draw.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel"><canvas id="dMap" width="520" height="340" style="width:100%" aria-label="Posterior map with draws"></canvas><div class="btns"><button type="button" id="dRe">Draw again</button></div></div>
+<div class="cpanel"><svg id="dCurve" viewBox="0 0 520 260" role="img" aria-label="Curves from posterior draws"></svg><div class="statgrid" id="dStats"></div><div class="now" id="dNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$(\alpha^{(s)}, \beta^{(s)}) \sim p(\alpha, \beta \mid y), \quad s = 1, \dots, S$$
+$$\text{95\% credible interval for } \beta: \ \big[\beta_{(0.025)},\ \beta_{(0.975)}\big]$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+draws <- posterior::as_draws_df(fit)
+quantile(draws$b_ItempM20, c(.025, .5, .975))
+mean(draws$b_ItempM20 > 0)         # P(heat harmful)
+mean(exp(draws$b_Intercept +
+         10 * draws$b_ItempM20))    # visits at 30°C
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#dReport}
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Thinking a Bayesian model has a different equation from the frequentist one. The model equation and the likelihood are the same; the prior is the only new ingredient. With plenty of data and a weakly informative prior, the posterior median and credible interval closely match the maximum likelihood estimate and the confidence interval. The interpretation is what differs.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gelman2013bayesian on summarizing posterior simulations; @kruschke2015doing on credible intervals and posterior probabilities; @bland1998bayesians on Bayesian and frequentist interpretations side by side.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Bayes' rule for a parameter: posterior ∝ likelihood × prior. With a beta prior and binomial data, the update just adds counts.
+- The model equation, plus a distribution for the outcome, builds the likelihood. Prior and posterior are distributions over the equation's parameters.
+- Multiplying prior and likelihood point by point gives the posterior; it lies between them, closer to whichever is more precise.
+- Posterior draws, plugged into the model equation, give a bundle of curves; any question is answered by computing on the draws.
+- A 95% credible interval contains the parameter with 95% posterior probability, given the model, prior and data.
+
+```{=html}
+<div class="done" data-lesson="lesson-19"><button type="button"></button><span></span></div>
+<script src="assets/lesson-19.js"></script>
+```

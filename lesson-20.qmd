@@ -1,0 +1,290 @@
+---
+title: "Lesson 20 · Priors: what they say and how much they matter"
+subtitle: "Part V · Bayesian modeling"
+description: "Prior predictive checks, why vague priors aren't neutral, eliciting priors from subject knowledge, prior sensitivity, and priors as penalties that shrink and smooth."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lesson 19]{} [Threads: shrinkage · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- check what a prior implies about the data with a prior predictive simulation;
+- explain why "vague" priors are often unreasonable on the scale of the data;
+- translate subject-matter knowledge into a prior distribution;
+- judge how much a conclusion depends on the prior, and how that changes with the amount of data;
+- explain a prior as a penalty, and use it to shrink or smooth a set of related coefficients.
+
+:::
+
+::: {.why}
+
+**Why it matters.** The prior is the part of a Bayesian analysis readers question most. Defending it requires knowing what it actually says, which is rarely obvious from its formula. A prior that looks harmless on the coefficient scale can claim that a hot day might bring a million emergency visits. Conversely, a well-chosen prior is one of the most useful tools in this course: it is how shrinkage and smoothing, introduced in Lessons 11, 17 and 18, enter a Bayesian model.
+
+:::
+
+## 20.1 What does a prior say? Prior predictive checks {#s1}
+
+A prior on α and β in log μ = α + β(T − 20) is hard to judge directly. Simulate from it instead: draw (α, β) from the prior, compute the curve of expected visits against temperature, and look. That is a **prior predictive check**. "Vague" priors with large standard deviations, often presented as letting the data speak, imply absurd numbers of visits.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="ppB">Prior SD of β (log scale, per °C)</label><select id="ppB"><option value="1">1 (vague)</option><option value="0.2">0.2</option><option value="0.05" selected>0.05 (weakly informative)</option><option value="0.01">0.01 (informative)</option></select></div>
+  <div class="ctrl"><label for="ppA">Prior SD of α around log(8)</label><select id="ppA"><option value="10">10 (vague)</option><option value="2">2</option><option value="0.5" selected>0.5</option></select></div>
+  <div class="btns"><button type="button" id="ppNew">Draw again</button></div>
+  <svg id="ppPlot" viewBox="0 0 520 280" role="img" aria-label="Prior predictive curves"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="ppStats"></div><div class="now" id="ppNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\alpha^{(s)} \sim p(\alpha), \quad \beta^{(s)} \sim p(\beta), \quad \tilde\mu^{(s)}(T) = e^{\alpha^{(s)} + \beta^{(s)}(T - 20)}$$
+$$\tilde y^{(s)} \sim \mathrm{Poisson}\big(\tilde\mu^{(s)}(T)\big)$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+a <- rnorm(100, log(8), 0.5)
+b <- rnorm(100, 0, 0.05)
+exp(a + b * (35 - 20))     # visits at 35°C
+
+brms::brm(..., sample_prior = "only")
+```
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): a prior predictive check"}
+
+```{r}
+set.seed(20)
+prior_draws <- function(sd_a, sd_b, n = 1000)
+  tibble(a = rnorm(n, log(8), sd_a), b = rnorm(n, 0, sd_b)) |>
+  mutate(visits_35 = exp(a + b * 15))
+
+bind_rows(vague = prior_draws(10, 1), weak = prior_draws(0.5, 0.05), .id = "prior") |>
+  group_by(prior) |>
+  summarise(median_visits_35C = median(visits_35),
+            share_above_1000 = mean(visits_35 > 1000))
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @gabry2019visualization on prior predictive checks in the Bayesian workflow; @gelman2017prior on understanding priors through the likelihood and data they imply; @mcelreath2020statistical on simulating from priors.
+
+:::
+
+## 20.2 Eliciting a prior from subject knowledge {#s2}
+
+Experts rarely think in log rate ratios, but they can usually say what range of effects they find plausible: "heat probably raises visits among older people by somewhere between 0% and 4% per degree." That statement translates directly into a normal prior on β. Set the range, and check what the prior implies for a hot day.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="elL">Lowest plausible effect (% per °C)</label><input type="range" id="elL" min="-5" max="5" step="0.25" value="0"><output id="elLO"></output></div>
+  <div class="ctrl"><label for="elU">Highest plausible effect (% per °C)</label><input type="range" id="elU" min="-2" max="15" step="0.25" value="4"><output id="elUO"></output></div>
+  <svg id="elPlot" viewBox="0 0 520 240" role="img" aria-label="The elicited prior"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="elStats"></div><div class="now" id="elNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\beta \sim \mathrm{Normal}(m, s^2), \quad m = \frac{\log(1 + L) + \log(1 + U)}{2}, \quad s = \frac{\log(1 + U) - \log(1 + L)}{2 \times 1.96}$$
+
+::: {.note}
+
+$L$ and $U$: the lowest and highest plausible effects, read as a 95% prior range.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+L <- 0.00; U <- 0.04
+m <- (log1p(L) + log1p(U)) / 2
+s <- (log1p(U) - log1p(L)) / (2 * 1.96)
+prior(normal(m, s), class = b)   # brms
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#elReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @spiegelhalter2004bayesian on eliciting priors from clinical and epidemiological experts; @greenland2006bayesian on priors expressed as plausible ranges of relative risks; @greenland2007bayesian on informative priors in regression.
+
+:::
+
+## 20.3 How much does the prior matter? {#s3}
+
+The same heat model from Lesson 19 is fitted under four priors, for increasing amounts of data. With little data, the priors give different answers. As data accumulate, the posteriors converge, unless the prior is so strong that it effectively ignores them. Reporting results under several priors is a **sensitivity analysis**.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel"><svg id="snPlot" viewBox="0 0 520 300" role="img" aria-label="Posterior estimates under four priors by amount of data"></svg><div class="legend" id="snLeg"></div></div>
+<div class="cpanel"><div class="ctrl"><label for="snN">Highlight: summer days of data</label><input type="range" id="snN" min="0" max="6" value="2"><output id="snNO"></output></div><div class="tw"><table data-quarto-disable-processing="true" class="t" id="snTab"></table></div><div class="now" id="snNow"></div></div>
+</div>
+```
+
+::: {.callout-warning title="Common pitfall"}
+
+Choosing the prior after seeing which one gives the preferred answer. Like choosing a spline's flexibility by its result (Lesson 11), this invalidates the analysis. Specify the prior in advance, justify it, and report sensitivity to reasonable alternatives.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gelman2013bayesian on sensitivity analysis; @spiegelhalter2004bayesian on skeptical and enthusiastic priors as a community of opinions; @greenland2006bayesian on presenting results under several priors.
+
+:::
+
+## 20.4 Priors as penalties: shrinking and smoothing {#s4}
+
+The posterior mode under a normal prior is the same as a **penalized** maximum likelihood estimate: the prior adds a penalty for coefficients far from its mean. This is the bridge between Bayesian priors and the penalized splines of Lesson 11. Here it is applied to the unconstrained distributed lag model of Lesson 16. An independent prior shrinks each lag coefficient toward zero; a **random-walk** prior shrinks neighboring lags toward each other, smoothing the curve.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Prior type"><button type="button" id="pzI" aria-pressed="false">Independent normal (shrink to 0)</button><button type="button" id="pzR" aria-pressed="true">Random walk (shrink toward smooth)</button></div>
+  <div class="ctrl"><label for="pzL">Prior precision, log₁₀ λ</label><input type="range" id="pzL" min="-2" max="7" step="0.25" value="4"><output id="pzLO"></output></div>
+  <svg id="pzPlot" viewBox="0 0 520 260" role="img" aria-label="Lag coefficients under the prior"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="pzStats"></div><div class="now" id="pzNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\text{independent: } \beta_\ell \sim \mathrm{Normal}(0, 1/\lambda)$$
+$$\text{random walk: } \beta_\ell - \beta_{\ell-1} \sim \mathrm{Normal}(0, 1/\lambda)$$
+$$\log p(\beta \mid y) = \ell(\beta) - \tfrac{\lambda}{2}\,\beta^\top P \beta + \text{const}$$
+
+::: {.note}
+
+$P = I$ for the independent prior; $P = D^\top D$, with $D$ the first-difference matrix, for the random walk.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+b[1] ~ normal(0, 0.1)
+b[l] ~ normal(b[l - 1], sigma_rw)    # l = 2..L
+# mgcv: the same penalty, chosen by REML
+mgcv::gam(visits ~ s(lag_matrix, by = temp_matrix,
+                     bs = "ps"), ...)
+```
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+Here λ is fixed by hand. In a hierarchical model it becomes a parameter with its own prior, and the data decide how much to shrink or smooth, just as τ was estimated in Lesson 18. Lesson 24 makes this the central idea.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gelman2008weakly propose weakly informative default priors that act as gentle penalties; @eilers1996flexible on difference penalties, the random-walk prior in frequentist form; @wood2017generalized on the link between penalties and priors.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Judge a prior by what it implies about data: simulate from it.
+- "Vague" priors are not neutral; on the scale of the data they can be absurd, and they can distort comparisons between models.
+- Plausible ranges from subject knowledge translate directly into normal priors on log relative risks.
+- The prior's influence fades as data accumulate; report sensitivity to reasonable alternatives.
+- A normal prior acts as a penalty. Independent priors shrink toward zero; random-walk priors smooth.
+
+```{=html}
+<div class="done" data-lesson="lesson-20"><button type="button"></button><span></span></div>
+<script src="assets/lesson-20.js"></script>
+```

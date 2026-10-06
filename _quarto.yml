@@ -1,0 +1,107 @@
+project:
+  type: website
+  output-dir: _site
+  execute-dir: project
+  resources:
+    - assets/
+    - data/
+    - course-plan.html
+  pre-render: R/check-project.R
+  render:
+    - "*.qmd"
+
+website:
+  title: "Statistics for epidemiology"
+  description: "An interactive course from probability to Bayesian hierarchical models, for MSc students in epidemiology and public health."
+  # site-url: https://YOUR-USER.github.io/stats-epi-course/
+  # repo-url: https://github.com/YOUR-USER/stats-epi-course
+  search: true
+  page-navigation: true
+  reader-mode: false
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: glossary.qmd
+        text: Glossary
+      - href: course-plan.html
+        text: Course plan
+  sidebar:
+    style: docked
+    search: false
+    contents:
+      - section: "Part I · Foundations"
+        contents:
+          - lesson-00.qmd
+          - lesson-01.qmd
+          - lesson-02.qmd
+          - lesson-03.qmd
+          - lesson-04.qmd
+          - lesson-05.qmd
+          - lesson-06.qmd
+      - section: "Part II · Frequentist regression"
+        contents:
+          - lesson-07.qmd
+          - lesson-08.qmd
+          - lesson-09.qmd
+          - lesson-10.qmd
+          - lesson-11.qmd
+      - section: "Part III · Causal inference, measurement and burden"
+        contents:
+          - lesson-12.qmd
+          - lesson-13.qmd
+          - lesson-14.qmd
+      - section: "Part IV · Time, space and clustering"
+        contents:
+          - lesson-15.qmd
+          - lesson-16.qmd
+          - lesson-17.qmd
+          - lesson-18.qmd
+      - section: "Part V · Bayesian modeling"
+        contents:
+          - lesson-19.qmd
+          - lesson-20.qmd
+          - lesson-21.qmd
+          - lesson-22.qmd
+  page-footer:
+    left: "All data are simulated. Course text CC BY 4.0, code MIT."
+    right: "Built with [Quarto](https://quarto.org)"
+
+bibliography: references.bib
+link-citations: true
+citation-location: document
+reference-section-title: "References"
+
+format:
+  html:
+    theme:
+      light: [cosmo, assets/theme-light.scss]
+      dark: [darkly, assets/theme-dark.scss]
+    css: assets/course.css
+    grid:
+      sidebar-width: 260px
+      body-width: 1100px
+      margin-width: 200px
+      gutter-width: 1.5rem
+    toc: true
+    toc-depth: 2
+    toc-title: "In this lesson"
+    code-copy: true
+    code-overflow: wrap
+    highlight-style: a11y
+    html-math-method: mathjax
+    smooth-scroll: true
+    anchor-sections: true
+    include-after-body: assets/include-after.html
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false
+
+knitr:
+  opts_chunk:
+    comment: "#>"
+    fig.width: 7
+    fig.height: 4

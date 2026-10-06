@@ -1,0 +1,328 @@
+---
+title: "Lesson 7 · Linear regression"
+subtitle: "Part II · Frequentist regression"
+description: "Least squares, interpreting coefficients, multiple regression, residuals and assumptions, and prediction."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 2.5 hours]{} [Before this: Part I]{} [Threads: likelihood]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- fit a straight line by least squares and explain what "least squares" minimizes;
+- interpret an intercept and a slope, and a coefficient adjusted for other variables;
+- check the assumptions of linear regression from residual plots;
+- distinguish a confidence interval for the mean from a prediction interval for a new observation.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Land-use regression models, which estimate the air pollution each child in Example B is exposed to, are linear regressions. So are many analyses of continuous health outcomes. And every model in the rest of the course, from logistic regression to Bayesian hierarchical models, extends the same idea: an equation for the mean, plus a statement about how observations scatter around it.
+
+:::
+
+## 7.1 A line through the data: least squares {#s1}
+
+Children living with more green space around their home tend to have lower NO₂ exposure. A straight line describes this with two numbers: an **intercept** (the expected NO₂ with no green space) and a **slope** (the change in NO₂ per unit of green space). Each child's vertical distance from the line is a **residual**. Least squares picks the line that makes the sum of squared residuals as small as possible. Try to beat it by hand.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="a0">Intercept (NO₂ at no green space)</label><input type="range" id="a0" min="10" max="70" step="0.5" value="30"><output id="a0O"></output></div>
+  <div class="ctrl"><label for="b1">Slope (change per unit green)</label><input type="range" id="b1" min="-70" max="20" step="0.5" value="0"><output id="b1O"></output></div>
+  <div class="btns"><button type="button" id="lsFit">Show the least-squares line</button><button type="button" id="lsNew">New sample of 60 children</button><label class="small"><input type="checkbox" id="lsSq" checked> show squared residuals</label></div>
+  <svg id="ls" viewBox="0 0 520 320" role="img" aria-label="Scatter plot with a line and residuals"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="lsStats"></div><div class="now" id="lsNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$Y_i = \beta_0 + \beta_1 x_i + \varepsilon_i, \qquad \varepsilon_i \sim \mathrm{Normal}(0, \sigma^2)$$
+$$(\hat\beta_0, \hat\beta_1) = \arg\min_{\beta_0, \beta_1} \sum_i \big(y_i - \beta_0 - \beta_1 x_i\big)^2$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+no2[i] ~ normal(mu[i], sigma)
+mu[i]  = b0 + b1 * green[i]
+
+fit <- lm(no2_modeled ~ green, data = cohort)
+coef(fit)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#lsReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @gelman2020regression introduce regression through simulation and graphs; @kirkwood2003essential cover linear regression for medical data; @fox2016applied give a fuller treatment of least squares.
+
+:::
+
+## 7.2 Interpreting coefficients and adjusting for other variables {#s2}
+
+With several predictors, each coefficient is the expected difference in the outcome per unit of that predictor, **holding the others fixed**. Adding a predictor can change the coefficients of the others: here, families in greener areas also tend to have higher socio-economic position, and the district's traffic matters too. Add predictors and watch the green-space coefficient.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <p class="small">Outcome: modeled NO₂ (µg/m³), all 5,000 children. Green space is always in the model.</p>
+  <label class="small"><input type="checkbox" id="mSes"> socio-economic position (SES score)</label><br>
+  <label class="small"><input type="checkbox" id="mTraf"> district traffic (0–1)</label><br>
+  <label class="small"><input type="checkbox" id="mBoy"> sex</label>
+  <div class="tw"><table data-quarto-disable-processing="true" class="t" id="mTab"></table></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="mStats"></div><div class="now" id="mNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$E[Y_i \mid x_i] = \beta_0 + \beta_1\,\mathrm{green}_i + \beta_2\,\mathrm{SES}_i + \beta_3\,\mathrm{traffic}_{j[i]}$$
+
+::: {.note}
+
+$\beta_1$ is the difference in mean NO₂ per unit of green space among children with the same SES and district traffic.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+fit <- lm(no2_modeled ~ green + ses + traffic,
+          data = cohort |> left_join(districts,
+                                     by = "district_id"))
+broom::tidy(fit, conf.int = TRUE)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#mReport}
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Interpreting every coefficient in a multivariable model as an effect estimate (the "Table 2 fallacy"). The model may be well suited to estimating one exposure's effect, while the coefficients of the adjustment variables have quite different, often uninterpretable, meanings.
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): simple and multiple linear regression"}
+
+```{r}
+cohort_d <- cohort |> left_join(districts |> select(district_id, traffic), by = "district_id")
+
+fit1 <- lm(no2_modeled ~ green, data = cohort_d)
+fit2 <- lm(no2_modeled ~ green + ses + traffic, data = cohort_d)
+
+bind_rows(broom::tidy(fit1, conf.int = TRUE) |> mutate(model = "green only"),
+          broom::tidy(fit2, conf.int = TRUE) |> mutate(model = "adjusted")) |>
+  filter(term == "green") |>
+  select(model, estimate, conf.low, conf.high)
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @gelman2020regression on interpreting coefficients; @westreich2013table explain the Table 2 fallacy; @harrell2015regression on building multivariable models.
+
+:::
+
+## 7.3 Residuals and assumptions {#s3}
+
+Linear regression assumes the mean is a straight-line function of the predictors, observations are independent, the scatter around the line has the same variance everywhere (**homoskedasticity**), and, for small-sample inference, that the errors are normal. Residual plots check these. Pick a model and look for curves, funnels or long tails.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="rM">Model</label><select id="rM">
+    <option value="good">NO₂ ~ green + SES + traffic (children)</option>
+    <option value="curve">daily city visits ~ temperature, straight line</option>
+    <option value="funnel">daily visits ~ population, all district–age groups</option></select></div>
+  <svg id="rPlot" viewBox="0 0 520 260" role="img" aria-label="Residuals against fitted values"></svg>
+  <svg id="rHist" viewBox="0 0 520 160" role="img" aria-label="Histogram of residuals"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="rStats"></div><div class="now" id="rNow"></div></div>
+</div>
+```
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): residual plots"}
+
+```{r}
+fit2 |>
+  broom::augment() |>
+  ggplot(aes(.fitted, .resid)) +
+  geom_point(alpha = 0.15) +
+  geom_hline(yintercept = 0, colour = "firebrick") +
+  geom_smooth(se = FALSE) +
+  labs(x = "Fitted NO₂", y = "Residual")
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @fox2016applied on regression diagnostics; @harrell2015regression on checking linearity and variance assumptions; @gelman2020regression on why normality of residuals is usually the least important assumption.
+
+:::
+
+## 7.4 Predicting the mean and predicting a child {#s4}
+
+A fitted line answers two different questions. What is the **average** NO₂ for children with a given amount of green space? The confidence interval for the mean answers that, and it narrows as data accumulate. What NO₂ will **one particular child** have? The prediction interval adds the scatter of individuals around the mean, and it never gets narrower than that scatter.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pX">Green space</label><input type="range" id="pX" min="0" max="1" step="0.01" value="0.3"><output id="pXO"></output></div>
+  <div class="ctrl"><label for="pN">Children used to fit the line</label><input type="range" id="pN" min="20" max="5000" step="10" value="200"><output id="pNO"></output></div>
+  <svg id="pPlot" viewBox="0 0 520 300" role="img" aria-label="Confidence and prediction bands"></svg>
+  <div class="legend"><span><i style="background:var(--p1);opacity:.45"></i>95% confidence band for the mean</span><span><i style="background:var(--p2);opacity:.25"></i>95% prediction band for a child</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="pStats"></div><div class="now" id="pNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\text{mean: } \hat y_0 \pm t\,\sqrt{\widehat{\mathrm{Var}}(\hat y_0)}$$
+$$\text{new child: } \hat y_0 \pm t\,\sqrt{\hat\sigma^2 + \widehat{\mathrm{Var}}(\hat y_0)}$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+new <- tibble(green = 0.3)
+predict(fit1, new, interval = "confidence")
+predict(fit1, new, interval = "prediction")
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#pReport}
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+In Bayesian regression, both questions are answered from the same posterior draws: computing the line for each draw gives the uncertainty in the mean, and simulating a child from each draw gives the posterior predictive distribution. Lesson 22 does this for Poisson and logistic models.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gelman2020regression on predictive uncertainty; @altman1991practical and @kirkwood2003essential on confidence versus prediction intervals.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Least squares chooses the line that minimizes the sum of squared residuals; with normal errors this is also maximum likelihood.
+- A slope is the expected difference in outcome per unit of the predictor. In a multivariable model, it is that difference holding the other predictors fixed.
+- Adding a predictor can change other coefficients a lot. Only some coefficients in a model are meant as effect estimates.
+- Residual plots reveal curvature, non-constant variance and outliers. Counts often violate linear-regression assumptions.
+- A confidence interval describes the mean; a prediction interval describes a new individual and is always wider.
+
+```{=html}
+<div class="done" data-lesson="lesson-07"><button type="button"></button><span></span></div>
+<script src="assets/lesson-07.js"></script>
+```

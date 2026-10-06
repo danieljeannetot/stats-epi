@@ -1,0 +1,339 @@
+---
+title: "Lesson 22 · Bayesian regression and GLMs"
+subtitle: "Part V · Bayesian modeling"
+description: "Bayesian logistic regression, priors for regression coefficients, answering questions with posterior draws, posterior predictive checks, and reporting a Bayesian analysis."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lessons 8, 12 and 19–21]{} [Threads: likelihood · uncertainty · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- fit a Bayesian logistic regression and compare it with the frequentist fit;
+- choose weakly informative priors for regression coefficients on the odds ratio scale;
+- answer substantive questions, including causal contrasts, by computing on posterior draws;
+- check a model's fit with posterior predictive checks, and recognize overdispersion;
+- report a Bayesian analysis completely.
+
+:::
+
+::: {.why}
+
+**Why it matters.** This is where Lessons 8 and 19–21 meet. The models are the same GLMs; the Bayesian version adds priors and returns draws. The draws make two things easy that are awkward otherwise: probability statements about effects ("how likely is it that the OR exceeds 1.1?"), and uncertainty for derived quantities such as the cases prevented by an intervention (Lesson 12).
+
+:::
+
+## 22.1 Bayesian logistic regression {#s1}
+
+The NO₂–asthma model of Lesson 8, with priors. Each 10 µg/m³ gets a prior on its log odds ratio; the adjustment variables get weakly informative priors too. With the full cohort, the prior barely matters. With a small sample, it does. Move the sample size and the prior, and compare the posterior with the frequentist estimate.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="bN">Children in the analysis</label><input type="range" id="bN" min="100" max="5000" step="50" value="400"><output id="bNO"></output></div>
+  <div class="ctrl"><label for="bP">Prior for the log OR per 10 µg/m³</label><select id="bP"><option value="10">Normal(0, 10²): vague</option><option value="0.5" selected>Normal(0, 0.5²): weakly informative</option><option value="0.1">Normal(0, 0.1²): skeptical</option></select></div>
+  <svg id="bPlot" viewBox="0 0 520 260" role="img" aria-label="Posterior and likelihood for the odds ratio"></svg>
+  <div class="legend"><span><i style="background:var(--c-prior)"></i>prior</span><span><i style="background:var(--c-lik)"></i>frequentist estimate and 95% CI</span><span><i style="background:var(--c-post)"></i>posterior</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="bStats"></div><div class="now" id="bNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$Y_i \sim \mathrm{Bernoulli}(\pi_i), \qquad \mathrm{logit}\,\pi_i = \alpha + \beta\,\frac{\mathrm{NO}_{2,i}}{10} + \gamma^\top z_i$$
+$$\beta \sim \mathrm{Normal}(0, 0.5^2), \quad \gamma_k \sim \mathrm{Normal}(0, 1), \quad \alpha \sim \mathrm{Normal}(-1.8, 1.5^2)$$
+
+::: {.note}
+
+A Normal(0, 0.5²) prior on the log OR gives 95% prior probability to ORs between 0.38 and 2.7 per 10 µg/m³.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+fit <- brms::brm(
+  asthma ~ I(no2_modeled / 10) + ses + green +
+    parent_smoke + sex,
+  family = bernoulli, data = cohort,
+  prior = c(prior(normal(0, 0.5), class = b,
+                  coef = "Ino2_modeledD10"),
+            prior(normal(0, 1), class = b),
+            prior(normal(-1.8, 1.5),
+                  class = Intercept)))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#bReport}
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): the same posterior by normal approximation, in base R"}
+
+```{r}
+X <- model.matrix(~ I(no2_modeled / 10) + ses + green + parent_smoke + sex, data = cohort)
+y <- cohort$asthma
+prior_sd <- c(1.5, 0.5, rep(1, ncol(X) - 2)); prior_mean <- c(-1.8, rep(0, ncol(X) - 1))
+
+neg_log_post <- function(b) {
+  eta <- X %*% b
+  -sum(y * eta - log1p(exp(eta))) + sum((b - prior_mean)^2 / (2 * prior_sd^2))
+}
+opt <- optim(rep(0, ncol(X)), neg_log_post, method = "BFGS", hessian = TRUE)
+post_sd <- sqrt(diag(solve(opt$hessian)))
+exp(opt$par[2] + c(median = 0, low = -1.96, high = 1.96) * post_sd[2])   # OR per 10 ug/m3
+```
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional, not run when the site builds): the full brms model"}
+
+```{r}
+#| eval: false
+fit <- brms::brm(
+  asthma ~ I(no2_modeled / 10) + ses + green + parent_smoke + sex,
+  family = bernoulli, data = cohort, chains = 4, cores = 4, seed = 22,
+  prior = c(brms::prior(normal(0, 0.5), class = b, coef = "Ino2_modeledD10"),
+            brms::prior(normal(0, 1), class = b),
+            brms::prior(normal(-1.8, 1.5), class = Intercept)))
+summary(fit)
+draws <- posterior::as_draws_df(fit)
+mean(exp(draws$b_Ino2_modeledD10) > 1)
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @gelman2008weakly propose weakly informative priors for logistic regression; @greenland2007bayesian on Bayesian regression in epidemiology; @burkner2017brms describes brms.
+
+:::
+
+## 22.2 Answering questions with posterior draws {#s2}
+
+Once you have posterior draws, every question is a computation on them. What is the probability that the odds ratio exceeds 1? That it exceeds 1.1? And, combining with Lesson 12, how many asthma cases per 1,000 children would a 10 µg/m³ reduction prevent? For that, g-computation is run once for every draw, giving a full posterior for the causal quantity.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="qT">Threshold for "a meaningful effect" (OR per 10 µg/m³)</label><input type="range" id="qT" min="1" max="1.3" step="0.01" value="1.1"><output id="qTO"></output></div>
+  <label class="small"><input type="checkbox" id="qX"> use the true exposure (simulation only) instead of modeled NO₂</label>
+  <svg id="qOr" viewBox="0 0 520 190" role="img" aria-label="Posterior of the odds ratio"></svg>
+  <svg id="qCp" viewBox="0 0 520 190" role="img" aria-label="Posterior of cases prevented"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="qStats"></div><div class="now" id="qNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$P(OR > c \mid y) \approx \frac{1}{S}\sum_s 1\{e^{10\beta^{(s)}} > c\}$$
+$$\Delta^{(s)} = \frac{1}{n}\sum_i\Big[\pi_i^{(s)}(x_i) - \pi_i^{(s)}(x_i - 10)\Big]$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+draws <- posterior::as_draws_df(fit)
+mean(exp(draws$b_Ino2_modeledD10) > 1.1)
+# g-computation on every draw
+p_obs <- brms::posterior_epred(fit)
+p_int <- brms::posterior_epred(fit,
+  newdata = mutate(cohort, no2_modeled = no2_modeled - 10))
+cases_prevented <- 1000 * rowMeans(p_obs - p_int)
+quantile(cases_prevented, c(.025, .5, .975))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#qReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @gelman2020regression on computing with posterior simulations; @kruschke2015doing on posterior probabilities of meaningful effects; @hernan2020causal on combining outcome models with standardization.
+
+:::
+
+## 22.3 Posterior predictive checks {#s3}
+
+Does the model reproduce the data? A **posterior predictive check** simulates new datasets from the fitted model, one per posterior draw, and compares them with the real data. Here the data are daily visits by Old Town residents aged 65+. A Poisson model with only an intercept, a Poisson model with season and day of week, and a negative binomial model are checked against the observed distribution and its variance.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pcM">Model</label><select id="pcM"><option value="p0">Poisson, intercept only</option><option value="p1" selected>Poisson + season + day of week</option><option value="nb">negative binomial + season + day of week</option></select></div>
+  <svg id="pcHist" viewBox="0 0 520 240" role="img" aria-label="Observed and replicated distributions of daily counts"></svg>
+  <div class="legend"><span><i style="background:var(--c-ink)"></i>observed</span><span><i style="background:var(--c-post)"></i>20 replicated datasets</span></div>
+</div>
+<div class="cpanel"><svg id="pcStat" viewBox="0 0 520 190" role="img" aria-label="Variance-to-mean ratio in replicated datasets"></svg><div class="statgrid" id="pcStats"></div><div class="now" id="pcNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$y^{\text{rep}(s)} \sim p(y \mid \theta^{(s)}), \qquad p_B = P\big(T(y^{\text{rep}}) \ge T(y) \mid y\big)$$
+
+::: {.note}
+
+$T$ = a test statistic, here the variance-to-mean ratio. $p_B$ near 0 or 1 signals misfit.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+brms::pp_check(fit, ndraws = 20)
+brms::pp_check(fit, type = "stat",
+               stat = \(y) var(y) / mean(y))
+# switch the likelihood:
+brms::brm(..., family = negbinomial)
+```
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+Posterior predictive checks ask whether the model could have produced the data. They don't choose between models. For that, Lesson 23 compares models by their out-of-sample predictive accuracy (LOO) and by Bayes factors, and shows when those two disagree.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gabry2019visualization on posterior predictive checks; @gelman2013bayesian on model checking with replicated data; @verhoef2007quasi on choosing between quasi-Poisson and negative binomial models.
+
+:::
+
+## 22.4 Reporting a Bayesian analysis {#s4}
+
+A Bayesian result is only interpretable alongside the choices that produced it. Reporting guidelines ask for the following, which together let a reader judge and reproduce the analysis:
+
+- the model, written out, and the reason for each prior, with a prior predictive check where helpful;
+- the software, sampler settings (chains, iterations, warm-up) and convergence diagnostics (R-hat, effective sample sizes, any divergences);
+- posterior summaries: medians and credible intervals, and posterior probabilities for the questions of interest;
+- posterior predictive checks of fit;
+- a sensitivity analysis under alternative reasonable priors;
+- the data and code.
+
+::::: {.triad}
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#rReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @kruschke2021bayesian set out the Bayesian analysis reporting guidelines; @gelman2020bayesian describe the full Bayesian workflow; @spiegelhalter2004bayesian on reporting Bayesian analyses in health research.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Bayesian GLMs use the same model equations as Lesson 8, plus priors on the coefficients.
+- Priors on log odds ratios are easiest to set by thinking about plausible odds ratios; weakly informative priors rule out absurd values.
+- With much data the posterior matches the frequentist fit; with little data the prior matters, and its choice must be justified.
+- Posterior draws answer any question, including probabilities of meaningful effects and causal contrasts by g-computation.
+- Posterior predictive checks reveal misfit such as overdispersion; switch the likelihood when they fail.
+
+```{=html}
+<div class="done" data-lesson="lesson-22"><button type="button"></button><span></span></div>
+<script src="assets/lesson-22.js"></script>
+```

@@ -1,0 +1,316 @@
+---
+title: "Lesson 17 · Spatial data and spatial autocorrelation"
+subtitle: "Part IV · Time, space and clustering"
+description: "Standardized morbidity ratios and the small-numbers problem, funnel plots, spatial autocorrelation and Moran's I, ecological bias, and smoothing area estimates."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lessons 1, 8 and 10]{} [Threads: shrinkage · bias]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- compute standardized morbidity ratios by indirect standardization, and map them;
+- explain why the most extreme values on a map are often just the smallest areas, and use a funnel plot;
+- measure spatial autocorrelation with Moran's I and test it by permutation;
+- explain the ecological fallacy, and why area-level associations can differ from individual-level ones;
+- describe how smoothing toward an overall or local mean makes small-area maps more reliable.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Maps of disease rates drive decisions about where to act. Yet a map of raw rates for small areas is mostly a map of noise, and the districts that look worst are often simply the ones with the fewest people. Neighboring districts also resemble each other, which breaks the independence assumption of standard models. This lesson shows the problems; Lesson 25 brings the Bayesian solution.
+
+:::
+
+## 17.1 Standardized morbidity ratios and the small-numbers problem {#s1}
+
+An **SMR** compares the number of visits a district actually had with the number **expected** if each age group had the city-wide rate (indirect standardization, Lesson 1). An SMR of 1.2 means 20% more visits than expected for its age structure. Shorten the period, and the counts, and watch how noisy the map becomes. The **funnel plot** shows why: the range of SMRs expected by chance alone is much wider for small expected counts.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="mP">Period</label><select id="mP"><option value="all">2020–2024 (five years)</option><option value="y">2023</option><option value="m">July 2023</option><option value="w" selected>1–7 July 2023</option><option value="d">3 July 2023 (one day)</option></select></div>
+  <div class="ctrl"><label for="mA">Age group</label><select id="mA"><option value="all">all ages</option><option value="0" selected>0–14</option><option value="2">65+</option></select></div>
+  <svg id="mMap" viewBox="0 0 520 340" role="img" aria-label="Map of SMRs"></svg>
+</div>
+<div class="cpanel"><svg id="mFun" viewBox="0 0 520 280" role="img" aria-label="Funnel plot of SMRs"></svg><div class="now" id="mNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$E_j = \sum_k r_k\, PT_{jk}, \qquad SMR_j = \frac{O_j}{E_j}$$
+$$O_j \sim \mathrm{Poisson}(E_j\,\theta_j) \ \Rightarrow\ \mathrm{SE}(SMR_j) \approx \frac{\sqrt{O_j}}{E_j}$$
+
+::: {.note}
+
+$r_k$ = city-wide rate in age group $k$; $\theta_j$ = the district's true relative risk.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+rates <- visits |> group_by(age_group) |>
+  summarise(r = sum(visits) / sum(population))
+visits |> left_join(rates, by = "age_group") |>
+  group_by(district) |>
+  summarise(O = sum(visits),
+            E = sum(r * population),
+            smr = O / E)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#mReport}
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Ranking areas by their raw SMRs, or labeling the most extreme as "hot spots", without considering their expected counts. On a funnel plot, a small district outside the 95% limits may still be within the range expected by chance once you allow for 12 comparisons.
+
+:::
+
+::: {.further}
+
+**Further reading:** @spiegelhalter2005funnel introduced funnel plots for comparing institutions; @elliott2004spatial review spatial epidemiology; @waller2004applied on SMRs and indirect standardization for small areas.
+
+:::
+
+## 17.2 Spatial autocorrelation and Moran's I {#s2}
+
+Neighboring districts share air, housing and populations, so their values tend to be similar. **Moran's I** measures this: it is positive when neighbors resemble each other, near zero when they don't. Its significance is tested by **permutation**: shuffle the values among districts many times, and see how often chance alone gives an I as large as the observed one.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="iV">Variable</label><select id="iV"><option value="dep">deprivation</option><option value="traffic">traffic</option><option value="smr">SMR, all ages, five years</option><option value="res">SMR after adjusting for deprivation</option><option value="noise">random noise</option></select></div>
+  <svg id="iMap" viewBox="0 0 520 340" role="img" aria-label="Map of the selected variable"></svg>
+</div>
+<div class="cpanel"><svg id="iPerm" viewBox="0 0 520 220" role="img" aria-label="Permutation distribution of Moran's I"></svg><div class="statgrid" id="iStats"></div><div class="now" id="iNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$I = \frac{n}{\sum_{ij} w_{ij}}\;\frac{\sum_i\sum_j w_{ij}(x_i - \bar x)(x_j - \bar x)}{\sum_i (x_i - \bar x)^2}$$
+
+::: {.note}
+
+$w_{ij} = 1$ if districts $i$ and $j$ are neighbors (here: share a border or a corner), row-standardized. Under no autocorrelation, $E[I] = -1/(n-1)$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+nb <- lapply(strsplit(districts$neighbors, " "),
+             as.integer)
+class(nb) <- "nb"
+lw <- spdep::nb2listw(nb, style = "W")
+spdep::moran.mc(districts$deprivation, lw,
+                nsim = 999)
+```
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): SMRs and Moran's I with spdep"}
+
+```{r}
+rates <- visits |> group_by(age_group) |> summarise(r = sum(visits) / sum(population), .groups = "drop")
+smr <- visits |>
+  left_join(rates, by = "age_group") |>
+  group_by(district_id) |>
+  summarise(O = sum(visits), E = sum(r * population), .groups = "drop") |>
+  mutate(smr = O / E) |>
+  arrange(district_id)
+
+nb <- lapply(strsplit(districts$neighbors, " "), as.integer)
+class(nb) <- "nb"
+lw <- spdep::nb2listw(nb, style = "W")
+spdep::moran.mc(smr$smr, lw, nsim = 999)
+spdep::moran.mc(districts$deprivation, lw, nsim = 999)
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @moran1950notes introduced the statistic; @bivand2013applied cover neighbor structures and Moran's I in R; @waller2004applied on testing spatial autocorrelation in health data.
+
+:::
+
+## 17.3 Ecological associations and the ecological fallacy {#s3}
+
+With district-level data only, the association between NO₂ and asthma has to be estimated from 12 points: district asthma risk against district mean NO₂. This **ecological** association need not equal the individual-level one. District-level confounding, by deprivation for example, can distort it, and with few areas it is very imprecise. Concluding from an area-level association to individuals is the **ecological fallacy**.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <label class="small"><input type="checkbox" id="eAdj"> adjust the ecological model for district mean SES</label>
+  <svg id="ePlot" viewBox="0 0 520 300" role="img" aria-label="District asthma risk against mean NO2"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="eStats"></div><div class="now" id="eNow"></div></div>
+</div>
+```
+
+::: {.further}
+
+**Further reading:** @robinson1950ecological first described the ecological fallacy; @greenland1989ecological explain ecological bias, confounding and effect modification; @elliott2004spatial on when ecological designs are informative.
+
+:::
+
+## 17.4 Smoothing small-area estimates {#s4}
+
+With small counts, each district's SMR is noisy. An **empirical Bayes** estimate pulls each SMR toward the city-wide value by an amount that depends on its own precision: districts with few expected visits move a lot, large ones hardly at all. Here the five-year SMRs serve as the "truth" against which one week's raw and smoothed SMRs are judged.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="sP">Short period</label><select id="sP"><option value="m" selected>July 2023</option><option value="w">1–7 July 2023</option><option value="d">3 July 2023</option></select></div>
+  <div class="ctrl"><label for="sA">Age group</label><select id="sA"><option value="0" selected>0–14</option><option value="2">65+</option><option value="all">all ages</option></select></div>
+  <svg id="sPlot" viewBox="0 0 520 320" role="img" aria-label="Raw and smoothed SMRs against the five-year value"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="sStats"></div><div class="now" id="sNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\hat\theta_j^{\text{EB}} = w_j\, SMR_j + (1 - w_j)\,\hat\mu, \qquad w_j = \frac{\hat\sigma^2_\theta}{\hat\sigma^2_\theta + \hat\mu / E_j}$$
+
+::: {.note}
+
+$\hat\mu$ and $\hat\sigma^2_\theta$: mean and between-district variance of the true relative risks, estimated by the method of moments (Marshall, 1991).
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+mu   <- sum(O) / sum(E)
+s2   <- sum(E * (smr - mu)^2) / sum(E) -
+        mu / mean(E)
+s2   <- max(s2, 0)
+w    <- s2 / (s2 + mu / E)
+smr_eb <- w * smr + (1 - w) * mu
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#sReport}
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+Empirical Bayes shrinks every district toward one city-wide value. A full Bayesian disease-mapping model (BYM2, Lesson 25) shrinks each district partly toward the city mean and partly toward its **neighbors**, with the balance between the two estimated from the data, and with uncertainty for every district.
+
+:::
+
+::: {.further}
+
+**Further reading:** @clayton1987empirical introduced empirical Bayes estimates of relative risk for disease mapping; @marshall1991mapping gave the method-of-moments estimator used here; @efron1977stein explain why shrinkage improves many estimates at once.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- SMRs compare observed with expected counts, allowing for age structure. Their precision depends on the expected count.
+- Maps of raw SMRs for small areas or short periods mostly show noise; funnel plots put each area's value in context.
+- Neighboring areas tend to be similar. Moran's I measures this, and permutation tests it.
+- Ecological associations can differ from individual-level ones because of area-level confounding and aggregation.
+- Shrinking noisy area estimates toward a common value, or toward neighbors, gives more accurate maps.
+
+```{=html}
+<div class="done" data-lesson="lesson-17"><button type="button"></button><span></span></div>
+<script src="assets/lesson-17.js"></script>
+```

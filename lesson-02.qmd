@@ -1,0 +1,342 @@
+---
+title: "Lesson 2 · Probability and conditional probability"
+subtitle: "Part I · Foundations"
+description: "The rules of probability, conditional probability and independence, Bayes' theorem, and diagnostic tests."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 2 hours]{} [Before this: Lesson 1]{} [Threads: frequentist ↔ Bayesian (first appearance of Bayes' rule)]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- compute joint, marginal and conditional probabilities from a 2×2 table;
+- decide whether two events are independent, and explain what that means for a study;
+- use Bayes' theorem to turn sensitivity, specificity and prevalence into predictive values;
+- explain why a good test can still produce mostly false positives;
+- update a probability with a likelihood ratio, the simplest form of Bayesian reasoning.
+
+:::
+
+::: {.why}
+
+**Why it matters.** "Children whose parents smoke are more likely to develop asthma" is a statement about conditional probability. So is "a positive wheeze questionnaire means a child probably has asthma", and that one is often wrong. Reversing a conditional probability is one of the most common reasoning errors in medicine, and the same error reappears later as the misreading of p-values.
+
+:::
+
+## 2.1 Probability and its rules {#s1}
+
+A probability is a number between 0 and 1. In a cohort, the probability of an event is estimated by the proportion of children who experience it. Two events can be combined: both happen (the **intersection**, written A ∩ B), or at least one happens (the **union**, A ∪ B). Choose two events in the asthma cohort. The mosaic plot divides the children into the four combinations, with each area proportional to the number of children.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pairSel">Event B</label><select id="pairSel">
+    <option value="smoke">a parent smokes at home</option>
+    <option value="no2">modeled NO₂ at least 30 µg/m³</option>
+    <option value="boy">the child is a boy</option>
+    <option value="wheeze">the wheeze questionnaire is positive</option></select></div>
+  <p class="small">Event A is always "the child develops asthma by age 8".</p>
+  <svg id="mosaic" viewBox="0 0 520 330" role="img" aria-label="Mosaic plot of events A and B"></svg>
+  <div class="legend"><span><i style="background:var(--p2)"></i>asthma (A)</span><span><i style="background:var(--c-rule)"></i>no asthma</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="pStats"></div><div class="now" id="pNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$P(A \cup B) = P(A) + P(B) - P(A \cap B)$$
+$$P(A \mid B) = \frac{P(A \cap B)}{P(B)}$$
+$$\text{independent} \iff P(A \cap B) = P(A)\,P(B)$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+cohort |>
+  summarise(
+    p_A       = mean(asthma),
+    p_B       = mean(parent_smoke),
+    p_AandB   = mean(asthma & parent_smoke),
+    p_AorB    = mean(asthma | parent_smoke),
+    p_A_givB  = mean(asthma[parent_smoke]),
+    p_A_givnB = mean(asthma[!parent_smoke]))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#pReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @blitzstein2019introduction develop probability from first principles; @kirkwood2003essential introduce it for medical statistics; @clayton1993statistical connect probability to epidemiological models.
+
+:::
+
+## 2.2 Conditional probability and independence {#s2}
+
+Conditioning restricts attention to the children for whom one event is true. In the mosaic plot, P(A | B) is the height of the orange part in the left column, and P(A | not B) in the right column. If the two heights are equal, knowing B tells you nothing about A: the events are **independent**. If they differ, the events are associated. Association between an exposure and an outcome is exactly what epidemiology measures; the risk ratio from Lesson 1 is P(A | B) / P(A | not B).
+
+The order of conditioning matters. P(asthma | positive questionnaire) and P(positive questionnaire | asthma) are different numbers, and the next section shows how far apart they can be. Switch event B to the questionnaire and compare them.
+
+```{=html}
+<div class="cw cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="condTable"></table></div><div class="now" id="condNow"></div></div>
+```
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): joint and conditional probabilities"}
+
+```{r}
+cohort |>
+  count(parent_smoke, asthma) |>
+  mutate(p_joint = n / sum(n)) |>
+  group_by(parent_smoke) |>
+  mutate(p_asthma_given_smoke = n / sum(n)) |>
+  ungroup()
+
+# independence would make these two equal
+with(cohort, c(p_A = mean(asthma),
+               p_A_given_B = mean(asthma[parent_smoke])))
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @blitzstein2019introduction on conditioning and independence; @gigerenzer1995improve show that natural frequencies make conditional reasoning much easier; @lash2021modern on measures of association as contrasts of conditional risks.
+
+:::
+
+## 2.3 Bayes' theorem and diagnostic tests {#s3}
+
+The wheeze questionnaire is used to screen for asthma. Its **sensitivity** is the probability of a positive result in a child with asthma; its **specificity** the probability of a negative result in a child without. Parents and doctors want the reverse: given a positive result, how likely is asthma? That is the **positive predictive value (PPV)**, and Bayes' theorem gives it. The icon array shows 1,000 children; change the prevalence, sensitivity and specificity.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="dPrev">Prevalence</label><input type="range" id="dPrev" min="1" max="50" value="13"><output id="dPrevO"></output></div>
+  <div class="ctrl"><label for="dSe">Sensitivity</label><input type="range" id="dSe" min="50" max="99" value="85"><output id="dSeO"></output></div>
+  <div class="ctrl"><label for="dSp">Specificity</label><input type="range" id="dSp" min="50" max="99" value="90"><output id="dSpO"></output></div>
+  <div class="btns"><button type="button" id="dCohort">Use the values observed in the cohort</button><button type="button" id="dRare">A rare condition (1%)</button></div>
+  <svg id="icons" viewBox="0 0 520 300" role="img" aria-label="Icon array of 1,000 children"></svg>
+  <div class="legend"><span><i style="background:var(--p2)"></i>true positive</span><span><i style="background:var(--p2);opacity:.3"></i>false negative</span><span><i style="background:var(--p1)"></i>false positive</span><span><i style="background:var(--c-rule)"></i>true negative</span></div>
+</div>
+<div class="cpanel">
+  <svg id="tree" viewBox="0 0 520 250" role="img" aria-label="Natural frequency tree"></svg>
+  <div class="statgrid" id="dStats"></div>
+  <div class="now" id="dNow"></div>
+</div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$Se = P(T^+ \mid D^+) \qquad Sp = P(T^- \mid D^-)$$
+$$PPV = P(D^+ \mid T^+) = \frac{Se \cdot p}{Se \cdot p + (1 - Sp)(1 - p)}$$
+
+::: {.note}
+
+$p$ = prevalence, $D^+$ = has asthma, $T^+$ = positive test.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+cohort |>
+  summarise(
+    sens = mean(wheeze_q[asthma == 1]),
+    spec = mean(!wheeze_q[asthma == 0]),
+    ppv  = mean(asthma[wheeze_q]),
+    npv  = mean(1 - asthma[!wheeze_q]))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#dReport}
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Reading sensitivity as the probability that a positive child has the condition. With a prevalence of 1%, a test with 90% sensitivity and 90% specificity gives a PPV of only about 8%: more than nine in ten positives are false. Try the "rare condition" button.
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): diagnostic accuracy in the cohort"}
+
+```{r}
+cohort |>
+  count(wheeze_q, asthma) |>
+  pivot_wider(names_from = asthma, values_from = n, names_prefix = "asthma_")
+
+cohort |>
+  summarise(sens = mean(wheeze_q[asthma == 1]),
+            spec = mean(!wheeze_q[asthma == 0]),
+            ppv  = mean(asthma[wheeze_q]),
+            npv  = mean(1 - asthma[!wheeze_q]))
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @altman1994diagnostic1 and @altman1994diagnostic2 are short classics on sensitivity, specificity and predictive values; @gigerenzer1995improve and @hoffrage2000communicating show how natural frequencies, like the tree above, prevent errors.
+
+:::
+
+## 2.4 Likelihood ratios: updating a probability {#s4}
+
+Bayes' theorem has an especially simple form on the odds scale. A **likelihood ratio** says how many times more likely a test result is in children with asthma than without. Multiply the pre-test odds by it, and you get the post-test odds. This is updating: start from what you believed before the test, and let the evidence move you. The same logic, applied to parameters instead of diagnoses, is the core of Bayesian statistics (Part V).
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="lPre">Pre-test probability</label><input type="range" id="lPre" min="1" max="90" value="13"><output id="lPreO"></output></div>
+  <div class="ctrl"><label for="lSe">Sensitivity</label><input type="range" id="lSe" min="50" max="99" value="85"><output id="lSeO"></output></div>
+  <div class="ctrl"><label for="lSp">Specificity</label><input type="range" id="lSp" min="50" max="99" value="90"><output id="lSpO"></output></div>
+  <svg id="lrPlot" viewBox="0 0 520 280" role="img" aria-label="Post-test probability against pre-test probability"></svg>
+  <div class="legend"><span><i style="background:var(--p2)"></i>after a positive result</span><span><i style="background:var(--p1)"></i>after a negative result</span><span><i style="background:var(--c-lik)"></i>no test</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="lStats"></div><div class="now" id="lNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$LR^+ = \frac{Se}{1 - Sp} \qquad LR^- = \frac{1 - Se}{Sp}$$
+$$\text{post-test odds} = \text{pre-test odds} \times LR$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+lr_pos    <- sens / (1 - spec)
+pre_odds  <- p_pre / (1 - p_pre)
+post_odds <- pre_odds * lr_pos
+p_post    <- post_odds / (1 + post_odds)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#lReport}
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+Replace "has asthma" with "the true effect of NO₂ is β" and "test result" with "the data". Bayes' theorem then turns a prior belief about β and the likelihood of the data into a posterior belief: $p(\beta \mid \text{data}) \propto p(\text{data} \mid \beta)\, p(\beta)$. The pre-test probability becomes the prior, the likelihood ratio becomes the likelihood, and the post-test probability becomes the posterior. Lesson 19 builds this up step by step.
+
+:::
+
+::: {.further}
+
+**Further reading:** @deeks2004diagnostic explain likelihood ratios for test results; @bland1998bayesians contrast Bayesian and frequentist reasoning in a page; @held2020applied develop likelihood and Bayesian inference together.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Probabilities of combined events follow simple rules: P(A ∪ B) = P(A) + P(B) − P(A ∩ B).
+- P(A | B) restricts attention to cases where B is true. P(A | B) and P(B | A) are different.
+- Events are independent when conditioning on one doesn't change the probability of the other. An exposure–outcome association is a departure from independence.
+- Bayes' theorem reverses a conditional probability. Predictive values depend strongly on prevalence.
+- On the odds scale, updating is a multiplication by the likelihood ratio, the simplest form of Bayesian reasoning.
+
+```{=html}
+<div class="done" data-lesson="lesson-02"><button type="button"></button><span></span></div>
+<script src="assets/lesson-02.js"></script>
+```

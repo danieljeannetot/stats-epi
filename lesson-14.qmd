@@ -1,0 +1,331 @@
+---
+title: "Lesson 14 · Measuring disease burden"
+subtitle: "Part III · Causal inference, measurement and disease burden"
+description: "Population attributable fractions, attributable cases, the counterfactual exposure, DALYs, and propagating uncertainty into burden estimates."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lessons 1, 12 and 13]{} [Threads: uncertainty · bias · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- compute a population attributable fraction for a binary exposure, and know which formula is valid under confounding;
+- compute the burden of a continuous exposure relative to a stated counterfactual level;
+- combine years of life lost and years lived with disability into DALYs;
+- propagate uncertainty in relative risks into an interval for attributable cases;
+- explain why attributable fractions for different risk factors can add up to more than 100%.
+
+:::
+
+::: {.why}
+
+**Why it matters.** "How many cases of childhood asthma in our city are due to traffic pollution?" is the question policy makers ask, and the answer depends on more than the relative risk. It depends on how many children are exposed, on what level of NO₂ counts as "no excess" (zero? the WHO guideline?), and on the uncertainty in every input. Burden estimates also inherit every bias from Lessons 9, 12 and 13.
+
+:::
+
+## 14.1 Attributable fractions for a binary exposure {#s1}
+
+The **population attributable fraction** (PAF) is the share of cases in a population that would not occur without the exposure. It combines how common the exposure is with how much it raises risk. **Levin's formula** uses the exposure prevalence and the risk ratio; it is valid only with an unconfounded risk ratio. With confounding, **Miettinen's formula**, which uses the proportion of *cases* exposed and an adjusted risk ratio, remains valid.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="lvP">Prevalence of exposure</label><input type="range" id="lvP" min="1" max="90" value="30"><output id="lvPO"></output></div>
+  <div class="ctrl"><label for="lvR">Risk ratio</label><input type="range" id="lvR" min="1" max="4" step="0.05" value="1.5"><output id="lvRO"></output></div>
+  <div class="btns"><button type="button" id="lvCoh">Use the cohort: NO₂ ≥ 30 µg/m³</button></div>
+  <svg id="lvPlot" viewBox="0 0 520 240" role="img" aria-label="PAF by exposure prevalence and risk ratio"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="lvStats"></div><div class="now" id="lvNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$PAF_{\text{Levin}} = \frac{p_e\,(RR - 1)}{1 + p_e\,(RR - 1)}$$
+$$PAF_{\text{Miettinen}} = p_c\,\frac{RR_{\text{adj}} - 1}{RR_{\text{adj}}}$$
+
+::: {.note}
+
+$p_e$ = proportion of the population exposed; $p_c$ = proportion of cases exposed.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+d  <- cohort |> mutate(high = no2_true >= 30)
+pe <- mean(d$high)
+pc <- mean(d$high[d$asthma == 1])
+paf_levin <- pe * (rr - 1) / (1 + pe * (rr - 1))
+paf_miet  <- pc * (rr_adj - 1) / rr_adj
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#lvReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @levin1953occurrence proposed the attributable fraction; @miettinen1974proportion gave the formula valid under confounding; @rockhill1998use review the use and misuse of PAFs; @greenland1988conceptual on what attributable fractions do and don't measure.
+
+:::
+
+## 14.2 Continuous exposures and the counterfactual level {#s2}
+
+NO₂ isn't present or absent: every child is exposed to some level. The burden is computed against a **counterfactual** exposure, often called the theoretical minimum risk exposure level (TMREL). Children above it contribute excess risk; children at or below it contribute none. The choice of counterfactual can matter more than any statistical decision. Move it, and compare zero, the WHO 2021 guideline of 10 µg/m³, and the former guideline of 40.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="cfX">Counterfactual NO₂ (µg/m³)</label><input type="range" id="cfX" min="0" max="45" step="1" value="10"><output id="cfXO"></output></div>
+  <div class="ctrl"><label for="cfB">Exposure–response from</label><select id="cfB"><option value="true">the true effect (simulation: OR 1.15 per 10)</option><option value="naive">the naive estimate with modeled NO₂</option><option value="rc">the regression-calibrated estimate</option></select></div>
+  <svg id="cfPlot" viewBox="0 0 520 260" role="img" aria-label="Distribution of NO2 exposure with the counterfactual level"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="cfStats"></div><div class="now" id="cfNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$PAF = 1 - \frac{E\big[\,P(Y = 1 \mid X = \min(x_i, x^*), Z = z_i)\,\big]}{E\big[\,P(Y = 1 \mid X = x_i, Z = z_i)\,\big]}$$
+$$AN = PAF \times D$$
+
+::: {.note}
+
+$x^*$ = counterfactual exposure; $D$ = total cases. This is g-computation (Lesson 12) with the intervention "cap NO₂ at $x^*$".
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+fit <- glm(asthma ~ no2_true + ses + green,
+           family = binomial, data = cohort)
+r_obs <- mean(predict(fit, type = "response"))
+r_cf  <- mean(predict(fit,
+  mutate(cohort, no2_true = pmin(no2_true, 10)),
+  type = "response"))
+paf <- 1 - r_cf / r_obs
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#cfReport}
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Reporting a burden estimate without stating the counterfactual exposure, or comparing burden estimates that used different ones. A PAF relative to zero NO₂ and a PAF relative to 40 µg/m³ answer different questions, and can differ several-fold.
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): PAF and attributable cases for several counterfactuals"}
+
+```{r}
+fit <- glm(asthma ~ no2_true + ses + green, family = binomial, data = cohort)
+r_obs <- mean(predict(fit, type = "response"))
+paf_at <- function(x_star) {
+  r_cf <- mean(predict(fit, mutate(cohort, no2_true = pmin(no2_true, x_star)), type = "response"))
+  1 - r_cf / r_obs
+}
+tibble(counterfactual = c(0, 10, 20, 40)) |>
+  mutate(paf = map_dbl(counterfactual, paf_at),
+         cases_per_10000 = 10000 * r_obs * paf)
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @achakulwisut2019global estimate the global burden of paediatric asthma attributable to NO₂; @khreis2017exposure meta-analyze traffic pollution and childhood asthma incidence; @who2021global set the current NO₂ guideline; @ezzati2002selected describe the comparative risk assessment framework.
+
+:::
+
+## 14.3 From cases to DALYs {#s3}
+
+Attributable cases count events; **disability-adjusted life years** (DALYs) measure lost healthy life, so that burdens from different diseases can be compared. DALYs add **years of life lost** (YLL) to early death and **years lived with disability** (YLD), weighted by the severity of the condition. For childhood asthma, YLD dominate. The inputs below are illustrative; real analyses take disability weights and durations from sources such as the Global Burden of Disease study.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="dyC">Attributable cases per year (from 14.2)</label><input type="range" id="dyC" min="0" max="400" step="5" value="80"><output id="dyCO"></output></div>
+  <div class="ctrl"><label for="dyL">Average duration of asthma (years)</label><input type="range" id="dyL" min="1" max="40" value="10"><output id="dyLO"></output></div>
+  <div class="ctrl"><label for="dyW">Disability weight</label><input type="range" id="dyW" min="0.005" max="0.2" step="0.005" value="0.05"><output id="dyWO"></output></div>
+  <div class="ctrl"><label for="dyD">Attributable deaths per year</label><input type="range" id="dyD" min="0" max="3" step="0.1" value="0.1"><output id="dyDO"></output></div>
+  <div class="ctrl"><label for="dyE">Remaining life expectancy at death</label><input type="range" id="dyE" min="40" max="80" value="70"><output id="dyEO"></output></div>
+  <div class="btns"><button type="button" id="dyFrom">Take cases from 14.2</button></div>
+  <svg id="dyPlot" viewBox="0 0 520 150" role="img" aria-label="DALYs split into YLL and YLD"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="dyStats"></div><div class="now" id="dyNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$DALY = YLL + YLD$$
+$$YLL = \sum_a D_a\,L_a, \qquad YLD = I \times DW \times L_{\text{dur}}$$
+
+::: {.note}
+
+Incidence-based YLD: new cases $I$, disability weight $DW$, average duration $L_{\text{dur}}$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+yld  <- cases * dw * duration
+yll  <- deaths * life_expectancy
+daly <- yll + yld
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#dyReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @murray1994quantifying set out the technical basis of DALYs; @gbd2020risk report risk-factor burdens with current methods; @ezzati2002selected on combining burden across risk factors.
+
+:::
+
+## 14.4 Propagating uncertainty {#s4}
+
+A burden estimate inherits uncertainty from every input: the relative risk, the exposure distribution, the baseline risk. Plugging the confidence limits of the relative risk into the formula gives a crude range. **Monte Carlo simulation** does better: draw each input from a distribution expressing its uncertainty, compute the burden for each draw, and summarize the resulting distribution.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <label class="small"><input type="checkbox" id="mcRR" checked> uncertainty in the exposure–response coefficient</label><br>
+  <label class="small"><input type="checkbox" id="mcBase"> uncertainty in the baseline risk</label><br>
+  <label class="small"><input type="checkbox" id="mcDur"> uncertainty in duration (5 to 15 years) and disability weight (0.03 to 0.08)</label>
+  <div class="btns"><button type="button" id="mcGo">Run 4,000 simulations</button></div>
+  <svg id="mcPlot" viewBox="0 0 520 240" role="img" aria-label="Distribution of simulated DALYs"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="mcStats"></div><div class="now" id="mcNow"></div></div>
+</div>
+```
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+Monte Carlo propagation is the frequentist analyst borrowing a Bayesian idea: treating inputs as uncertain quantities with distributions. In a fully Bayesian analysis, the burden is a derived quantity computed on every posterior draw, so all uncertainties, and their correlations, flow through automatically. The capstone (Lesson 25) computes heat-attributable visits and DALYs this way.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gbd2020risk describe uncertainty intervals from repeated draws; @achakulwisut2019global propagate uncertainty in exposure–response and incidence; @greenland1988conceptual on why attributable fractions for several risk factors needn't sum to 100%.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- The PAF combines exposure prevalence and risk ratio. Levin's formula needs an unconfounded RR; Miettinen's formula and g-computation work under confounding.
+- For continuous exposures, burden is defined against a counterfactual level, which must be stated and justified.
+- Attributable cases = PAF × total cases. DALYs add years of life lost and years lived with disability.
+- Burden estimates inherit uncertainty and bias from every input: propagate uncertainty by simulation and correct the relative risk for confounding and measurement error first.
+- PAFs for different risk factors can sum to more than 100%, because cases can have several causes.
+
+```{=html}
+<div class="done" data-lesson="lesson-14"><button type="button"></button><span></span></div>
+<script src="assets/lesson-14.js"></script>
+```

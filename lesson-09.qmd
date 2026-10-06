@@ -1,0 +1,317 @@
+---
+title: "Lesson 9 · Confounding, effect modification and interaction"
+subtitle: "Part II · Frequentist regression"
+description: "Confounding and adjustment, DAGs, colliders and mediators, effect modification, and additive versus multiplicative interaction."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lesson 8]{} [Threads: bias · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- recognize confounding and remove it by stratification or regression;
+- draw a DAG and use it to choose an adjustment set;
+- explain why adjusting for a collider, a mediator or a consequence of the outcome causes bias;
+- assess effect modification with a test of the difference, not by comparing p-values;
+- distinguish interaction on the additive and multiplicative scales, and compute the RERI.
+
+:::
+
+::: {.why}
+
+**Why it matters.** The crude association between NO₂ and asthma in our cohort is substantially larger than the true effect, because children in polluted districts also differ in other ways. Deciding what to adjust for is not a statistical question, but a causal one. Adjusting for the wrong variable can create bias where there was none.
+
+:::
+
+## 9.1 Confounding and stratification {#s1}
+
+Children in high-traffic districts have, on average, lower socio-economic position (SES), and lower SES independently raises asthma risk. SES is a **confounder**: it opens a non-causal route between NO₂ and asthma. **Stratification** compares children within groups of similar SES; regression does the same thing more smoothly. This section uses the true NO₂ exposure, available only in the simulation, so that confounding is the only source of bias.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="stK">SES strata</label><input type="range" id="stK" min="1" max="5" value="3"><output id="stKO"></output></div>
+  <svg id="stPlot" viewBox="0 0 520 280" role="img" aria-label="Odds ratios within strata of SES"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="stStats"></div><div class="now" id="stNow"></div></div>
+</div>
+```
+
+::: {.further}
+
+**Further reading:** @lash2021modern on confounding and its control; @hernan2020causal define confounding through causal structures; @keiding2014standardization trace stratification and standardization to regression.
+
+:::
+
+## 9.2 Using a DAG to choose what to adjust for {#s2}
+
+A **directed acyclic graph** (DAG) draws the assumed causal relations. Each arrow means "directly causes". Non-causal paths from NO₂ to asthma that start with an arrow *into* NO₂ are **backdoor paths**; they create confounding unless blocked. A path is blocked by adjusting for a non-collider on it. A **collider** (a node where two arrows meet) blocks a path on its own, and adjusting for it opens the path. Click variables to adjust for them, and watch the paths and the estimated odds ratio.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <svg id="dag" viewBox="0 0 520 330" role="img" aria-label="Causal diagram for NO2 and asthma"></svg>
+  <p class="small">Click a variable to adjust for it (filled = adjusted). The arrows match the model that generated the data. "Clinic visit" is a variable created for this demonstration.</p>
+  <div class="btns"><button type="button" id="dagMin">Use a minimal adjustment set</button><button type="button" id="dagNone">Adjust for nothing</button><button type="button" id="dagAll">Adjust for everything</button></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="dagStats"></div><div class="tw"><table data-quarto-disable-processing="true" class="t" id="dagPaths"></table></div><div class="now" id="dagNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\mathrm{SES} \rightarrow \mathrm{NO_2} \rightarrow \mathrm{asthma}, \quad \mathrm{SES} \rightarrow \mathrm{asthma}$$
+$$\text{adjustment set } Z: \ Y^{x} \perp\!\!\!\perp X \mid Z$$
+
+::: {.note}
+
+The backdoor criterion: $Z$ blocks every backdoor path from $X$ to $Y$, and contains no descendant of $X$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+dag <- dagitty::dagitty("dag {
+  SES -> NO2; SES -> Asthma; SES -> Smoke
+  Smoke -> Asthma; Green -> NO2; Green -> Asthma
+  Traffic -> NO2; Sex -> Asthma; NO2 -> Asthma
+  Asthma -> Wheeze; NO2 -> Clinic; Asthma -> Clinic
+}")
+dagitty::adjustmentSets(dag, "NO2", "Asthma")
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+The adjustment set was chosen from a DAG of assumed causal relations (Supplementary Figure S1): **SES and green space**. Parental smoking, sex and district traffic were not required for confounding control.
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Adjusting for every available variable. Adjusting for a collider (here, clinic attendance) or for a consequence of the outcome (the wheeze questionnaire) creates bias. Adjusting for a variable that only affects the exposure (traffic) costs precision for no gain.
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): adjustment sets and adjusted estimates"}
+
+```{r}
+dag <- dagitty::dagitty("dag {
+  SES -> NO2; SES -> Asthma; SES -> Smoke; Smoke -> Asthma
+  Green -> NO2; Green -> Asthma; Traffic -> NO2; Sex -> Asthma
+  NO2 -> Asthma; Asthma -> Wheeze; NO2 -> Clinic; Asthma -> Clinic
+}")
+dagitty::adjustmentSets(dag, exposure = "NO2", outcome = "Asthma")
+
+fit <- glm(asthma ~ I(no2_true / 10) + ses + green, family = binomial, data = cohort)
+exp(coef(fit)[2])   # close to the true OR of 1.15
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @greenland1999causal introduced causal diagrams to epidemiology; @hernan2004structural explain selection bias as collider bias; @textor2016robust describe the dagitty software; @westreich2013table on why adjustment variables' coefficients need not be interpretable.
+
+:::
+
+## 9.3 Effect modification: compare effects, not p-values {#s3}
+
+Heat raises emergency visits more among older people. When an effect differs across levels of another variable, that variable is an **effect modifier**. The right test is of the *difference* between the effects. A common error is to report "significant in one group, not in the other" as evidence of a difference: the non-significant group may just have less data. Choose a district and compare the age groups.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="emD">District</label><select id="emD"></select></div>
+  <div class="ctrl"><label for="emA">Compare 65+ with</label><select id="emA"><option value="0">0–14</option><option value="1">15–64</option></select></div>
+  <svg id="emPlot" viewBox="0 0 520 220" role="img" aria-label="Heat effect by age group"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="emStats"></div><div class="now" id="emNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\log\mu_{tk} = \alpha_k + \beta_k (T_t - 22) + \gamma^\top \mathrm{dow}_t$$
+$$z = \frac{\hat\beta_{65+} - \hat\beta_{0\text{–}14}}{\sqrt{SE_{65+}^2 + SE_{0\text{–}14}^2}}$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+summer <- visits |>
+  filter(month(date) %in% 6:8,
+         district == "Lakeside")
+glm(visits ~ age_group * I(temp - 22) + dow,
+    family = quasipoisson, data = summer)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#emReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @matthews1996interaction "compare effect sizes, not P values"; @knol2012recommendations recommend how to present effect modification; @vanderweele2014tutorial give a full tutorial.
+
+:::
+
+## 9.4 Interaction on the additive and multiplicative scales {#s4}
+
+Is the harm of high NO₂ larger among children whose parents smoke? The answer depends on the scale. On the **multiplicative** scale (ratios), the question is whether the NO₂ risk ratio differs between groups. On the **additive** scale (differences), it is whether NO₂ causes more *extra cases* in one group. The additive scale tells you where reducing exposure prevents the most cases.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="inF">Second factor</label><select id="inF"><option value="smoke">a parent smokes</option><option value="ses">low SES (bottom third)</option><option value="boy">boy</option></select></div>
+  <div class="tw"><table data-quarto-disable-processing="true" class="t" id="inTab"></table></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="inStats"></div><div class="now" id="inNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$RERI = RR_{11} - RR_{10} - RR_{01} + 1$$
+$$\text{multiplicative: } \frac{RR_{11}}{RR_{10}\,RR_{01}}$$
+
+::: {.note}
+
+$RR_{ab}$: risk with NO₂ level $a$ and factor level $b$, relative to neither.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+cohort |>
+  mutate(no2 = no2_true >= 30) |>
+  group_by(no2, parent_smoke) |>
+  summarise(risk = mean(asthma))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#inReport}
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+Hypotheses such as "heat harms the elderly more than children, and children not at all" can be stated as constraints on several parameters and compared directly with Bayes factors. Lesson 23 does exactly this for age-group heat effects.
+
+:::
+
+::: {.further}
+
+**Further reading:** @vanderweele2014tutorial on additive and multiplicative interaction and the RERI; @knol2012recommendations on reporting both scales; @lash2021modern on effect-measure modification.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- A confounder opens a non-causal path between exposure and outcome. Stratification or regression on it closes that path.
+- What to adjust for is decided by causal assumptions, best made explicit in a DAG.
+- Adjusting for a collider, a mediator, or a consequence of the outcome introduces bias. Adjusting for a cause of the exposure only (an instrument) costs precision.
+- Effect modification is assessed by estimating the difference between effects, not by comparing p-values.
+- Interaction depends on the scale. Report effects on both additive and multiplicative scales.
+
+```{=html}
+<div class="done" data-lesson="lesson-09"><button type="button"></button><span></span></div>
+<script src="assets/lesson-09.js"></script>
+```

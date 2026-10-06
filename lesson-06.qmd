@@ -1,0 +1,353 @@
+---
+title: "Lesson 6 · Confidence intervals and hypothesis tests"
+subtitle: "Part I · Foundations"
+description: "Coverage of confidence intervals, p-values, errors and power, multiple testing, and evidence of absence."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lessons 4–5]{} [Threads: uncertainty · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- interpret a confidence interval through its coverage across repeated studies;
+- explain what a p-value is, and list what it is not;
+- describe type I and type II errors and calculate power;
+- explain why small studies that reach significance exaggerate effects;
+- control false positives when testing many hypotheses, and know when not to;
+- use an equivalence test to support "no meaningful effect".
+
+:::
+
+::: {.why}
+
+**Why it matters.** Confidence intervals and p-values are reported in almost every epidemiological paper, and misread in many of them. "Not significant" read as "no effect" has buried real harms; a single p < 0.05 from a small study has launched false alarms. The aim of this lesson is to make you a careful reader and writer of both.
+
+:::
+
+## 6.1 Confidence intervals and coverage {#s1}
+
+Each simulated study draws a sample of children and computes a 95% confidence interval for the risk of asthma. The true risk in the whole cohort is known. A 95% interval comes from a procedure that, across many studies, captures the truth 95% of the time. Any single interval either contains it or doesn't. Run 100 studies and count the misses.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="ciN">Children per study</label><input type="range" id="ciN" min="30" max="2000" value="200"><output id="ciNO"></output></div>
+  <div class="ctrl"><label for="ciL">Confidence level</label><select id="ciL"><option value="0.8">80%</option><option value="0.9">90%</option><option value="0.95" selected>95%</option><option value="0.99">99%</option></select></div>
+  <div class="btns"><button type="button" id="ciRun">Run 100 new studies</button></div>
+  <svg id="dance" viewBox="0 0 520 420" role="img" aria-label="Confidence intervals from 100 studies"></svg>
+  <div class="legend"><span><i style="background:var(--p1)"></i>interval contains the truth</span><span><i style="background:var(--p2)"></i>interval misses</span><span><i style="background:var(--c-ink)"></i>true risk</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="ciStats"></div><div class="now" id="ciNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\hat\pi \pm z_{1-\alpha/2}\sqrt{\frac{\hat\pi(1-\hat\pi)}{n}}$$
+$$P_\pi\big(L \le \pi \le U\big) = 1 - \alpha \ \text{ for every } \pi$$
+
+::: {.note}
+
+$z_{0.975} = 1.96$ for a 95% interval. The probability statement is about the procedure, over repeated samples.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+smp <- cohort |> slice_sample(n = 200)
+p  <- mean(smp$asthma)
+se <- sqrt(p * (1 - p) / 200)
+p + c(-1.96, 1.96) * se
+
+binom.test(sum(smp$asthma), 200)$conf.int
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#ciReport}
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+"There is a 95% probability that the true risk lies between 9% and 18%." For a confidence interval, the 95% describes the method, not this interval. The statement in quotes is what a Bayesian credible interval says (Lesson 19).
+
+:::
+
+::: {.further}
+
+**Further reading:** @gardner1986confidence argued for reporting confidence intervals rather than p-values; @greenland2016statistical list common misinterpretations of intervals; @kirkwood2003essential derive intervals for risks and rates.
+
+:::
+
+## 6.2 Hypothesis tests and p-values {#s2}
+
+A test asks: if there were truly no effect, how surprising would data like ours be? The **p-value** is the probability, computed under the null hypothesis, of a result at least as extreme as the one observed. To see its behavior, run many studies comparing asthma risk between two groups. First use a fake "exposure" assigned by coin toss, so the null is true; then the real exposure, high modeled NO₂.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Exposure"><button type="button" id="pvNull" aria-pressed="true">Coin-toss exposure (null true)</button><button type="button" id="pvReal" aria-pressed="false">High NO₂, ≥ 30 µg/m³</button></div>
+  <div class="ctrl"><label for="pvN">Children per study</label><input type="range" id="pvN" min="100" max="3000" step="50" value="500"><output id="pvNO"></output></div>
+  <div class="btns"><button type="button" id="pvRun">Run 1,000 studies</button></div>
+  <svg id="pvHist" viewBox="0 0 520 260" role="img" aria-label="Histogram of p-values"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="pvStats"></div><div class="now" id="pvNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$H_0: \pi_1 = \pi_0 \quad\text{vs}\quad H_1: \pi_1 \ne \pi_0$$
+$$z = \frac{\hat\pi_1 - \hat\pi_0}{\sqrt{\bar\pi(1-\bar\pi)\left(\frac{1}{n_1} + \frac{1}{n_0}\right)}}, \qquad p = 2\,P(Z \ge |z|)$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+smp <- cohort |> slice_sample(n = 500) |>
+  mutate(high = no2_modeled >= 30)
+prop.test(table(smp$high, smp$asthma)[, 2:1],
+          correct = FALSE)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#pvReport}
+
+::: {.note}
+
+Report the effect estimate with its confidence interval and the exact p-value, not only "p < 0.05".
+
+:::
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): p-values under the null and under a real effect"}
+
+```{r}
+set.seed(6)
+one_study <- function(n, real = TRUE) {
+  smp <- slice_sample(cohort, n = n)
+  expo <- if (real) smp$no2_modeled >= 30 else runif(n) < 0.5
+  prop.test(c(sum(smp$asthma[expo]), sum(smp$asthma[!expo])),
+            c(sum(expo), sum(!expo)), correct = FALSE)$p.value
+}
+p_null <- map_dbl(1:1000, \(i) one_study(500, real = FALSE))
+p_real <- map_dbl(1:1000, \(i) one_study(500, real = TRUE))
+c(null_below_0.05 = mean(p_null < 0.05), real_below_0.05 = mean(p_real < 0.05))
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @wasserstein2016asa is the American Statistical Association's statement on p-values; @greenland2016statistical explain 25 common misinterpretations; @matthews1996interaction on comparing effect sizes rather than p-values.
+
+:::
+
+## 6.3 Errors, power and exaggerated estimates {#s3}
+
+Rejecting a true null is a **type I error**, with probability α. Missing a real effect is a **type II error**. **Power** is the probability of detecting an effect of a given size, and it depends on the effect, the baseline risk, the sample size and α. Small studies have low power, and there is a second, less obvious problem: when a low-powered study does reach significance, its estimate tends to be far too large.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pwRR">True risk ratio</label><input type="range" id="pwRR" min="1" max="2" step="0.05" value="1.25"><output id="pwRRO"></output></div>
+  <div class="ctrl"><label for="pwN">Children per group</label><input type="range" id="pwN" min="50" max="5000" step="50" value="500"><output id="pwNO"></output></div>
+  <div class="ctrl"><label for="pwA">Significance level α</label><select id="pwA"><option value="0.01">0.01</option><option value="0.05" selected>0.05</option><option value="0.1">0.10</option></select></div>
+  <svg id="pwPlot" viewBox="0 0 520 250" role="img" aria-label="Power against sample size"></svg>
+  <div class="btns"><button type="button" id="pwSim">Simulate 2,000 studies at this size</button></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="pwStats"></div><div class="now" id="pwNow"></div></div>
+</div>
+```
+
+::: {.callout-warning title="Common pitfall"}
+
+Treating a significant result from a small study as a reliable estimate of the effect. Among the studies that pass p < 0.05, the estimates are biased upward, often severely. This "winner's curse" is one reason early findings shrink when replicated.
+
+:::
+
+::: {.further}
+
+**Further reading:** @button2013power show how low power undermines reliability, including the exaggeration of significant effects; @greenland2016statistical on misinterpretations of power; @kirkwood2003essential give sample size and power calculations for epidemiological comparisons.
+
+:::
+
+## 6.4 Multiple testing {#s4}
+
+Test twenty exposures that have no effect at all, each at α = 0.05, and you expect one "significant" result by chance alone. The chance of at least one false positive is 64%. A Bonferroni correction divides α by the number of tests, at a cost in power. Whether to correct depends on the question: confirming a single pre-specified hypothesis, or exploring many.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="mtK">Number of null exposures tested</label><input type="range" id="mtK" min="1" max="60" value="20"><output id="mtKO"></output></div>
+  <label class="small"><input type="checkbox" id="mtBon"> Apply a Bonferroni correction</label>
+  <div class="btns"><button type="button" id="mtRun">Run one study with these tests</button><button type="button" id="mtMany">Repeat 1,000 times</button></div>
+  <svg id="mtPlot" viewBox="0 0 520 250" role="img" aria-label="p-values of the tested exposures"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="mtStats"></div><div class="now" id="mtNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$P(\text{at least one false positive}) = 1 - (1-\alpha)^m$$
+$$\text{Bonferroni: reject } H_{0j} \text{ if } p_j < \alpha / m$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+p_values <- c(0.003, 0.02, 0.04, 0.30)
+p.adjust(p_values, method = "bonferroni")
+p.adjust(p_values, method = "holm")
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#mtReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @bender2001adjusting explain when and how to adjust for multiple testing; @rothman1990no argues that adjustment is often unnecessary when results are interpreted with care; @greenland2016statistical place both views in context.
+
+:::
+
+## 6.5 Absence of evidence and equivalence {#s5}
+
+A non-significant result means the data are compatible with no effect. They may also be compatible with a large effect. "Absence of evidence is not evidence of absence." To support the claim that an effect is negligible, set a margin in advance, here a risk ratio between 0.9 and 1.1, and check whether the confidence interval lies entirely inside it. Move the estimate and its precision and watch the four possible conclusions.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="eqE">Estimated risk ratio</label><input type="range" id="eqE" min="0.7" max="1.6" step="0.01" value="1.05"><output id="eqEO"></output></div>
+  <div class="ctrl"><label for="eqS">Standard error of log RR</label><input type="range" id="eqS" min="0.01" max="0.3" step="0.005" value="0.12"><output id="eqSO"></output></div>
+  <div class="ctrl"><label for="eqM">Equivalence margin (±)</label><input type="range" id="eqM" min="0.05" max="0.3" step="0.01" value="0.1"><output id="eqMO"></output></div>
+  <svg id="eqPlot" viewBox="0 0 520 200" role="img" aria-label="Confidence interval against the null and the equivalence margin"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="eqStats"></div><div class="now" id="eqNow"></div></div>
+</div>
+```
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+A frequentist test can reject "no effect" but can never support it; that needs the separate equivalence test above. A Bayesian analysis can state the probability that the effect lies inside the margin (a "region of practical equivalence"), and a Bayes factor can weigh "no effect" against "some effect" directly. Lesson 23 compares the approaches.
+
+:::
+
+::: {.further}
+
+**Further reading:** @altman1995absence on why a non-significant result is not evidence of no effect; @lakens2017equivalence is a practical primer on equivalence tests (TOST); @greenland2016statistical on interpreting non-significant results.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- A 95% confidence interval comes from a procedure that captures the truth in 95% of studies. Its width shows precision.
+- A p-value is the probability of data at least this extreme if the null were true. It is not the probability that the null is true, nor a measure of effect size.
+- Under a true null, p-values are uniformly distributed: 5% fall below 0.05 by chance.
+- Power depends on effect size, baseline risk, sample size and α. Significant results from low-powered studies exaggerate effects.
+- Testing many hypotheses inflates false positives; correct when confirming, interpret carefully when exploring.
+- Non-significant does not mean no effect. To support "no meaningful effect", use an equivalence margin.
+
+```{=html}
+<div class="done" data-lesson="lesson-06"><button type="button"></button><span></span></div>
+<script src="assets/lesson-06.js"></script>
+```

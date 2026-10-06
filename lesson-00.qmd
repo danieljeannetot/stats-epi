@@ -1,0 +1,208 @@
+---
+title: "Lesson 0 · Welcome: the city, the data and how to use the course"
+subtitle: "Start here"
+description: "The simulated city, the two running examples, how each lesson works, and setting up R."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 30–45 minutes]{} [No prerequisites]{}
+
+:::
+
+This course takes you from describing data to Bayesian spatio-temporal hierarchical models. Every method is shown on the same simulated city, so you can always compare an estimate with the truth that generated the data.
+
+## The city {#city}
+
+Our simulated city has about 660,000 residents in 12 districts. The districts differ in size, age structure, deprivation, green space, traffic and how much hotter they get in summer (the urban heat island). These differences drive many of the patterns you'll meet. Choose a characteristic to color the map, and click a district to see its profile.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="mapVar">Color districts by</label><select id="mapVar">
+    <option value="pop">Population</option><option value="p65">Share aged 65+</option><option value="dep">Deprivation</option>
+    <option value="green">Green space</option><option value="traffic">Traffic</option><option value="uhi">Summer heat island (°C)</option></select></div>
+  <svg id="map" viewBox="0 0 520 340" role="img" aria-label="Map of the 12 districts"></svg>
+  <div class="legend" id="mapLegend"></div>
+</div>
+<div class="cpanel"><h4 id="dName"></h4><div class="tw"><table data-quarto-disable-processing="true" class="t" id="dTable"></table></div><div class="now" id="mapNow"></div></div>
+</div>
+```
+
+## Example A · Heat and emergency department visits {#exA}
+
+For every day from 1 January 2020 to 31 December 2024, we have the number of emergency visits by residents of each district in three age groups, with that day's temperature and PM2.5. That's 65,772 rows: 1,827 days × 12 districts × 3 age groups. It's the setting for count data, time series, lagged and nonlinear effects, and spatial models.
+
+```{=html}
+<div class="cw cpanel">
+  <div class="ctrl"><label for="aD">District</label><select id="aD"></select><label for="aG" style="min-width:auto">Age group</label><select id="aG"><option value="all">All ages</option><option value="0">0–14</option><option value="1">15–64</option><option value="2">65+</option></select><label for="aY" style="min-width:auto">Year</label><select id="aY"><option>2020</option><option>2021</option><option>2022</option><option selected>2023</option><option>2024</option></select></div>
+  <svg id="tsTemp" viewBox="0 0 1000 170" role="img" aria-label="Daily temperature"></svg>
+  <svg id="tsVis" viewBox="0 0 1000 230" role="img" aria-label="Daily emergency visits"></svg>
+  <div class="now" id="tsNow"></div>
+</div>
+```
+
+## Example B · Traffic-related air pollution and childhood asthma {#exB}
+
+A birth cohort of 5,000 children living in the same districts, followed to age 8. Each child has a modeled residential NO₂ level from a land-use regression model, as in most real studies. A validation subsample of children also wore personal NO₂ monitors. We know their socio-economic position, parental smoking, residential green space, school, a parent-reported wheeze questionnaire, and whether they were diagnosed with asthma by age 8.
+
+```{=html}
+<div class="cw"><div class="statgrid" id="bStats"></div><div class="tw"><table data-quarto-disable-processing="true" class="t" id="bTable"></table></div></div>
+```
+
+Notice how NO₂ and socio-economic position travel together across districts. Untangling them is the subject of Lessons 9 and 12.
+
+## How each lesson works {#how}
+
+Every lesson follows the same pattern, so you always know where to look.
+
+- **Interactive demonstrations**: sliders, buttons and maps that change a calculation. A **What's happening** box narrates, in words and with the numbers on screen, what your change did and why.
+- **Glossary terms**: underlined with dots. Hover to see a short definition; click to open the full entry, with its formal definition, in a side panel. The **Glossary** button at the bottom right of every page opens the full list with a search box.
+- **Optional R code**: closed panels you can open to reproduce an analysis on the course data. The code runs when the site is built, so the output you see is real.
+- **Bayesian previews**: until Part V, short boxes show how a Bayesian would see the same idea.
+- **Common pitfalls**: mistakes that appear in published papers.
+- **Check your understanding**: concept questions, some on statistics, some on epidemiology, with feedback that explains each answer.
+
+## Three ways of writing the same thing {#notation}
+
+Statistical models appear in three forms, and you'll need all three. Papers and textbooks use **standard notation**. Software uses a **model list**, one line per assumption, written in R. And results are communicated in **epidemiological reporting** style. Throughout the course, the three appear side by side so you can translate between them. Here is the model that actually generated the asthma data in Example B. Don't worry about understanding it yet; by Lesson 18 you will.
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$Y_i \sim \mathrm{Bernoulli}(\pi_i)$$
+$$\mathrm{logit}(\pi_i) = \alpha + \beta\,\frac{\mathrm{NO}_{2,i} - 25}{10} + \gamma_1 \mathrm{SES}_i + \gamma_2\, \mathrm{smoke}_i + \gamma_3\, \mathrm{green}_i + \gamma_4\, \mathrm{boy}_i + u_{s[i]}$$
+$$u_s \sim \mathrm{Normal}(0, \sigma_u^2)$$
+
+::: {.note}
+
+$Y_i$ = asthma by age 8 for child $i$, $\pi_i$ its probability, $s[i]$ the child's school.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+asthma    ~ bernoulli(p)
+logit(p)  = alpha + beta * (no2 - 25) / 10 +
+            g1 * ses + g2 * smoke +
+            g3 * green + g4 * boy + u[school]
+u[school] ~ normal(0, sigma_u)
+
+# in R (Lesson 18):
+glmer(asthma ~ I((no2 - 25) / 10) + ses +
+        parent_smoke + green + sex + (1 | school),
+      family = binomial, data = cohort)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+Each 10 µg/m³ increase in residential NO₂ was associated with 15% higher odds of asthma by age 8 (**OR 1.15 per 10 µg/m³**), adjusted for socio-economic position, parental smoking, green space and sex, and accounting for clustering within schools.
+
+::: {.note}
+
+Here these numbers are the truth, known because the data are simulated. In a real study they would be estimates with confidence or credible intervals.
+
+:::
+
+::::
+
+:::::
+
+The symbols are used consistently in every lesson: $\alpha$ for intercepts and baselines, $\beta$ for exposure effects, $\gamma$ for adjustment terms, $u$ for group effects, $\sigma$ and $\tau$ for standard deviations, and the indices $i$ (child), $t$ (day), $j$ (district or school) and $\ell$ (lag). The [glossary](glossary.qmd#symbols) keeps the full list.
+
+## Setting up R (optional) {#setup}
+
+The course repository contains the data as CSV files in `data/`, and a script, `R/course-data.R`, that loads them with the right variable types. Open the course folder as an RStudio project so the paths work.
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): install packages and load the data"}
+
+```{r}
+#| eval: false
+# once
+install.packages(c("tidyverse", "broom", "sandwich", "mgcv", "dlnm",
+                   "sf", "spdep", "lme4", "glmmTMB", "dagitty",
+                   "brms", "tidybayes", "posterior", "bayesplot", "loo"))
+```
+
+```{r}
+# every session
+library(tidyverse)
+source("R/course-data.R")   # creates visits, cohort and districts
+
+glimpse(visits)
+glimpse(cohort)
+count(cohort, district, sort = TRUE)
+```
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="Data dictionary: Example A (data/example-A-heat-visits.csv)"}
+
+| Column | Meaning |
+|:--|:--|
+| `date` | Calendar day, 2020-01-01 to 2024-12-31 |
+| `district_id`, `district` | District of residence (1–12) |
+| `age_group` | 0-14, 15-64 or 65+ |
+| `population` | Residents in that district and age group (fixed over the period) |
+| `visits` | Emergency department visits that day |
+| `temp` | Daily mean temperature in the district (°C), including its heat-island effect |
+| `temp_city` | City-wide daily mean temperature (°C) |
+| `pm25` | City-wide daily PM2.5 (µg/m³) |
+| `dow`, `holiday` | Day of week; TRUE if a public holiday |
+
+:::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="Data dictionary: Example B (data/example-B-no2-asthma.csv)"}
+
+| Column | Meaning |
+|:--|:--|
+| `child_id` | Child identifier (1–5,000) |
+| `district_id`, `district`, `school` | District of residence and school attended (40 schools) |
+| `sex` | boy or girl |
+| `ses` | Family socio-economic position score (higher = more advantaged) |
+| `parent_smoke` | TRUE if a parent smoked at home |
+| `green` | Green space around the home (0–1) |
+| `no2_modeled` | Residential NO₂ from the land-use regression model (µg/m³) |
+| `validation`, `no2_personal` | TRUE if in the validation subsample; their personal-monitor NO₂ (NA otherwise) |
+| `wheeze_q` | TRUE if the wheeze screening questionnaire was positive |
+| `asthma` | 1 if diagnosed with asthma by age 8 |
+| `no2_true` | The child's true NO₂ exposure. **Only available because the data are simulated**; real studies never have it. |
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+<div class="done" data-lesson="lesson-00"><button type="button"></button><span></span></div>
+<script src="assets/lesson-00.js"></script>
+```

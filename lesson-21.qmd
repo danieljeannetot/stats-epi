@@ -1,0 +1,267 @@
+---
+title: "Lesson 21 · Computing the posterior: Markov chain Monte Carlo"
+subtitle: "Part V · Bayesian modeling"
+description: "Why posteriors are sampled, the Metropolis algorithm, Hamiltonian Monte Carlo, the effect of parameterization, and convergence diagnostics: trace plots, R-hat and effective sample size."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Lessons 19–20]{} [Threads: uncertainty · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- explain why posteriors are computed by sampling rather than on a grid;
+- run the Metropolis algorithm by hand, and explain the role of the step size;
+- describe how Hamiltonian Monte Carlo (the method in Stan) uses the posterior's slope to move efficiently;
+- explain why centering predictors helps samplers;
+- read trace plots, R-hat and effective sample size, and recognize a sampler that has not converged.
+
+:::
+
+::: {.why}
+
+**Why it matters.** The grids of Lesson 19 work for two parameters. A DLNM has dozens and a spatial model hundreds, and a grid with 100 points per parameter would need more points than there are atoms in the universe. Markov chain Monte Carlo instead wanders through the parameter space, spending time in each region in proportion to its posterior probability. Every Bayesian result in Part V depends on this working, so it pays to know what failure looks like.
+
+:::
+
+## 21.1 The Metropolis algorithm {#s1}
+
+The Metropolis algorithm is a random walk with one rule. From the current value, propose a jump of random size. If the posterior is higher there, move. If it's lower, move only with probability equal to the ratio of the two heights; otherwise stay put. Over many steps, the chain visits each value in proportion to its posterior density. Here it samples the risk of asthma from 30 cases in 200 children, with a Beta(2, 18) prior, so the exact answer is known for comparison.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="m1S">Step size (SD of proposals)</label><input type="range" id="m1S" min="0.002" max="0.3" step="0.002" value="0.03"><output id="m1SO"></output></div>
+  <div class="ctrl"><label for="m1X">Starting value</label><input type="range" id="m1X" min="0.01" max="0.9" step="0.01" value="0.6"><output id="m1XO"></output></div>
+  <div class="btns"><button type="button" id="m1One">1 step</button><button type="button" id="m1Ten">100 steps</button><button type="button" id="m1K">2,000 steps</button><button type="button" id="m1R">Reset</button></div>
+  <svg id="m1Trace" viewBox="0 0 520 170" role="img" aria-label="Trace of the chain"></svg>
+  <svg id="m1Hist" viewBox="0 0 520 200" role="img" aria-label="Histogram of samples against the exact posterior"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="m1Stats"></div><div class="now" id="m1Now"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\theta^* \sim \mathrm{Normal}(\theta^{(s)}, \sigma^2_{\text{step}})$$
+$$\theta^{(s+1)} = \begin{cases} \theta^* & \text{with probability } \min\!\left(1, \dfrac{p(\theta^* \mid y)}{p(\theta^{(s)} \mid y)}\right) \\ \theta^{(s)} & \text{otherwise} \end{cases}$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+log_post <- function(p) if (p <= 0 || p >= 1) -Inf else
+  dbinom(30, 200, p, log = TRUE) + dbeta(p, 2, 18, log = TRUE)
+theta <- numeric(5000); theta[1] <- 0.6
+for (s in 2:5000) {
+  prop <- rnorm(1, theta[s - 1], 0.03)
+  accept <- log(runif(1)) < log_post(prop) - log_post(theta[s - 1])
+  theta[s] <- if (accept) prop else theta[s - 1]
+}
+```
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): a Metropolis sampler checked against the exact posterior"}
+
+```{r}
+set.seed(21)
+log_post <- function(p) if (p <= 0 || p >= 1) -Inf else
+  dbinom(30, 200, p, log = TRUE) + dbeta(p, 2, 18, log = TRUE)
+theta <- numeric(5000); theta[1] <- 0.6
+for (s in 2:5000) {
+  prop <- rnorm(1, theta[s - 1], 0.03)
+  theta[s] <- if (log(runif(1)) < log_post(prop) - log_post(theta[s - 1])) prop else theta[s - 1]
+}
+kept <- theta[-(1:500)]                       # discard warm-up
+rbind(metropolis = quantile(kept, c(.025, .5, .975)),
+      exact      = qbeta(c(.025, .5, .975), 2 + 30, 18 + 170))
+mean(diff(theta) != 0)                        # acceptance rate
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @metropolis1953equation introduced the algorithm; @hastings1970monte generalized it; @gelman2013bayesian on Markov chain simulation for posteriors.
+
+:::
+
+## 21.2 Hamiltonian Monte Carlo and the shape of the posterior {#s2}
+
+With two or more correlated parameters, a random walk struggles: proposals that move along the narrow ridge of the posterior are rare. **Hamiltonian Monte Carlo** (HMC), the method behind Stan and brms, uses the **slope** of the log posterior to glide along it, like a frictionless puck on a curved surface, making long moves that are still likely to be accepted. Compare the two samplers on the Lakeside heat model of Lesson 19, with temperature centered at 20°C or left uncentered.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Sampler"><button type="button" id="hM" aria-pressed="true">Random-walk Metropolis</button><button type="button" id="hH" aria-pressed="false">Hamiltonian Monte Carlo</button></div>
+  <div class="btns" role="group" aria-label="Parameterization"><button type="button" id="hC" aria-pressed="true">Temperature centered at 20°C</button><button type="button" id="hU" aria-pressed="false">Temperature uncentered (°C)</button></div>
+  <div class="btns"><button type="button" id="hRun">Run 300 iterations</button><button type="button" id="hRes">Reset</button></div>
+  <svg id="hMap" viewBox="0 0 520 330" role="img" aria-label="Posterior contours with the sampler's path"></svg>
+</div>
+<div class="cpanel"><svg id="hTr" viewBox="0 0 520 160" role="img" aria-label="Trace of beta"></svg><div class="statgrid" id="hStats"></div><div class="now" id="hNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$H(\theta, r) = -\log p(\theta \mid y) + \tfrac12 r^\top r$$
+$$r \leftarrow r + \tfrac{\epsilon}{2}\nabla_\theta \log p(\theta \mid y), \quad \theta \leftarrow \theta + \epsilon\, r, \quad r \leftarrow r + \tfrac{\epsilon}{2}\nabla_\theta \log p(\theta \mid y)$$
+
+::: {.note}
+
+The last line is one leapfrog step, repeated L times per iteration; $r$ is a random momentum.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+# brms / Stan use an adaptive HMC (NUTS):
+fit <- brms::brm(visits ~ I(temp - 20),
+                 family = poisson, data = d,
+                 chains = 4, iter = 2000,
+                 warmup = 1000)
+```
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @betancourt2017conceptual is an accessible introduction to HMC; @hoffman2014no introduced the No-U-Turn sampler used by Stan; @carpenter2017stan describe Stan.
+
+:::
+
+## 21.3 Has it converged? Trace plots, R-hat and effective sample size {#s3}
+
+A sampler gives no warning on its own when it fails. Standard practice runs **several chains** from different starting points and checks that they agree. **Trace plots** should look like overlapping, well-mixed "hairy caterpillars". **R-hat** compares variation between and within chains; values above 1.01 signal trouble. The **effective sample size** (ESS) says how many independent draws the correlated chain is worth.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Scenario"><button type="button" data-sc="good" aria-pressed="true">Healthy</button><button type="button" data-sc="short" aria-pressed="false">Too short</button><button type="button" data-sc="tiny" aria-pressed="false">Step size too small</button><button type="button" data-sc="unc" aria-pressed="false">Uncentered, random walk</button></div>
+  <svg id="dTr" viewBox="0 0 520 300" role="img" aria-label="Trace plots of four chains"></svg>
+  <div class="legend"><span><i style="background:var(--p1)"></i>chain 1</span><span><i style="background:var(--p2)"></i>chain 2</span><span><i style="background:var(--p4)"></i>chain 3</span><span><i style="background:var(--p5)"></i>chain 4</span></div>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="dTab"></table></div><div class="now" id="dNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\hat R = \sqrt{\frac{\frac{N-1}{N}W + \frac{1}{N}B}{W}}, \qquad \text{ESS} = \frac{M N}{1 + 2\sum_{k \ge 1}\rho_k}$$
+
+::: {.note}
+
+$W$: average within-chain variance; $B$: between-chain variance (× $N$); $M$ chains of length $N$ (after splitting each in half); $\rho_k$: autocorrelation at lag $k$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+summary(fit)            # Rhat, Bulk_ESS, Tail_ESS
+bayesplot::mcmc_trace(fit)
+posterior::summarise_draws(fit)
+```
+
+::::
+
+:::::
+
+::: {.callout-warning title="Common pitfall"}
+
+Reporting results from a model with R-hat above 1.01, low effective sample sizes, or divergent-transition warnings. These aren't cosmetic: they mean the draws may not represent the posterior. Fix the model (reparameterize, center predictors, use better priors) before interpreting it.
+
+:::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+The hardest posterior shape for samplers is the **funnel** that appears in hierarchical models when the group-level SD is small: a narrow neck where the step size must be tiny, opening into a wide mouth. Stan flags it with divergent transitions. Lesson 24 shows the funnel and the standard cure, the non-centered parameterization.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gelman1992inference introduced R-hat; @vehtari2021rank give the improved rank-normalized version used by Stan today; @gabry2019visualization on diagnostic plots in the Bayesian workflow.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Grids are infeasible beyond a few parameters; MCMC samples the posterior instead.
+- Metropolis accepts uphill moves always and downhill moves sometimes. Step sizes too small or too large both make it inefficient.
+- HMC uses the posterior's gradient to make long, well-aimed moves; Stan's NUTS tunes it automatically.
+- Centering predictors reduces posterior correlation and helps every sampler.
+- Run several chains; check trace plots, R-hat (≤ 1.01) and effective sample size before interpreting results.
+
+```{=html}
+<div class="done" data-lesson="lesson-21"><button type="button"></button><span></span></div>
+<script src="assets/lesson-21.js"></script>
+```

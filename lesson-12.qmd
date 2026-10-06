@@ -1,0 +1,403 @@
+---
+title: "Lesson 12 · Causal inference: from association to effect"
+subtitle: "Part III · Causal inference, measurement and disease burden"
+description: "Potential outcomes, identification assumptions, g-computation, propensity scores and inverse probability weighting, positivity, and sensitivity to unmeasured confounding."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3.5 hours]{} [Before this: Lessons 8–9]{} [Threads: bias · uncertainty · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- state a causal question as a contrast between potential outcomes, under a well-defined intervention;
+- explain exchangeability, positivity and consistency, and why each is needed;
+- estimate a marginal causal effect by g-computation, and explain why it can differ from an adjusted odds ratio;
+- estimate the same effect by inverse probability weighting, check balance and diagnose positivity problems;
+- quantify how strong unmeasured confounding would need to be to explain away an estimate.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Policy questions are causal: how many cases of childhood asthma would a 10 µg/m³ reduction in NO₂ prevent? An adjusted odds ratio from Lesson 9 doesn't answer that directly. Causal inference makes the question precise, says which assumptions the answer depends on, and provides estimators that target the answer itself.
+
+:::
+
+## 12.1 Potential outcomes: two worlds, one observed {#s1}
+
+Imagine two worlds. In one, every child lives with the NO₂ they actually had. In the other, an intervention has reduced every child's NO₂ by Δ µg/m³. Each child has a **potential outcome** in each world. The **causal effect** compares the two worlds for the same children. Real data show only the first world. Here, because the data are simulated, both can be shown.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="poD">Reduction in NO₂, Δ (µg/m³)</label><input type="range" id="poD" min="0" max="20" step="1" value="10"><output id="poDO"></output></div>
+  <svg id="poGrid" viewBox="0 0 520 300" role="img" aria-label="Potential outcomes for 400 children"></svg>
+  <div class="legend"><span><i style="background:var(--p2)"></i>asthma in both worlds</span><span><i style="background:var(--p4)"></i>asthma prevented by the reduction</span><span><i style="background:var(--c-rule)"></i>no asthma in either world</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="poStats"></div><div class="now" id="poNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$Y_i^{x}: \text{ outcome of child } i \text{ if exposure were set to } x$$
+$$RR_{\text{causal}} = \frac{E[Y^{X-\Delta}]}{E[Y^{X}]}, \qquad RD_{\text{causal}} = E[Y^{X-\Delta}] - E[Y^{X}]$$
+
+::: {.note}
+
+Only $Y_i^{X_i}$, the outcome under the exposure actually received, is ever observed (consistency).
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+# the causal question, written as a contrast:
+# E[asthma | everyone's NO2 lowered by 10]
+#   vs E[asthma | NO2 as observed]
+# Identification needs:
+#   exchangeability given (SES, green)
+#   positivity: every child could have had
+#     NO2 10 µg/m3 lower
+#   consistency: "lowering NO2" is well defined
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#poReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @hernan2020causal develop causal inference from potential outcomes; @hernan2016using on framing observational analyses as emulations of a target trial; @greenland1999confounding on the formal definition of confounding.
+
+:::
+
+## 12.2 G-computation: estimating the two worlds from data {#s2}
+
+**G-computation**, also called standardization, estimates each world with an outcome model. Fit a regression of asthma on NO₂ and confounders; predict every child's risk with their own NO₂, and again with NO₂ lowered by Δ; average each set of predictions; compare. The result is a **marginal** effect for this population, the quantity the policy question asks for, and it can be compared directly with the truth from 12.1.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="gcD">Reduction Δ (µg/m³)</label><input type="range" id="gcD" min="1" max="20" step="1" value="10"><output id="gcDO"></output></div>
+  <div class="ctrl"><label for="gcM">Outcome model adjusts for</label><select id="gcM"><option value="none">nothing (crude)</option><option value="ses">SES only</option><option value="min" selected>SES and green space (the DAG's minimal set)</option><option value="all">SES, green, parental smoking, sex</option></select></div>
+  <svg id="gcPlot" viewBox="0 0 520 230" role="img" aria-label="Estimated and true risks in the two worlds"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="gcStats"></div><div class="now" id="gcNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\widehat{E}[Y^{x}] = \frac{1}{n}\sum_{i=1}^{n} \widehat{P}(Y = 1 \mid X = x_i,\ Z = z_i)$$
+
+::: {.note}
+
+Evaluated once with each child's own $x_i$, once with $x_i - \Delta$; $Z$ = confounders.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+fit <- glm(asthma ~ no2_true + ses + green,
+           family = binomial, data = cohort)
+r1 <- mean(predict(fit, cohort, type = "response"))
+r0 <- mean(predict(fit,
+        mutate(cohort, no2_true = no2_true - 10),
+        type = "response"))
+c(rr = r0 / r1, rd = r0 - r1)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#gcReport}
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): g-computation with a bootstrap confidence interval"}
+
+```{r}
+gcomp <- function(d, delta = 10) {
+  fit <- glm(asthma ~ no2_true + ses + green, family = binomial, data = d)
+  r_obs <- mean(predict(fit, d, type = "response"))
+  r_int <- mean(predict(fit, mutate(d, no2_true = no2_true - delta), type = "response"))
+  c(rr = r_int / r_obs, cases_prevented_per_1000 = 1000 * (r_obs - r_int))
+}
+gcomp(cohort)
+
+set.seed(12)
+boot <- map(1:200, \(b) as_tibble_row(gcomp(slice_sample(cohort, prop = 1, replace = TRUE)))) |>
+  bind_rows()
+apply(boot, 2, quantile, c(0.025, 0.975))
+```
+
+:::
+
+::: {.callout-warning title="Common pitfall"}
+
+Reading an adjusted odds ratio as a population effect. The aOR is conditional on the covariates, and because odds ratios are non-collapsible it differs from the marginal OR even without confounding. G-computation turns a model into the marginal risk ratio or risk difference the question asks for.
+
+:::
+
+::: {.further}
+
+**Further reading:** @snowden2011implementation demonstrate g-computation step by step; @hernan2020causal treat standardization and the g-formula; @keiding2014standardization link it to classical standardization.
+
+:::
+
+## 12.3 Propensity scores and inverse probability weighting {#s3}
+
+A second route models the **exposure** instead of the outcome. The **propensity score** is each child's probability of high NO₂ (here ≥ 30 µg/m³) given the confounders. Weighting each child by the inverse probability of the exposure they actually had creates a pseudo-population in which the confounders are balanced between exposed and unexposed. Check the overlap and the balance, and see what happens if the propensity model includes a variable that predicts exposure strongly but isn't a confounder.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <p class="small">Propensity model for high NO₂ (≥ 30 µg/m³):</p>
+  <label class="small"><input type="checkbox" id="psS" checked> SES</label> <label class="small"><input type="checkbox" id="psG" checked> green space</label> <label class="small"><input type="checkbox" id="psT"> district traffic (not a confounder)</label>
+  <div class="ctrl"><label for="psTr">Trim propensity scores outside</label><input type="range" id="psTr" min="0" max="0.2" step="0.01" value="0"><output id="psTrO"></output></div>
+  <svg id="psPlot" viewBox="0 0 520 240" role="img" aria-label="Propensity score distributions"></svg>
+  <div class="legend"><span><i style="background:var(--p2)"></i>high NO₂</span><span><i style="background:var(--p1)"></i>lower NO₂</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="psStats"></div><div class="tw"><table data-quarto-disable-processing="true" class="t" id="psBal"></table></div><div class="now" id="psNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$e(z) = P(A = 1 \mid Z = z), \qquad w_i = \frac{A_i}{e(z_i)} + \frac{1 - A_i}{1 - e(z_i)}$$
+$$\widehat{E}[Y^{a}] = \frac{\sum_i w_i\, 1\{A_i = a\}\, Y_i}{\sum_i w_i\, 1\{A_i = a\}}$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+d <- cohort |> mutate(high = no2_true >= 30)
+ps <- glm(high ~ ses + green, family = binomial,
+          data = d) |> fitted()
+d$w <- ifelse(d$high, 1 / ps, 1 / (1 - ps))
+with(d, weighted.mean(asthma[high], w[high]) /
+        weighted.mean(asthma[!high], w[!high]))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#psReport}
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): weights, balance and the weighted risk ratio"}
+
+```{r}
+d <- cohort |> mutate(high = no2_true >= 30)
+ps_fit <- glm(high ~ ses + green, family = binomial, data = d)
+d <- d |> mutate(ps = fitted(ps_fit), w = if_else(high, 1 / ps, 1 / (1 - ps)))
+
+smd <- function(x, g, w) {
+  m1 <- weighted.mean(x[g], w[g]); m0 <- weighted.mean(x[!g], w[!g])
+  (m1 - m0) / sqrt((var(x[g]) + var(x[!g])) / 2)
+}
+tibble(variable = c("ses", "green"),
+       before = c(smd(d$ses, d$high, rep(1, nrow(d))), smd(d$green, d$high, rep(1, nrow(d)))),
+       after  = c(smd(d$ses, d$high, d$w), smd(d$green, d$high, d$w)))
+
+with(d, weighted.mean(asthma[high], w[high]) / weighted.mean(asthma[!high], w[!high]))
+summary(d$w)
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @austin2011introduction introduces propensity score methods; @cole2008constructing on constructing and checking inverse probability weights; @westreich2010positivity on positivity violations in practice.
+
+:::
+
+## 12.4 How strong would unmeasured confounding have to be? {#s4}
+
+Every observational estimate assumes no unmeasured confounding. The **E-value** asks: how strongly would an unmeasured confounder need to be associated with both the exposure and the outcome (as risk ratios) to fully explain away the observed association? Here, pretend green space had not been measured, and see how the estimate and its E-value compare.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="evR">Observed risk ratio</label><input type="range" id="evR" min="1.01" max="3" step="0.01" value="1.12"><output id="evRO"></output></div>
+  <div class="ctrl"><label for="evL">Lower 95% confidence limit</label><input type="range" id="evL" min="0.8" max="2.5" step="0.01" value="1.01"><output id="evLO"></output></div>
+  <div class="btns"><button type="button" id="evFull">Use the cohort estimate (SES + green)</button><button type="button" id="evNoG">Use the estimate without green space</button></div>
+  <svg id="evPlot" viewBox="0 0 520 280" role="img" aria-label="Combinations of confounder strength that explain away the estimate"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="evStats"></div><div class="now" id="evNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$E = RR + \sqrt{RR\,(RR - 1)}$$
+$$\text{explains away if } \frac{RR_{EU}\, RR_{UD}}{RR_{EU} + RR_{UD} - 1} \ge RR$$
+
+::: {.note}
+
+$RR_{EU}$: confounder–exposure association; $RR_{UD}$: confounder–outcome association.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+e_value <- function(rr) rr + sqrt(rr * (rr - 1))
+e_value(1.12)   # point estimate
+e_value(1.01)   # lower confidence limit
+# or: EValue::evalues.RR(1.12, lo = 1.01)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#evReport}
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian preview"}
+
+In a Bayesian analysis, g-computation is done on every posterior draw of the outcome model, giving a full posterior for the causal risk ratio. Sensitivity to unmeasured confounding can be expressed as a prior on the bias parameters, so that uncertainty about the confounder enters the final interval (probabilistic bias analysis, Lesson 13).
+
+:::
+
+::: {.further}
+
+**Further reading:** @vanderweele2017sensitivity introduced the E-value; @fox2021applying on quantitative bias analysis more generally; @hernan2020causal on the role of each identification assumption.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- A causal effect compares potential outcomes for the same population under two well-defined interventions. Only one is ever observed.
+- Identifying it from data needs exchangeability (no unmeasured confounding), positivity and consistency.
+- G-computation predicts both worlds from an outcome model and averages, giving marginal risk ratios and risk differences.
+- Inverse probability weighting balances confounders by weighting; check balance, overlap and extreme weights.
+- Don't put non-confounders that strongly predict exposure into a propensity model: they worsen positivity and precision.
+- E-values express how strong unmeasured confounding would need to be to explain an association away.
+
+```{=html}
+<div class="done" data-lesson="lesson-12"><button type="button"></button><span></span></div>
+<script src="assets/lesson-12.js"></script>
+```
