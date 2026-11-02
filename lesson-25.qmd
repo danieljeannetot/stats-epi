@@ -1,0 +1,373 @@
+---
+title: "Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling"
+subtitle: "Part V · Bayesian modeling"
+description: "A complete analysis from question to report: district-specific distributed lag non-linear models, Bayesian pooling with a BYM2 spatial prior, heat- and cold-attributable visits on every posterior draw, sensitivity analysis and reporting."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 5 hours]{} [Before this: the whole course, especially Lessons 14, 16, 17, 18 and 24]{} [Threads: all five]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- plan a multi-location temperature–health analysis, and choose between one-stage and two-stage designs;
+- fit a distributed lag non-linear model in each district, and summarize it by its cumulative exposure–response curve;
+- pool the district curves with a Bayesian hierarchical model whose prior lets neighboring districts borrow strength from each other;
+- compute minimum morbidity temperatures, attributable visits and exceedance probabilities on every posterior draw;
+- check, stress-test and report the analysis.
+
+:::
+
+::: {.why}
+
+**Why it matters.** A city health department wants to know which districts suffer most from heat, so that cooling centers, outreach and warnings go where they matter. Each district's own data are too few for a reliable answer; the city-wide answer ignores real differences. This lesson brings the course together to answer the question properly: the DLNM of Lesson 16, the pooling of Lessons 18 and 24, the spatial structure of Lesson 17, and the burden calculations of Lesson 14, with uncertainty carried through every step.
+
+:::
+
+## 25.1 The question, the data and the design {#s1}
+
+**The question.** For each of the city's 12 districts: how do daily emergency visits depend on temperature, accumulated over three weeks of lags; at what temperature is risk lowest; and how many visits each year are attributable to heat and to cold?
+
+**The design.** A **two-stage** analysis, the standard in multi-location studies [@gasparrini2012multivariate; @sera2022extended]. Stage 1 fits a DLNM in each district separately. Stage 2 pools the districts' cumulative curves with a Bayesian hierarchical model. A one-stage model, fitting everything at once, is possible in Stan or INLA but much slower; with daily counts in hundreds per district, the two-stage approximation is accurate.
+
+**Two versions of the data.** In the simulated city, all districts share the same underlying sensitivity to heat; only their temperatures and age structures differ. That is a legitimate finding, but it makes the case for spatial modeling hard to see. So the lesson also offers a **vulnerability scenario**. The heat sensitivity there is increased overall and varies between districts, rising with the urban heat island and with deprivation, so that central and deprived districts are much more sensitive. The data are regenerated in the browser; the course data files are unchanged.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Data"><button type="button" id="dReal" aria-pressed="true">The simulated city</button><button type="button" id="dScn" aria-pressed="false">Vulnerability scenario</button></div>
+  <svg id="dMap" viewBox="0 0 520 340" role="img" aria-label="Map of the true relative risk at 30 degrees by district"></svg>
+</div>
+<div class="cpanel"><div class="now" id="dNow"></div></div>
+</div>
+```
+
+::: {.further}
+
+**Further reading:** @gasparrini2015mortality is a landmark multi-location study using this design; @sera2022extended review extensions of two-stage designs; @bhaskaran2013time on the time-series foundations.
+
+:::
+
+## 25.2 Stage 1: a DLNM in each district {#s2}
+
+Each district gets the model of Lesson 16: quasi-Poisson regression of daily visits on a cross-basis of its own temperature (a natural spline in temperature, three degrees of freedom, with knots common to all districts, crossed with a natural spline in lag over 0–21 days), a spline of time with 7 degrees of freedom per year, and day of week. The fitted surface is then **reduced** to its cumulative curve: three coefficients per district, with their 3 × 3 covariance matrix. These 12 small summaries are all that stage 2 needs.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns"><button type="button" id="s1Run">Fit the 12 district DLNMs</button></div>
+  <div class="small" id="s1Prog"></div>
+  <svg id="s1Plot" viewBox="0 0 520 330" role="img" aria-label="District cumulative curves from stage 1"></svg>
+  <div class="legend"><span><i style="background:var(--p1)"></i>stage 1 estimate, 95% CI</span><span><i style="background:var(--c-ink)"></i>truth</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="s1Stats"></div><div class="now" id="s1Now"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\log\mu_{jt} = \alpha_j + \sum_{k,q}\eta_{jkq}\, w_{jt,kq} + s_j(t) + \gamma_j^\top \mathrm{dow}_t$$
+$$\hat\theta_{jk} = \sum_q \hat\eta_{jkq}\sum_{\ell=0}^{21} c_q(\ell), \qquad \log RR_j(x) = \sum_k \hat\theta_{jk}\,\big[b_k(x) - b_k(x_{\text{ref}})\big]$$
+
+::: {.note}
+
+$\hat\theta_j$: district $j$'s three cumulative coefficients, with covariance $S_j$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+cb <- dlnm::crossbasis(d$temp, lag = 21,
+  argvar = list(fun = "ns", knots = kn),
+  arglag = list(fun = "ns",
+                knots = dlnm::logknots(21, 3)))
+fit <- glm(visits ~ cb + splines::ns(t, 35) + dow,
+           family = quasipoisson, data = d)
+red <- dlnm::crossreduce(cb, fit)   # overall
+coef(red); vcov(red)
+```
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): stage 1 for all districts with dlnm"}
+
+```{r}
+dd <- visits |>
+  group_by(district_id, district, date) |>
+  summarise(visits = sum(visits), temp = first(temp), dow = first(dow), .groups = "drop") |>
+  group_by(district_id) |>
+  mutate(t = row_number()) |>
+  ungroup()
+kn <- quantile(dd$temp, c(0.05, 0.35, 0.65, 0.95))    # knots common to all districts
+
+stage1 <- dd |>
+  group_by(district_id, district) |>
+  group_modify(\(d, key) {
+    cb <- dlnm::crossbasis(d$temp, lag = 21,
+            argvar = list(fun = "ns", knots = kn[2:3], Boundary.knots = kn[c(1, 4)]),
+            arglag = list(fun = "ns", knots = dlnm::logknots(21, 3)))
+    fit <- glm(visits ~ cb + splines::ns(t, df = 35) + dow, family = quasipoisson, data = d)
+    red <- dlnm::crossreduce(cb, fit)
+    tibble(coef = list(coef(red)), vcov = list(vcov(red)))
+  }) |>
+  ungroup()
+stage1$coef[[1]]     # three cumulative coefficients for the first district
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @gasparrini2011distributed on `crossreduce()`; @gasparrini2012multivariate on reducing DLNMs before pooling; @gasparrini2010distributed on the cross-basis.
+
+:::
+
+## 25.3 Stage 2: Bayesian pooling with a spatial prior {#s3}
+
+Stage 2 treats each district's coefficients as a noisy measurement of its true coefficients, θ̂_j ~ N(θ_j, S_j), and models the true ones as a city-wide mean plus a district deviation. The **BYM2 prior** splits each deviation into an unstructured part (any district can differ) and a spatially structured part (neighbors tend to differ in the same way), with a mixing parameter φ, the share of variation that is spatial, estimated from the data. Compare three choices: no pooling (stage 1 as it is), exchangeable pooling (φ = 0, the Bayesian version of Lesson 18), and BYM2.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Pooling"><button type="button" id="pNone" aria-pressed="false">No pooling</button><button type="button" id="pEx" aria-pressed="false">Exchangeable</button><button type="button" id="pBym" aria-pressed="true">BYM2 (spatial)</button></div>
+  <div class="btns"><button type="button" id="s2Run">Run stage 2 (all three)</button></div>
+  <div class="small" id="s2Prog"></div>
+  <svg id="s2Plot" viewBox="0 0 520 330" role="img" aria-label="District curves after pooling"></svg>
+  <div class="legend"><span><i style="background:var(--c-post)"></i>posterior median, 95% CrI</span><span><i style="background:var(--c-ink)"></i>truth</span></div>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="s2Tab"></table></div><div class="now" id="s2Now"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\hat\theta_j \sim \mathrm{N}(\theta_j, S_j), \qquad \theta_{jk} = \mu_k + \sigma_k\big(\sqrt{1-\phi}\, v_{jk} + \sqrt{\phi}\, u_{jk}\big)$$
+$$v_{jk} \sim \mathrm{N}(0, 1), \qquad u_{\cdot k} \sim \text{ICAR (scaled)}, \qquad \sigma_k \sim \text{Half-N}(0, 0.3^2), \quad \phi \sim \mathrm{U}(0, 1)$$
+
+::: {.note}
+
+ICAR: each district's $u$ is centered on the average of its neighbors'. Scaling makes $\sigma_k$ comparable whatever the map.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+# INLA, one coefficient at a time (sketch)
+f <- theta_hat ~ 1 + f(district, model = "bym2",
+                       graph = g, scale.model = TRUE)
+INLA::inla(f, data = s1k, family = "gaussian",
+  control.family = list(hyper = list(prec =
+    list(initial = log(1 / se2), fixed = TRUE))))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#s2Report}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @besag1991bayesian introduced the BYM model; @riebler2016intuitive the BYM2 parameterization used here; @morris2019bayesian implement it in Stan; @simpson2017penalising on penalized complexity priors for φ and σ.
+
+:::
+
+## 25.4 Burden on every posterior draw {#s4}
+
+Every posterior draw gives a complete set of district curves, so every derived quantity gets a posterior too: each district's minimum morbidity temperature, its heat- and cold-attributable visits, and the probability that its heat burden exceeds a policy threshold. That last quantity, an **exceedance probability**, is often what decision-makers need: not "what is the burden?" but "how sure are we that it is high here?".
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="bT">Threshold: heat-attributable visits per 100,000 residents per year</label><input type="range" id="bT" min="5" max="400" step="5" value="60"><output id="bTO"></output></div>
+  <svg id="bMap1" viewBox="0 0 520 340" role="img" aria-label="Map of heat-attributable visits"></svg>
+  <svg id="bMap2" viewBox="0 0 520 340" role="img" aria-label="Map of exceedance probabilities"></svg>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="bTab"></table></div><div class="now" id="bNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\mathrm{AN}_j^{(s)} = \sum_{t:\, T_{jt} > \mathrm{MMT}_j^{(s)}} y_{jt}\Big(1 - e^{-\{f_j^{(s)}(T_{jt}) - f_j^{(s)}(\mathrm{MMT}_j^{(s)})\}}\Big)$$
+$$P\big(\mathrm{AN}_j / \mathrm{pop}_j > c \mid y\big) \approx \frac{1}{S}\sum_s 1\{\mathrm{AN}_j^{(s)} / \mathrm{pop}_j > c\}$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+# for each draw s and district j:
+f   <- B %*% theta[s, j, ]           # curve
+mmt <- grid[which.min(f)]
+an  <- sum(y_j[temp_j > mmt] *
+           (1 - exp(-(f_t - f_mmt))))
+# then summarise over draws:
+mean(an / pop_j * 1e5 / years > 60)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#bReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @gasparrini2014attributable on attributable numbers from DLNMs; @gasparrini2015mortality on heat and cold burden across locations; @rockhill1998use on interpreting attributable fractions.
+
+:::
+
+## 25.5 Checking, sensitivity and reporting {#s5}
+
+Before reporting, three checks. **Sensitivity to the prior:** with only 12 districts, the prior on the between-district SDs matters (Lesson 24). **Comparison with simpler analyses:** does the pooled answer agree with Lesson 16's city-wide curve and Lesson 18's two-stage estimates? **Comparison with the truth**, available only because the data are simulated: did pooling bring the district curves closer to it?
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="sP">Prior on the between-district SDs σ_k</label><select id="sP"><option value="0.3">half-normal(0, 0.3²), as above</option><option value="1">half-normal(0, 1²), weaker</option><option value="0.1">half-normal(0, 0.1²), stronger pooling</option></select></div>
+  <div class="btns"><button type="button" id="sRun">Refit BYM2 with this prior</button></div>
+  <div class="small" id="sProg"></div>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="sTab"></table></div><div class="now" id="sNow"></div></div>
+</div>
+```
+
+**Reporting the analysis.** A complete report states the question, the two-stage design and every modeling choice (bases, knots, lags, time control), the stage-2 model and its priors, the computation (sampler, iterations, convergence checks), the results with credible intervals and exceedance probabilities, and the sensitivity analyses. The paragraph below is generated from your results.
+
+::::: {.triad}
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#sReport}
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Extensions"}
+
+A **random-walk prior** on the long-term trend, instead of a spline of time, lets the data choose its smoothness (Lesson 20): in INLA, `f(week, model = "rw2")`; in brms, `s(t, bs = "ps")`. A **one-stage model** fits all districts' daily counts at once, with the BYM2 prior on the cross-basis coefficients; it avoids the stage-2 normal approximation but takes hours rather than seconds. **Effect modifiers** such as deprivation can enter stage 2 as covariates (meta-regression), separating explained from unexplained spatial variation.
+
+:::
+
+**The five threads, one last time.**
+
+| Thread | Where it appears in this analysis |
+|---|---|
+| Likelihood | Each district's DLNM is a likelihood for its coefficients; stage 2 uses its normal approximation. |
+| Uncertainty | Every curve, MMT and attributable number carries a posterior interval, propagated from stage 1 through stage 2. |
+| Shrinkage | District curves are pulled toward the city mean and toward their neighbors, in proportion to how imprecise they are. |
+| Bias | Time control by splines guards against seasonal confounding; temperature is measured at district level, not personally (Lesson 13). |
+| Frequentist ↔ Bayesian | Stage 1 is a frequentist GLM; stage 2 is Bayesian; the combination is standard practice and can be compared with fully frequentist two-stage meta-analysis. |
+
+::: {.further}
+
+**Further reading:** @kruschke2021bayesian on reporting Bayesian analyses; @gelman2020bayesian on the full Bayesian workflow; @riebler2016intuitive on prior choices for BYM2.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Multi-location temperature studies usually use two stages: a DLNM per location, reduced to its cumulative curve, then pooling.
+- Pooling stabilizes district curves; a BYM2 prior lets districts borrow from neighbors as well as from the city, in proportions estimated from the data.
+- With few districts, spatial pooling may add little to exchangeable pooling; the data decide, and the result should be reported either way.
+- Every derived quantity, including MMTs, attributable visits and exceedance probabilities, is computed on each posterior draw.
+- Check prior sensitivity, compare with simpler analyses, and report every modeling choice.
+
+```{=html}
+<div class="done" data-lesson="lesson-25"><button type="button"></button><span></span></div>
+<script src="assets/bayes-engine.js"></script>
+<script src="assets/lesson-25.js"></script>
+```

@@ -82,6 +82,14 @@ from being linked, wrap it in `::: {.no-gloss}`.
 6. Run `python3 tools/tidy_fences.py`. Pandoc, and so Quarto, only recognizes a `:::` block when it
    has a blank line before and after it; the script adds any that are missing.
 
+## Optional packages
+
+Some lessons show code that is not run when the site builds, so these packages are not
+needed to render: `brms` and `loo` (Part V), `bain` (Lesson 23), `INLA` (Lesson 25; install from
+https://www.r-inla.org, it is not on CRAN), and `bartisan`, `marginaleffects`, `dlmtree` and
+`stan4bart` (Lesson 26). To run that code yourself:
+`install.packages(c("brms", "loo", "bain", "bartisan", "marginaleffects", "dlmtree", "stan4bart"))`.
+
 ## References
 
 All references are in `references.bib`. Cite them in a lesson with `@key` (narrative) or

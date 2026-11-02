@@ -13,8 +13,8 @@ project:
 website:
   title: "Statistics for epidemiology"
   description: "An interactive course from probability to Bayesian hierarchical models, for MSc students in epidemiology and public health."
-  # site-url: https://YOUR-USER.github.io/stats-epi-course/
-  # repo-url: https://github.com/YOUR-USER/stats-epi-course
+  site-url: https://danieljeannetot.github.io/stats-epi/
+  repo-url: https://github.com/danieljeannetot/stats-epi
   search: true
   page-navigation: true
   reader-mode: false
@@ -63,6 +63,12 @@ website:
           - lesson-20.qmd
           - lesson-21.qmd
           - lesson-22.qmd
+                    - lesson-23.qmd
+          - lesson-24.qmd
+          - lesson-25.qmd
+      - section: "Part VI · Machine learning meets Bayesian inference"
+        contents:
+          - lesson-26.qmd
   page-footer:
     left: "All data are simulated. Course text CC BY 4.0, code MIT."
     right: "Built with [Quarto](https://quarto.org)"

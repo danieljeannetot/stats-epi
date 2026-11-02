@@ -1,0 +1,184 @@
+# Glossary source, part 5: tree-based methods and Bayesian additive regression trees.
+
+- id: regression-tree
+  term: Regression tree
+  category: Tree-based methods
+  aliases: [regression tree, regression trees, decision tree, decision trees, CART]
+  short: >-
+    A model that splits the data by a sequence of yes/no questions and predicts the average outcome in each final group (leaf).
+  full: >-
+    A tree's prediction is a step function of the predictors. A path that splits on one variable
+    and then another represents an interaction, found without being specified. Single trees are
+    unstable: a slightly different sample can give quite different splits.
+  formal: >-
+    $g(x; T, M) = \mu_b$ when $x$ falls in leaf $b$ of tree $T$, with $M = (\mu_1, \dots, \mu_B)$.
+  confusion: >-
+    A regression tree is not a decision tree in the decision-analysis sense, which maps choices to
+    expected utilities.
+  related: [bart, step-function-trees]
+  lessons: [26]
+
+- id: step-function-trees
+  term: Leaf
+  category: Tree-based methods
+  aliases: [leaf, leaves, terminal node, terminal nodes]
+  pre: [a, each, per, the, tree's]
+  short: >-
+    A final group of a regression tree, which gets one predicted value.
+  related: [regression-tree, bart]
+  lessons: [26]
+
+- id: bart
+  term: Bayesian additive regression trees (BART)
+  category: Tree-based methods
+  aliases: [BART, Bayesian additive regression trees]
+  short: >-
+    A Bayesian model whose regression function is a sum of many small trees, each kept small by its prior; fitted by MCMC.
+  full: >-
+    BART learns nonlinear effects and interactions without their form being specified, and returns
+    posterior draws, so any derived quantity has a credible interval. The prior on tree size and leaf
+    values regularizes it so strongly that defaults work across many problems. It is widely used as
+    the outcome model in g-computation. It can't extrapolate beyond the data (predictions are flat
+    there), and it doesn't model autocorrelation, lags or spatial structure unless extended.
+  formal: >-
+    $y_i = \sum_{j=1}^{m} g(x_i; T_j, M_j) + \varepsilon_i$, with a prior making a node at depth $d$
+    split with probability $\gamma(1 + d)^{-\beta}$ and leaf values $\mu \sim \mathrm{Normal}(0,
+    \sigma_\mu^2)$, $\sigma_\mu \propto 1/(k\sqrt{m})$.
+  epi: >-
+    Suited to cohort and cross-sectional studies with many confounders of unknown form, to effect
+    heterogeneity and to mixtures; not a replacement for time-series, DLNM or spatial models.
+  r: |-
+    bartisan::bartisan(asthma ~ ses + green + vc(no2, ~ 1),
+                       data = cohort, family = binomial())
+  related: [regression-tree, soft-decision-rule, regularization-induced-confounding, bayesian-causal-forest, partial-dependence, g-computation]
+  lessons: [26]
+
+- id: soft-decision-rule
+  term: Soft decision rule
+  category: Tree-based methods
+  aliases: [soft decision rule, soft decision rules, soft rules, soft rule, SoftBART]
+  short: >-
+    A tree split that sends observations near the cut-point partly to both sides, so the fitted function is smooth rather than a step.
+  formal: >-
+    An observation goes left with weight $\psi\{(c - x_j)/\tau\}$, where $\psi$ is a distribution
+    function and $\tau$ a bandwidth; as $\tau \to 0$ the hard rule returns.
+  related: [bart, regression-tree]
+  lessons: [26]
+
+- id: partial-dependence
+  term: Partial dependence
+  category: Tree-based methods
+  aliases: [partial dependence, partial dependence plot, partial dependence plots]
+  short: >-
+    The model's average prediction as one predictor is varied over a grid, with the other predictors kept at their observed values.
+  full: >-
+    It summarizes how a flexible model, which has no coefficients, uses a predictor. With posterior
+    draws it comes with a credible band. Like any average over the sample, it can hide strong
+    interactions.
+  formal: >-
+    $\bar f(x_j = v) = \frac{1}{n}\sum_i f(v, x_{i,-j})$, computed on each posterior draw.
+  related: [bart, g-computation]
+  lessons: [26]
+
+- id: regularization-induced-confounding
+  term: Regularization-induced confounding
+  category: Tree-based methods
+  aliases: [regularization-induced confounding, RIC]
+  short: >-
+    Bias that arises when shrinkage in a flexible model blurs a weak exposure effect with the effects of confounders that strongly predict the exposure.
+  full: >-
+    Described for BART by Hahn, Murray and Carvalho (2020). Remedies give the exposure its own
+    model component (a varying or constant coefficient) and add an estimated propensity score as a
+    predictor, as Bayesian causal forests do.
+  related: [bayesian-causal-forest, bart, propensity-score]
+  lessons: [26]
+
+- id: bayesian-causal-forest
+  term: Bayesian causal forest (BCF)
+  category: Tree-based methods
+  aliases: [Bayesian causal forest, Bayesian causal forests, BCF]
+  short: >-
+    A BART-based model with one forest for the outcome without exposure and a separate, more strongly shrunk forest for how the exposure effect varies.
+  full: >-
+    BCF estimates conditional average treatment effects with well-calibrated uncertainty and reduces
+    regularization-induced confounding by including an estimated propensity score among the
+    predictors of the outcome forest.
+  formal: >-
+    $g(\mu_i) = f_0(z_i, \hat e(z_i)) + a_i\, \tau(z_i)$, with separate BART priors on $f_0$ and $\tau$.
+  r: |-
+    bartisan::bcf(death ~ age + sex + ..., treat = ~ rhc,
+                  data = rhc, family = binomial())
+  related: [bart, regularization-induced-confounding, effect-modification, propensity-score]
+  lessons: [26]
+
+- id: treed-dlm
+  term: Treed distributed lag model
+  category: Tree-based methods
+  aliases: [treed distributed lag model, treed distributed lag models, treed DLM, treed DLNM, TDLNM, dlmtree]
+  short: >-
+    A distributed lag model whose lag (and exposure) structure is built from regression trees rather than splines, good at locating sharp critical windows.
+  full: >-
+    Introduced by Mork and Wilson; trees partition the exposure–time space into blocks with constant
+    effects, so effects can switch on and off over lags or weeks of pregnancy. Implemented in the R
+    package dlmtree.
+  related: [dlnm, bart]
+  lessons: [26]
+
+- id: tsbart
+  term: BART with targeted smoothing (tsBART)
+  category: Tree-based methods
+  aliases: [tsBART, targeted smoothing]
+  short: >-
+    A BART variant whose leaves hold smooth functions of one chosen variable, such as time or gestational age, so the fit is smooth in that variable and flexible in the rest.
+  related: [bart, soft-decision-rule]
+  lessons: [26]
+
+- id: cl-bart
+  term: Conditional logistic BART (CL-BART)
+  category: Tree-based methods
+  aliases: [CL-BART, conditional logistic BART]
+  short: >-
+    BART inside the conditional likelihood of a case-crossover design, used to estimate how the effect of an acute exposure varies between people.
+  related: [bart, case-crossover]
+  lessons: [26]
+
+- id: forecasting
+  term: Forecasting
+  category: Prediction and forecasting
+  aliases: [forecasting, forecasts, forecast, forecaster, forecasters]
+  short: >-
+    Predicting future values of a time-ordered quantity from a forecast origin, for a given horizon, using only information available at that origin.
+  full: >-
+    Every forecast is a prediction, but not every prediction is a forecast. What defines a forecast is
+    the information set: anything not known at the origin, including the future values of inputs such
+    as temperature, must itself be forecast. Uncertainty grows with the horizon, and accuracy must be
+    judged on time-ordered, out-of-sample data.
+  formal: >-
+    $\hat y_{t+h \mid t} = E[Y_{t+h} \mid \mathcal{F}_t]$, where $\mathcal{F}_t$ is the information available at origin $t$ and $h$ is the horizon.
+  confusion: >-
+    Not the same as prediction in general (which may concern the present or past, such as an unmonitored
+    address's NO₂), nor as effect estimation (which asks what would happen under a different exposure).
+  related: [data-leakage, rolling-origin, prediction-interval, cross-validation]
+  lessons: [26]
+
+- id: data-leakage
+  term: Data leakage
+  category: Prediction and forecasting
+  aliases: [data leakage, leakage, look-ahead bias]
+  short: >-
+    Using information when fitting or evaluating a predictive model that wouldn't be available when the prediction is actually made, so accuracy looks better than it is.
+  full: >-
+    In forecasting, leakage comes from observed future inputs (tomorrow's actual temperature), from
+    features computed with future data (a spline of time or a centered moving average over the whole
+    series), and from random cross-validation, which lets neighboring days inform each other.
+  related: [forecasting, rolling-origin, cross-validation]
+  lessons: [26]
+
+- id: rolling-origin
+  term: Rolling-origin evaluation
+  category: Prediction and forecasting
+  aliases: [rolling-origin evaluation, rolling origin, rolling forecast origin, time-series cross-validation, backtest, backtesting]
+  short: >-
+    Evaluating forecasts by repeatedly fitting on data up to an origin, forecasting the next period, and moving the origin forward.
+  related: [forecasting, data-leakage, cross-validation]
+  lessons: [26]

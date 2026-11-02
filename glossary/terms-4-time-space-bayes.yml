@@ -959,3 +959,39 @@
     with $H$ the negative Hessian of the log posterior at its mode $\hat{\theta}$.
   related: [inla, marginal-likelihood]
   lessons: [23, 25]
+
+- id: pareto-k
+  term: Pareto k diagnostic
+  category: Bayesian model comparison
+  aliases: [Pareto k, Pareto k̂, Pareto-smoothed importance sampling, PSIS]
+  short: >-
+    A per-observation diagnostic of PSIS-LOO; values above about 0.7 mean that observation's leave-one-out estimate is unreliable and needs an exact refit.
+  related: [loo]
+  lessons: [23]
+
+- id: model-stacking
+  term: Stacking
+  category: Bayesian model comparison
+  aliases: [stacking, model stacking]
+  short: >-
+    Combining the predictive distributions of several models with weights chosen to maximize leave-one-out predictive accuracy, instead of choosing one model.
+  related: [loo]
+  lessons: [23]
+
+- id: two-stage-design
+  term: Two-stage design
+  category: Hierarchical models
+  aliases: [two-stage design, two-stage designs]
+  short: >-
+    Fitting a model in each location first, then pooling the location-specific estimates in a second-stage (meta-analytic) model; standard in multi-city studies.
+  related: [heterogeneity, partial-pooling, bym2]
+  lessons: [18, 25]
+
+- id: exceedance-probability
+  term: Exceedance probability
+  category: Hierarchical models
+  aliases: [exceedance probability, exceedance probabilities]
+  short: >-
+    The posterior probability that a quantity, such as an area's risk or burden, exceeds a chosen threshold; computed as the share of posterior draws above it.
+  related: [bym2]
+  lessons: [25]

@@ -1,0 +1,330 @@
+---
+title: "Lesson 24 · Bayesian hierarchical models"
+subtitle: "Part V · Bayesian modeling"
+description: "Full Bayesian partial pooling, priors for variance parameters, the funnel and the non-centered parameterization, and a Bayesian measurement-error model for exposure."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 3.5 hours]{} [Before this: Lessons 13, 18 and 19–22]{} [Threads: shrinkage · uncertainty · bias · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- fit a hierarchical model with a posterior for the between-group SD, and explain why empirical Bayes intervals are too narrow;
+- choose and defend a prior for a variance parameter, especially with few groups;
+- recognize the funnel in a hierarchical posterior, its divergent transitions, and fix it with a non-centered parameterization;
+- build a measurement-error model in which the true exposure is a parameter, and compare it with regression calibration.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Hierarchical models are the most widely used Bayesian models in epidemiology: districts in a multi-city study, schools in a cohort, hospitals in a registry. They are where Bayesian analysis most clearly beats the alternatives, because uncertainty about how much groups differ is carried into every group's estimate. They are also where Bayesian computation most often fails silently. And the same idea, treating an unknown quantity as a parameter with a prior, handles measurement error naturally.
+
+:::
+
+## 24.1 Full Bayes versus empirical Bayes {#s1}
+
+Lesson 18 estimated the between-school SD τ, then plugged it in as if it were known: **empirical Bayes**. A **full Bayesian** model gives τ its own prior and posterior, and averages over its uncertainty. How much this matters depends on how well the data pin down τ. Compare the 95% intervals for each school's asthma risk under both approaches with the true school risks, known from the simulation.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="fG">Groups</label><select id="fG"><option value="school">40 schools: asthma risk</option><option value="district">12 districts: asthma risk</option><option value="heat">12 districts: heat effects (Lesson 18)</option></select></div>
+  <svg id="fTau" viewBox="0 0 520 200" role="img" aria-label="Posterior of the between-group SD"></svg>
+  <svg id="fInt" viewBox="0 0 520 300" role="img" aria-label="Intervals for each group's risk"></svg>
+  <div class="legend"><span><i style="background:var(--c-lik)"></i>empirical Bayes 95% interval</span><span><i style="background:var(--c-post)"></i>full Bayes 95% interval</span><span><i style="background:var(--c-ink)"></i>truth</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="fStats"></div><div class="now" id="fNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\hat\theta_j \sim \mathrm{Normal}(\theta_j, v_j), \quad \theta_j \sim \mathrm{Normal}(\mu, \tau^2), \quad \tau \sim \text{Half-Normal}(0, 1)$$
+$$p(\tau \mid y) \propto p(\tau)\, V_\mu^{1/2} \prod_j (v_j + \tau^2)^{-1/2} \exp\!\left\{-\frac{(\hat\theta_j - \hat\mu_\tau)^2}{2(v_j + \tau^2)}\right\}$$
+
+::: {.note}
+
+$\hat\theta_j$: school $j$'s log-odds of asthma, with variance $v_j$; $\hat\mu_\tau$ and $V_\mu$: precision-weighted mean and its variance given $\tau$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+asthma[i] ~ bernoulli(p[i])
+logit(p[i]) = a + u[school[i]]
+u[j] ~ normal(0, tau)
+tau ~ half_normal(0, 1)
+
+brms::brm(asthma ~ 1 + (1 | school),
+  family = bernoulli, data = cohort,
+  prior = brms::prior(normal(0, 1), class = sd))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#fReport}
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): the marginal posterior of τ on a grid"}
+
+```{r}
+sch <- cohort |>
+  group_by(school) |>
+  summarise(n = n(), d = sum(asthma), .groups = "drop") |>
+  mutate(theta = qlogis((d + 0.5) / (n + 1)), v = 1 / (d + 0.5) + 1 / (n - d + 0.5))
+
+log_post_tau <- function(tau) {
+  w <- 1 / (sch$v + tau^2); mu <- sum(w * sch$theta) / sum(w)
+  dnorm(tau, 0, 1, log = TRUE) + 0.5 * log(1 / sum(w)) +
+    sum(dnorm(sch$theta, mu, sqrt(sch$v + tau^2), log = TRUE))
+}
+grid <- tibble(tau = seq(0.001, 1.5, by = 0.001)) |>
+  mutate(lp = map_dbl(tau, log_post_tau), post = exp(lp - max(lp)) / sum(exp(lp - max(lp))))
+grid |> summarise(median = tau[which(cumsum(post) >= 0.5)[1]],
+                  low = tau[which(cumsum(post) >= 0.025)[1]],
+                  high = tau[which(cumsum(post) >= 0.975)[1]])
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @rubin1981estimation is the classic "eight schools" analysis; @gelman2013bayesian on hierarchical models and the marginal posterior of τ; @gelman2007data on multilevel models in practice.
+
+:::
+
+## 24.2 Priors for variance parameters {#s2}
+
+With few groups, the data say little about τ, and the prior matters. The once-popular inverse-gamma(ε, ε) prior on τ², meant to be "uninformative", is not: it piles up mass near zero and can dominate the posterior. Half-normal and half-Cauchy priors on τ itself behave much better. Compare them on the 12 district heat effects, whose between-district SD is close to zero, and on the asthma risks of districts and schools.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pG">Groups</label><select id="pG"><option value="heat" selected>12 districts: heat effects (Lesson 18)</option><option value="district">12 districts: asthma risk</option><option value="school">40 schools: asthma risk</option></select></div>
+  <div class="ctrl"><label for="pP">Prior for τ</label><select id="pP"><option value="hn">half-normal(0, 1)</option><option value="hc">half-Cauchy(0, 0.5)</option><option value="un">uniform(0, 10)</option><option value="ig">inverse-gamma(0.001, 0.001) on τ²</option></select></div>
+  <svg id="pPlot" viewBox="0 0 520 260" role="img" aria-label="Prior and posterior of tau"></svg>
+  <div class="legend"><span><i style="background:var(--c-prior)"></i>prior</span><span><i style="background:var(--c-post)"></i>posterior</span></div>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="pTab"></table></div><div class="now" id="pNow"></div></div>
+</div>
+```
+
+::: {.callout-warning title="Common pitfall"}
+
+Using inverse-gamma(0.001, 0.001), or another "vague" prior, on a variance with few groups, and treating the result as data-driven. Check what the posterior of τ looks like under two or three reasonable priors; with fewer than about ten groups, report it as a sensitivity analysis.
+
+:::
+
+::: {.further}
+
+**Further reading:** @gelman2006prior is the standard reference on variance priors; @simpson2017penalising introduce penalized complexity priors, which shrink toward the simpler model; @mcelreath2020statistical on priors for hierarchical models in practice.
+
+:::
+
+## 24.3 The funnel, divergences and non-centering {#s3}
+
+The two-stage analysis of Lesson 18 pooled the 12 districts' heat effects and found almost no heterogeneity. Now fit the same model fully Bayesian with the HMC sampler of Lesson 21. When τ is small, the district effects θ_j are forced close together; when τ is large, they can spread out. The posterior is shaped like a **funnel**, with a narrow neck that a sampler tuned for the wide mouth can't enter. Stan warns of this with **divergent transitions**. The cure is to sample standardized effects z_j and compute θ_j = μ + τ z_j: the **non-centered parameterization**.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Parameterization"><button type="button" id="nC" aria-pressed="true">Centered: sample θ directly</button><button type="button" id="nN" aria-pressed="false">Non-centered: θ = μ + τ z</button></div>
+  <div class="btns"><button type="button" id="nRun">Run HMC (3,000 iterations)</button></div>
+  <svg id="nPlot" viewBox="0 0 520 300" role="img" aria-label="Posterior draws of log tau against one district effect"></svg>
+  <div class="legend"><span><i style="background:var(--c-post)"></i>draws</span><span><i style="background:var(--c-bad)"></i>divergent transitions</span></div>
+</div>
+<div class="cpanel"><svg id="nTr" viewBox="0 0 520 150" role="img" aria-label="Trace of log tau"></svg><div class="statgrid" id="nStats"></div><div class="now" id="nNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\text{centered: } \theta_j \sim \mathrm{Normal}(\mu, \tau^2)$$
+$$\text{non-centered: } z_j \sim \mathrm{Normal}(0, 1), \quad \theta_j = \mu + \tau z_j$$
+
+::: {.note}
+
+The same model, written two ways. In the non-centered form, the sampler's coordinates ($z_j$) are independent of τ a priori, and the funnel disappears.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+# brms uses the non-centered form automatically;
+# if divergences remain:
+brms::brm(..., control = list(adapt_delta = 0.99))
+# in Stan:
+# vector[J] z;  theta = mu + tau * z;
+# z ~ std_normal();
+```
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @betancourt2015hamiltonian explain the funnel and divergences in hierarchical models; @papaspiliopoulos2007general on centered and non-centered parameterizations; @gabry2019visualization on diagnosing divergences visually.
+
+:::
+
+## 24.4 A Bayesian measurement-error model {#s4}
+
+Lesson 13 corrected for exposure measurement error with regression calibration, ignoring the uncertainty of the calibration step. A Bayesian model treats each child's **true NO₂ as an unknown parameter**, informed at once by an exposure model (traffic, green space, SES), by the error-prone modeled value, by personal monitors in the validation subsample, and by the outcome itself. Every source of uncertainty flows into the final estimate. Here it is fitted by a Gibbs sampler, alongside the naive and regression-calibration analyses, and compared with the truth.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="mV">Children with personal monitors</label><select id="mV"><option value="280">all 280</option><option value="60">60</option><option value="20">20</option></select></div>
+  <div class="btns"><button type="button" id="mRun">Run the samplers (about 5 seconds)</button></div>
+  <div class="small" id="mProg"></div>
+  <svg id="mPlot" viewBox="0 0 520 230" role="img" aria-label="Cases prevented under each method"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="mStats"></div><div class="now" id="mNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$X_i \sim \mathrm{Normal}(\alpha^\top z_i, \sigma_X^2) \quad \text{(exposure model)}$$
+$$W_i \sim \mathrm{Normal}(X_i, \sigma_U^2), \qquad P_i \sim \mathrm{Normal}(X_i, \sigma_P^2) \ \text{(validation only)}$$
+$$\Phi^{-1}\{P(Y_i = 1)\} = \beta_0 + \beta_X \frac{X_i - 25}{10} + \gamma^\top z_i$$
+
+::: {.note}
+
+$X$: true NO₂ (a parameter for every child); $W$: modeled NO₂; $P$: personal monitor, with known precision $\sigma_P = 2$ µg/m³.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+// Stan sketch
+parameters { vector[N] X; ... }
+model {
+  X ~ normal(Z * alpha, sigma_X);
+  W ~ normal(X, sigma_U);
+  P[val] ~ normal(X[val], 2);
+  y ~ bernoulli(Phi(b0 + bX * (X - 25) / 10
+                    + Z * g));
+}
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#mReport}
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Why the outcome helps estimate exposure"}
+
+In this model, a child's asthma status slightly informs their estimated true exposure. That can look like cheating, but it is exactly what a joint probability model implies, and it's why "regression calibration plus a second step" understates uncertainty. The exposure model must still be right: if the true NO₂ depends on something left out of it, the correction can be biased.
+
+:::
+
+::: {.further}
+
+**Further reading:** @richardson1993conditional introduced Bayesian measurement-error models in epidemiology; @gustafson2003measurement is a book-length treatment; @keogh2020stratos compare Bayesian and other corrections.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Full Bayesian hierarchical models carry uncertainty about the between-group SD into every group's estimate; empirical Bayes intervals are too narrow when τ is poorly known.
+- With few groups the prior for τ matters. Prefer half-normal or half-Cauchy priors on τ; avoid inverse-gamma(ε, ε).
+- Hierarchical posteriors can form funnels. Divergent transitions are the warning; the non-centered parameterization is the usual cure.
+- A Bayesian measurement-error model treats true exposure as a parameter, combining every source of information and uncertainty.
+
+```{=html}
+<div class="done" data-lesson="lesson-24"><button type="button"></button><span></span></div>
+<script src="assets/bayes-engine.js"></script>
+<script src="assets/lesson-24.js"></script>
+```

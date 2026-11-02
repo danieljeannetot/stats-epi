@@ -1,0 +1,705 @@
+---
+title: "Lesson 26 · Bayesian additive regression trees (BART) and bartisan"
+subtitle: "Part VI · Machine learning meets Bayesian inference"
+description: "Regression trees, sums of trees, the BART prior and sampler, BART for causal effects, how BART compares with the models in this course, whether it is fit for purpose in environmental epidemiology, the bartisan package, BART extensions for lags, space and time, and the difference between prediction, forecasting and effect estimation."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 4 hours]{} [Before this: Lessons 11, 12, 16, 18 and 19–22]{} [Threads: shrinkage · bias · frequentist ↔ Bayesian]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- explain what a regression tree is, and why a single tree is a poor model on its own;
+- describe BART as a sum of many small trees, each kept small by a prior;
+- explain what the BART prior does, and why BART needs little tuning;
+- use BART as the outcome model in g-computation, and explain regularization-induced confounding and how separate exposure terms address it;
+- compare BART with the GLMs, splines, DLNMs and hierarchical models of this course;
+- judge where BART is, and is not, fit for purpose in environmental epidemiology;
+- fit, check and interpret a BART model with the bartisan package;
+- choose among BART extensions for lagged, temporal, spatial and clustered data;
+- distinguish prediction, forecasting and effect estimation, and evaluate a forecast honestly.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Every model so far has asked you to choose its shape: which terms are linear, where the splines bend, which variables interact. When the confounders are many and their effects unknown, those choices are where bias creeps in. BART takes a different route. It learns the shape from the data, yet stays a Bayesian model, so it returns posterior draws and credible intervals for anything you compute from it. That combination has made it one of the most successful methods for estimating causal effects. It is not, however, a universal replacement for the structured models of Parts II to V, and knowing why is as important as knowing how to use it.
+
+:::
+
+## 26.1 One regression tree {#s1}
+
+A **regression tree** splits the data with a sequence of yes/no questions ("is temperature below 3.2°C?") and predicts the average outcome in each final group, or **leaf**. The result is a step function. A greedy algorithm (CART) chooses each split to reduce the squared error as much as possible. Make the tree deeper and watch it go from too crude to fitting noise.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="tD">Tree depth</label><input type="range" id="tD" min="1" max="8" value="2"><output id="tDO"></output></div>
+  <div class="ctrl"><label for="tN">Days used to grow the tree</label><input type="range" id="tN" min="60" max="1827" step="1" value="1827"><output id="tNO"></output></div>
+  <svg id="tPlot" viewBox="0 0 520 300" role="img" aria-label="A regression tree's step function"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="tStats"></div><div class="now" id="tNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$g(x; T, M) = \mu_b \ \text{ if } x \text{ falls in leaf } b$$
+
+::: {.note}
+
+$T$ = the tree's splitting rules; $M = (\mu_1, \dots, \mu_B)$ = one value per leaf.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+tree <- rpart::rpart(visits ~ temp,
+                     data = city_daily,
+                     control = rpart::rpart.control(
+                       maxdepth = 3, cp = 0))
+```
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): a single regression tree with rpart"}
+
+```{r}
+city_daily <- visits |>
+  group_by(date) |>
+  summarise(visits = sum(visits), temp = first(temp_city), .groups = "drop")
+
+tree <- rpart::rpart(visits ~ temp, data = city_daily,
+                     control = rpart::rpart.control(maxdepth = 3, cp = 0, minbucket = 20))
+tree
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @breiman1984classification introduced CART; @hastie2009elements explain trees, their instability and their ensembles; @breiman2001random introduced random forests, which average many deep trees.
+
+:::
+
+## 26.2 From one tree to a sum of trees {#s2}
+
+A single tree is unstable and blocky. **BART** instead adds up many small trees. Each tree, kept to two or three leaves by its prior, explains only a little; the sum can approximate smooth curves and interactions. Because BART is fitted by MCMC, each iteration gives a whole new set of trees, so the result is a posterior distribution of curves, with credible bands. Fit it, and compare with the spline of Lesson 11.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="bM">Number of trees, m</label><select id="bM"><option>1</option><option>5</option><option>20</option><option selected>50</option><option>200</option></select></div>
+  <div class="btns"><button type="button" id="bRun">Fit BART (600 MCMC iterations)</button><label class="small"><input type="checkbox" id="bSpl" checked> show the spline fit</label></div>
+  <div class="small" id="bProg"></div>
+  <svg id="bPlot" viewBox="0 0 520 300" role="img" aria-label="BART fit with credible band"></svg>
+  <div class="legend"><span><i style="background:var(--c-post)"></i>BART posterior mean and 95% band</span><span><i style="background:var(--p2)"></i>a few single posterior draws</span><span><i style="background:var(--p1)"></i>natural spline (Lesson 11)</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="bStats"></div><div class="now" id="bNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$y_i = f(x_i) + \varepsilon_i, \qquad f(x) = \sum_{j=1}^{m} g(x; T_j, M_j), \qquad \varepsilon_i \sim \mathrm{Normal}(0, \sigma^2)$$
+
+::: {.note}
+
+Each tree is updated in turn against the residual left by the others ("Bayesian backfitting"), by Metropolis–Hastings moves that grow or prune a leaf.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+fit <- bartisan::bartisan(
+  visits ~ temp, data = city_daily,
+  family = gaussian(),
+  control = bartisan::bartisan_control(
+    num_trees = 50, gate = "hard"))
+bartisan::partial_dependence(fit, ~ temp) |>
+  plot()
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#bReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @chipman2010bart is the original BART paper; @hill2020bart review the model, its extensions and applications; @linero2025generalized extends BART beyond Gaussian outcomes, the method bartisan implements.
+
+:::
+
+## 26.3 What makes it Bayesian: the prior {#s3}
+
+BART's strength comes from its prior, which does the job that tuning does in other machine learning methods. A node at depth d splits with probability γ(1 + d)<sup>−β</sup>, so trees stay shallow. Leaf values are normal with a standard deviation that shrinks as more trees are added, so that no single tree dominates (the parameter k controls how hard). The residual SD gets its own prior. Change the settings and draw functions from the prior alone, the prior predictive check of Lesson 20 for a forest.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pG">γ (base probability of a split)</label><input type="range" id="pG" min="0.3" max="0.99" step="0.01" value="0.95"><output id="pGO"></output></div>
+  <div class="ctrl"><label for="pB">β (how fast splitting falls with depth)</label><input type="range" id="pB" min="0" max="4" step="0.1" value="2"><output id="pBO"></output></div>
+  <div class="ctrl"><label for="pK">k (leaf shrinkage)</label><input type="range" id="pK" min="0.5" max="5" step="0.1" value="2"><output id="pKO"></output></div>
+  <div class="ctrl"><label for="pM">Number of trees, m</label><select id="pM"><option>1</option><option>10</option><option selected>50</option><option>200</option></select></div>
+  <svg id="pFun" viewBox="0 0 520 240" role="img" aria-label="Functions drawn from the BART prior"></svg>
+</div>
+<div class="cpanel"><svg id="pSize" viewBox="0 0 520 200" role="img" aria-label="Prior distribution of tree sizes"></svg><svg id="pGate" viewBox="0 0 520 170" role="img" aria-label="Hard and soft decision rules"></svg><div class="ctrl"><label for="pBw">Soft-rule bandwidth τ</label><input type="range" id="pBw" min="0.01" max="0.3" step="0.01" value="0.08"><output id="pBwO"></output></div><div class="now" id="pNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$P(\text{node at depth } d \text{ splits}) = \gamma (1 + d)^{-\beta}, \qquad \gamma = 0.95,\ \beta = 2$$
+$$\mu_b \sim \mathrm{Normal}\!\left(0, \sigma_\mu^2\right), \qquad \sigma_\mu = \frac{0.5}{k\sqrt{m}} \ \text{(outcome scaled to } [-0.5, 0.5])$$
+$$\text{soft rule: } P(\text{go left}) = \psi\!\left(\frac{c - x_j}{\tau}\right)$$
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+bartisan::bartisan_control(
+  num_trees = 50,
+  gamma = 0.95, beta = 2, k = 2,
+  gate = "smoothstep",   # soft rules (default)
+  sparsity = FALSE)      # DART prior off
+```
+
+::::
+
+:::::
+
+::: {.callout-tip icon="false" title="Bayesian connection"}
+
+This is Lesson 20's idea taken to its limit. Instead of a prior on the coefficients of a chosen equation, BART puts a prior on the equation itself: on which variables are split, where, how deeply, and by how much. The prior regularizes so strongly toward small trees that the defaults work across a wide range of problems, which is why BART rarely needs cross-validation.
+
+:::
+
+::: {.further}
+
+**Further reading:** @chipman2010bart justify the default prior; @linero2018soft introduced soft decision rules, the default in bartisan; @linero2018dart introduced the Dirichlet sparsity prior (DART) for variable selection.
+
+:::
+
+## 26.4 How BART compares with the models in this course {#s4}
+
+BART is easiest to understand by placing it next to the methods you already know.
+
+| | GLM (Lessons 8, 22) | Splines and GAMs (Lesson 11) | DLNM (Lesson 16) | Mixed models (Lessons 18, 24) | BART (this lesson) |
+|---|---|---|---|---|---|
+| **Shape of each effect** | chosen by you (usually linear) | smooth curves, flexibility chosen or penalized | smooth surface in exposure and lag | as in the fixed part | learned from the data |
+| **Interactions** | only those you add | only those you add | exposure × lag, by design | random slopes you specify | found automatically |
+| **Output** | coefficients | curves | curves and surfaces | coefficients and group effects | predictions; effects are contrasts of predictions |
+| **Uncertainty** | SEs or posterior | SEs or posterior | SEs or simulation | SEs or posterior | full posterior |
+| **Regularization** | none, or priors | penalty | penalty or knot choice | shrinkage of group effects | prior on tree size and leaf values |
+| **Dependence between observations** | modeled if specified | modeled if specified | time handled by design | clustering modeled | random intercepts only (in bartisan) |
+| **Beyond the data's range** | follows the equation | linear beyond outer knots | as splines | as the fixed part | flat: the last leaf continues |
+| **Best when** | the form is known | one smooth effect | lagged nonlinear exposure | clustered data | many confounders, unknown form, heterogeneity |
+
+Compared with other tree ensembles, BART sums trees (as boosting does) rather than averaging them (as random forests do), and it is Bayesian: the prior replaces tuning, and every quantity comes with a posterior. Compared with Bayesian kernel machine regression [@bobb2015bayesian], the standard flexible model for environmental mixtures, BART scales better to many variables and finds interactions through splits rather than through a kernel.
+
+::: {.further}
+
+**Further reading:** @hill2020bart compare BART with other machine learning methods; @tan2019bayesian on combining BART with parametric terms (the General BART model); @deshpande2026vcbart on varying-coefficient BART.
+
+:::
+
+## 26.5 BART for causal effects {#s5}
+
+BART's best-known success is as the outcome model in **g-computation** [@hill2011bayesian], the method of Lesson 12: fit a flexible model for the outcome given exposure and confounders, predict every child's risk under two exposure levels, and average. Here BART is fitted to all 5,000 children with a probit link, asking Lesson 12's question: how many cases of asthma per 1,000 children would a 10 µg/m³ reduction in NO₂ prevent? The true answer, known from the simulation, is about 15.
+
+Two versions are compared. In the first, NO₂ is just one more variable the trees can split on. In the second, NO₂ gets its own linear term, and the trees model only the confounders: the semiparametric model that bartisan writes as `vc(no2, ~ 1)`.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Model"><button type="button" id="cIn" aria-pressed="true">NO₂ inside the trees</button><button type="button" id="cLin" aria-pressed="false">NO₂ as its own linear term</button></div>
+  <div class="btns"><button type="button" id="cRun">Fit (about 5 seconds)</button></div>
+  <div class="small" id="cProg"></div>
+  <svg id="cPlot" viewBox="0 0 520 240" role="img" aria-label="Estimates of cases prevented"></svg>
+  <svg id="cCate" viewBox="0 0 520 220" role="img" aria-label="Child-level effects by SES"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="cStats"></div><div class="now" id="cNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\Phi^{-1}\big(P(Y_i = 1)\big) = f(x_i, z_i) \quad \text{or} \quad \beta\, x_i + f(z_i)$$
+$$\Delta^{(s)} = \frac{1}{n}\sum_i\Big[\Phi\big(f^{(s)}(x_i, z_i)\big) - \Phi\big(f^{(s)}(x_i - 10, z_i)\big)\Big]$$
+
+::: {.note}
+
+$x$ = NO₂, $z$ = confounders; one value of $\Delta$ per posterior draw $s$.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+fit <- bartisan::bartisan(
+  asthma ~ ses + green + parent_smoke + sex +
+    vc(no2, ~ 1),
+  data = cohort, family = binomial("probit"))
+marginaleffects::avg_comparisons(fit,
+  variables = list(no2 = -10))
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#cReport}
+
+::::
+
+:::::
+
+::: {.callout-warning title="Regularization-induced confounding"}
+
+When the exposure is strongly predicted by the confounders, as NO₂ is by district traffic, green space and SES here, a single forest has trouble separating their effects. Its shrinkage pulls the estimated exposure effect toward zero and blurs it with confounding [@hahn2020bayesian]. The remedies are the ones bartisan builds in: give the exposure its own term (`vc()`), or use a Bayesian causal forest (`bcf()`), which also adds an estimated propensity score as a predictor. Neither removes the need for the identification assumptions of Lesson 12: BART adjusts for the confounders you give it, not for those you omit.
+
+:::
+
+::: {.further}
+
+**Further reading:** @hill2011bayesian introduced BART for causal inference; @hahn2020bayesian on regularization-induced confounding and Bayesian causal forests; @dorie2019automated report a large competition in which BART-based methods were among the most accurate.
+
+:::
+
+## 26.6 Is BART fit for purpose in environmental epidemiology? {#s6}
+
+One property deserves a demonstration before the overall verdict. Health impact projections under climate change, or for a colder or hotter city, need predictions at temperatures the data never covered. What do models predict beyond the range they were fitted on? Fit to milder days only, then compare the predictions for colder or hotter days with a reference fitted to all days.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="xDir">Extrapolate to</label><select id="xDir"><option value="cold" selected>colder days (fit to days above the cut-off)</option><option value="heat">hotter days (fit to days below the cut-off)</option></select></div>
+  <div class="ctrl"><label for="xC">Cut-off temperature</label><input type="range" id="xC" min="-2" max="10" step="0.5" value="5"><output id="xCO"></output></div>
+  <div class="btns"><button type="button" id="xRun">Fit BART and a spline GLM</button></div>
+  <div class="small" id="xProg"></div>
+  <svg id="xPlot" viewBox="0 0 520 300" role="img" aria-label="Extrapolation beyond the fitted range"></svg>
+  <div class="legend"><span><i style="background:var(--c-post)"></i>BART</span><span><i style="background:var(--p1)"></i>spline GLM</span><span><i style="background:var(--c-ink)"></i>spline fitted to all days (reference)</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="xStats"></div><div class="now" id="xNow"></div></div>
+</div>
+```
+
+**The verdict, task by task.**
+
+| Task | Fit for purpose? | Why |
+|---|---|---|
+| Adjusting for many confounders of unknown form (cohorts, cross-sectional studies) | **Yes**, often the best option | No functional form to misspecify; strong record in causal benchmarks. Give the exposure its own term (`vc()`, `bcf()`). |
+| Who is most vulnerable: effect heterogeneity | **Yes** | Bayesian causal forests estimate conditional effects with honest uncertainty, and are used in air pollution studies of vulnerability. |
+| Mixtures of several pollutants | **Yes**, with care | Finds nonlinear joint effects and interactions; compare with BKMR. Correlated pollutants remain hard to separate for any method. |
+| Exposure–response curves to report and use in burden estimates | **Partly** | Curves are partial dependence summaries, not parameters. Soft rules and `x_transform = "range"` help; splines remain easier to report and compare. |
+| Daily time series (Lesson 15) | **Not plain BART** | Residual autocorrelation is not modeled, and season and trend must be entered as predictors. A spline-based quasi-Poisson model is simpler; for effect heterogeneity in a case-crossover design, see CL-BART in 26.8. |
+| Lagged effects (Lesson 16) | **Not plain BART**: use treed DLMs | Lag structure isn't built in. The `dlmtree` package provides tree-based DLMs and DLNMs, which are good at finding sharp critical windows (26.8). |
+| Spatial data (Lessons 17, 25) | **Limited in bartisan** | Random intercepts but no spatial (CAR/BYM2) structure; neighboring areas are treated as unrelated. Spatial BART variants exist as research software (26.8). |
+| Clustered data (schools, districts) | **Yes, partly** | Random intercepts are supported; random slopes are not. |
+| Projecting to unseen exposures (future heat, new policies, other climates) | **No** | Trees predict a constant beyond the data. Every model's projection there is an assumption; BART's is "nothing changes", and its credible band doesn't flag it. |
+| Measurement error (Lesson 13) | **No** | BART models the measured exposure, and inherits its errors and their attenuation. |
+| Small samples, rare outcomes, weak effects | **Caution** | Strong shrinkage pulls weak effects toward zero; credible intervals are wide. A well-specified parametric model is more efficient when it is right. |
+
+So BART is a strong tool for the confounding-heavy, heterogeneity-seeking questions of cohort and cross-sectional environmental studies, especially as the outcome or propensity model inside a causal estimator. It does not replace the structured models of this course where time, space, lags, measurement error or extrapolation are central. There, the structure is the scientific content, and BART would have to rediscover it from data, or couldn't. A productive middle way is semiparametric: a parametric exposure term, or a lag structure, with BART for everything else.
+
+::: {.further}
+
+**Further reading:** @mork2022treed introduced treed distributed lag nonlinear models; @mork2023estimating extended them to mixtures; @mork2024heterogeneous use BART to find who is most affected by prenatal air pollution; @bobb2015bayesian describe BKMR for mixtures.
+
+:::
+
+## 26.7 BART in practice with bartisan {#s7}
+
+The **bartisan** package [@greifer2026bartisan] fits BART with a `glm()`-like interface: a formula, a data frame and a family. It implements Linero's sampler [@linero2025generalized], which extends BART to outcomes standard BART can't handle directly: Poisson and negative binomial counts, binomial with a logit link, gamma, beta, ordinal and survival outcomes. Its defaults include soft decision rules, a smooth predictor transform, and native handling of missing predictor values. A typical analysis has five steps.
+
+1. **Fit**, choosing the family as for a GLM, and giving the exposure its own term if its effect is the goal.
+2. **Check convergence** with several chains and `diagnose()`. Diagnose the reported quantity itself, not just the forest. Per-observation R-hat values for the fitted function are often above 1.05 in BART even when reported contrasts are fine.
+3. **Look at the fit**: posterior predictive checks with `pp_check()`, partial dependence plots, and variable importance (as a rough guide only).
+4. **Estimate** the quantity of interest by contrasting predictions: `estimate_effect()` for a binary exposure, or `marginaleffects::avg_comparisons()` for any contrast.
+5. **Compare** with simpler models by leave-one-out cross-validation (`loo()`), and report sensitivity to the main settings.
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (not run when the site builds): a bartisan workflow for the cohort and the time series"}
+
+```{r}
+#| eval: false
+install.packages("bartisan")
+library(bartisan)
+future::plan("multisession", workers = 4)     # run chains in parallel
+set.seed(26)
+
+# 1. Cohort: asthma, with NO2 given its own (constant) coefficient
+fit <- bartisan(asthma ~ ses + green + parent_smoke + sex + vc(no2_modeled, ~ 1),
+                data = cohort, family = binomial(), chains = 4)
+summary(fit)
+diagnose(fit)                                   # convergence of the fit
+
+# 2. The effect of a 10 ug/m3 reduction, as a posterior risk difference
+eff <- marginaleffects::avg_comparisons(fit, variables = list(no2_modeled = -10))
+eff
+
+# 3. Let the effect vary with SES and green space instead (effect heterogeneity)
+fit_vc <- bartisan(asthma ~ ses + green + parent_smoke + sex + vc(no2_modeled, ~ ses + green),
+                   data = cohort, family = binomial(), chains = 4)
+library(loo)
+loo_compare(list(constant = loo(fit), varying = loo(fit_vc)))
+
+# 4. Daily counts: negative binomial BART with a random intercept per district
+district_daily <- visits |>
+  group_by(date, district) |>
+  summarise(visits = sum(visits), temp = first(temp), pm25 = first(pm25),
+            dow = first(dow), .groups = "drop") |>
+  mutate(doy = yday(date), t = as.numeric(date - min(date)))
+fit_ts <- bartisan(visits ~ temp + pm25 + doy + t + dow + (1 | district),
+                   data = district_daily, family = negbin())
+partial_dependence(fit_ts, ~ temp) |> plot()
+pp_check(fit_ts)
+```
+
+:::
+
+Two cautions apply to the time-series example. Its residuals are not modeled as autocorrelated. And the temperature curve is a same-day association, not the cumulative lagged effect a DLNM estimates (Lesson 16); for lags, use `dlmtree`. The bartisan documentation is detailed and candid about limitations, including mixing of the fitted function and the leaf scale. Read its "Generalized BART with bartisan" and FAQ vignettes before a first serious analysis.
+
+::: {.further}
+
+**Further reading:** @greifer2026bartisan is the package, with extensive vignettes; @kapelner2015prediction on BART with missing predictors; @chernozhukov2018double on using BART predictions inside double/debiased machine learning for frequentist inference.
+
+:::
+
+## 26.8 Extensions for space, time, lags and space–time {#s8}
+
+Plain BART assumes independent observations and has no notion of lags, neighbors or smoothness over time. A growing literature extends it for exactly the structures of Part IV. They differ a great deal in maturity: some are published with maintained R packages, others exist only as papers with research code, and a general spatio-temporal BART for health counts doesn't yet exist.
+
+| Structure | Extension | How it works | Software and maturity |
+|---|---|---|---|
+| **Lags: DLM and DLNM** (Lesson 16) | Treed distributed lag models: TDLM (linear), TDLNM (nonlinear), TDLMM (mixtures of lagged exposures), HDLM (lag effects that vary across people), monotone DLMs [@mork2022treed; @mork2023estimating; @mork2024heterogeneous] | Trees split the lag axis (and, for TDLNM, the exposure axis) into blocks of constant effect, so the exposure–lag–response surface is built from rectangles instead of a spline cross-basis. Good at sharp critical windows; spline DLNMs remain smoother where the truth is smooth. | **Published; CRAN package `dlmtree`** [@mork2026dlmtree]. Families: Gaussian, binomial (logit) and zero-inflated negative binomial. Designed for birth cohorts with weekly exposures; applicable to daily series. The authors recommend long chains (at least 5,000 burn-in and 15,000 sampling iterations). |
+| **Smooth effects over time, lag or age** | BART with targeted smoothing (tsBART) [@starling2020bart] | Each leaf holds a smooth function of one "target" variable, with a Gaussian process prior, instead of a single number. The fit is smooth in time (or lag, or gestational age) while staying fully flexible in the other covariates. | **Published; R package `tsbart`.** |
+| **Case-crossover designs** (Lesson 15) | Conditional logistic BART (CL-BART) [@englert2025estimating] | BART inside the conditional likelihood of a time-stratified case-crossover design, so effects of acute exposures can vary flexibly with individual characteristics while time-invariant confounders cancel out. Applied to heat waves and Alzheimer's disease. | **Published (JASA, 2025)**; check the paper for code availability. |
+| **Daily counts with exposure mixtures** | Soft BART as one component of a larger count model [@englert2025modeling] | A soft-BART exposure–risk surface for several pollutants and temperature, inside a model for daily emergency visits, summarized with accumulated local effects. | **Published (Statistics in Medicine, 2025).** |
+| **Correlated errors in time or space** | Correlated BART and GP-CBART [@lu2025gaussian] | BART for the mean, with a Gaussian process for the correlation between observations, rather than independent errors. | **Preprint.** |
+| **Forecasting several series** | Bayesian additive vector autoregressive trees (BAVART) [@huber2022inference] | A vector autoregression whose dependence on past values is a sum of trees. Built for economic forecasting, not health effects. | **Published**, econometrics. |
+| **Areal spatial data** (Lessons 17, 25) | Spatially adjusted BART [@muller2007spatially]; BART for sparse spatial observations [@kim2022bayesian] | BART for the covariates plus spatial random effects with a CAR prior: the BART analogue of the disease-mapping models of Lesson 25. The General BART framework [@tan2019bayesian] shows how to add a BART component to such models. | **Published**; no maintained package that I could find. |
+| **Point-referenced (geostatistical) data** | BARTSIMP [@jiang2025bartsimp]; GP-BART [@maia2024gpbart] | BARTSIMP adds a Gaussian random field, handled by INLA within MCMC. GP-BART puts Gaussian processes in the leaves, giving smooth surfaces over coordinates. | BARTSIMP: **preprint**. GP-BART: **published**, R package `gpbart` on GitHub; computationally very demanding. |
+| **Spatially varying effects** | Varying-coefficient BART (VCBART) [@deshpande2026vcbart], applied to spatially varying pollution-mixture effects [@englert2025spatially] | The exposure coefficient is itself a forest, so its value can vary by area (and with area characteristics). | VCBART: **published**; the spatial application is a **preprint**. bartisan's `vc()` fits the same kind of model. |
+| **Multilevel structure with random slopes** (Lesson 18) | stan4bart [@dorie2022stan] | BART for the nonlinear part, with lme4-style random intercepts and random slopes sampled by Stan. | **Published; CRAN package `stan4bart`.** Continuous and binary (probit) outcomes. |
+| **Space–time together** | No established method for health counts | Options today: (1) combine the pieces above in a custom model, using the General BART framework; (2) in bartisan, exchangeable random intercepts for district and district × period, plus time and coordinates as tree predictors, which captures heterogeneity but not spatial smoothing; (3) keep the structured model of Lesson 25 for space and time, and use BART only where flexibility is needed, such as the confounder adjustment. | **Open research area.** |
+
+**What this means for the course's two examples.**
+
+- **Example A (daily visits by district).** The reference analysis remains the spline DLNM of Lesson 16 with the spatial pooling of Lesson 25. A treed DLNM from `dlmtree` is a credible sensitivity analysis for the lag structure, especially if heat or cold effects might switch on and off sharply. CL-BART is the tool if the question is who is most affected by heat.
+- **Example B (the cohort).** bartisan with a school random intercept handles clustering. stan4bart adds random slopes, for example an NO₂ effect varying by district. VCBART-type varying coefficients map spatially varying effects.
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (not run when the site builds): a treed DLNM and a multilevel BART"}
+
+```{r}
+#| eval: false
+# Treed distributed lag nonlinear model for daily city visits (dlmtree).
+# Check ?dlmtree for the argument names in your installed version.
+library(dlmtree)
+city_daily <- visits |>
+  group_by(date) |>
+  summarise(visits = sum(visits), temp = first(temp_city), dow = first(dow), .groups = "drop") |>
+  mutate(t = row_number())
+
+L <- 21
+lagmat <- sapply(0:L, \(l) dplyr::lag(city_daily$temp, l))   # columns: lag 0, 1, ..., 21
+keep <- complete.cases(lagmat)
+
+fit_tdlnm <- dlmtree(visits ~ splines::ns(t, df = 35) + dow,   # season, trend, weekday
+                     data = city_daily[keep, ],
+                     exposure.data = lagmat[keep, ],
+                     dlm.type = "nonlinear",                     # TDLNM
+                     family = "zinb",                            # counts
+                     control.mcmc = list(n.burn = 5000, n.iter = 15000, n.thin = 5))
+# cenval = reference temperature for the contrasts (the default is 0, which means 0°C here)
+s <- summary(fit_tdlnm, cenval = 20)
+plot(s)                              # exposure-lag-response surface, as in Lesson 16
+plot(s, plot.type = "cumulative")    # cumulative effect by temperature
+plot(s, plot.type = "effect")        # where the credible interval excludes zero
+diagnose(s)                          # shiny app with trace plots and convergence checks
+
+# Multilevel BART with a random NO2 slope by district (stan4bart; probit for binary outcomes)
+library(stan4bart)
+fit_ml <- stan4bart(asthma ~ bart(ses + green + parent_smoke + sex) +
+                      I(no2_modeled / 10) + (1 + I(no2_modeled / 10) | district_id),
+                    data = cohort, chains = 4, cores = 4, seed = 26)
+fixef(fit_ml)
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @mork2022treed and @mork2023estimating on treed distributed lag models; @englert2025estimating on BART for case-crossover designs; @tan2019bayesian on adding BART to existing hierarchical models; @dorie2022stan on multilevel BART.
+
+:::
+
+## 26.9 Prediction, forecasting and effect estimation {#s9}
+
+Three different questions are easily confused, because the same models can be used for all of them.
+
+- **Effect estimation** asks *what would happen if the exposure were different*. It is a question about counterfactuals (Lessons 9 and 12). A good model is one that removes confounding, even if it predicts poorly.
+- **Prediction** asks *what is the value of something we haven't observed*, given what we have. The unknown need not lie in the future: a child's asthma risk from their characteristics, the NO₂ at a home with no monitor (the exposure models of Lesson 13), or the number of visits yesterday that hasn't been reported yet ("nowcasting"). A good model is one that is accurate for new cases.
+- **Forecasting** is prediction of the **future** of a time-ordered process. It is defined by a **forecast origin** (the moment the forecast is made), a **horizon** (how far ahead) and an **information set** (what is known at the origin). Anything not yet known at the origin, including tomorrow's temperature, must itself be forecast.
+
+Every forecast is a prediction; not every prediction is a forecast; and neither is an effect estimate.
+
+| | Effect estimation | Prediction | Forecasting |
+|---|---|---|---|
+| **Question** | What if the exposure changed? | What is this unobserved value? | What will happen next? |
+| **Information allowed** | Anything that removes confounding | Anything known for the case being predicted | Only what is known at the forecast origin |
+| **Past outcome as a predictor** | Usually harmful: it can absorb part of the effect | Allowed if known | Usually the strongest predictor |
+| **Evaluation** | Bias and coverage against the truth (in simulation); sensitivity analyses | Accuracy on new cases, e.g. cross-validation | Accuracy on later periods: rolling-origin backtests |
+| **A good model** | Captures the causal structure | Predicts accurately | Predicts accurately, with honest uncertainty that grows with the horizon |
+| **In this course** | Heat effects (Lessons 15–16), NO₂ and asthma (Lessons 9, 12) | Exposure models, risk scores | Tomorrow's emergency visits (this section) |
+
+::: {.callout-warning title="Common pitfalls"}
+
+Using information a real forecaster wouldn't have (**data leakage**): the observed temperature of the forecast day, data that are reported late, or features computed with future data. A natural spline of time, as in Lessons 15–16, uses the whole series, which is fine for effect estimation but leaks the future into a forecast; calendar terms such as day of year are safe because the calendar is known in advance. Evaluating forecasts by **random cross-validation**, which lets neighboring days inform each other. Judging a forecaster by its **in-sample fit**. And reading a predictor's importance in a forecasting model as a **causal effect**.
+
+:::
+
+**A forecasting backtest.** The task is to forecast the city's emergency visits 1 or 7 days ahead, with three forecasters:
+
+- a **naive benchmark**: the count on the same weekday a week earlier;
+- a **quasi-Poisson GLM** with a temperature spline, calendar terms and recent visits;
+- **BART**, using the same information (on the log scale).
+
+Each model is fitted to all data before an origin and refitted every six months from January 2023, so every forecast uses only the past. Temperature for the forecast days comes from a simulated weather forecast whose error grows with lead time, unless you choose to cheat. One more fact matters: the test period contains a heat wave in July 2023 that peaked at 31.8°C, hotter than any day in 2020–2022.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="fH">Horizon</label><select id="fH"><option value="1">1 day ahead</option><option value="7">7 days ahead</option></select></div>
+  <div class="ctrl"><label for="fW">Temperature for forecast days</label><select id="fW"><option value="fc">a weather forecast, with error (realistic)</option><option value="oracle">the temperature actually observed (leakage)</option></select></div>
+  <div class="ctrl"><label for="fV">Show</label><select id="fV"><option value="hw">the July 2023 heat wave</option><option value="all">the whole test period, 2023–2024</option></select></div>
+  <div class="btns"><button type="button" id="fRun">Run the backtest (about 2 seconds)</button></div>
+  <div class="small" id="fProg"></div>
+  <svg id="fPlot" viewBox="0 0 520 300" role="img" aria-label="Forecasts against observed visits"></svg>
+  <div class="legend"><span><i style="background:var(--c-ink)"></i>observed</span><span><i style="background:var(--c-lik)"></i>naive</span><span><i style="background:var(--p1)"></i>GLM, with 90% interval</span><span><i style="background:var(--c-post)"></i>BART, with 90% interval</span></div>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="fTab"></table></div><div class="now" id="fNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\hat y_{t+h \mid t} = E\big[Y_{t+h} \mid \mathcal{F}_t\big]$$
+$$\mathrm{RMSE}_h = \sqrt{\frac{1}{|\mathcal{T}|}\sum_{t \in \mathcal{T}} \big(y_{t+h} - \hat y_{t+h \mid t}\big)^2}$$
+
+::: {.note}
+
+$\mathcal{F}_t$: everything known at origin $t$; $h$: horizon; $\mathcal{T}$: forecast origins in the test period, never used for fitting.
+
+:::
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[B]{.k}Model list and R
+
+:::
+
+```r
+for (k in seq_along(origins[-1])) {
+  train <- filter(city, date <  origins[k])
+  test  <- filter(city, date >= origins[k],
+                        date <  origins[k + 1])
+  fit <- glm(f, family = quasipoisson,
+             data = train)
+  test$forecast <- predict(fit, test,
+                           type = "response")
+}
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[C]{.k}How it's reported
+
+:::
+
+[ ]{#fReport}
+
+::::
+
+:::::
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): a rolling-origin backtest, and why random splits mislead"}
+
+```{r}
+city_fc <- visits |>
+  group_by(date) |>
+  summarise(visits = sum(visits), temp = first(temp_city), dow = first(dow),
+            holiday = first(holiday), .groups = "drop") |>
+  mutate(doy = yday(date),
+         temp03 = (temp + lag(temp) + lag(temp, 2) + lag(temp, 3)) / 4,  # observed: an oracle
+         lag1 = log(lag(visits)), lag7 = log(lag(visits, 7))) |>
+  filter(!is.na(lag7), !is.na(temp03))
+
+f_fc <- visits ~ splines::ns(temp03, df = 3) + sin(2 * pi * doy / 365.25) + cos(2 * pi * doy / 365.25) +
+  dow + holiday + lag1 + lag7
+
+origins <- as.Date(c("2023-01-01", "2023-07-01", "2024-01-01", "2024-07-01", "2025-01-01"))
+backtest <- map(1:4, \(k) {
+  train <- filter(city_fc, date < origins[k])
+  test  <- filter(city_fc, date >= origins[k], date < origins[k + 1])
+  fit <- glm(f_fc, family = quasipoisson, data = train)
+  mutate(test, forecast = predict(fit, newdata = test, type = "response"))
+}) |> bind_rows()
+
+# a random 80/20 split of all days, which ignores time order
+set.seed(26)
+test_rows <- sample(nrow(city_fc), round(0.2 * nrow(city_fc)))
+fit_random <- glm(f_fc, family = quasipoisson, data = city_fc[-test_rows, ])
+
+tibble(
+  rmse_rolling_origin = sqrt(mean((backtest$forecast - backtest$visits)^2)),
+  rmse_naive          = sqrt(mean((exp(backtest$lag7) - backtest$visits)^2)),
+  rmse_random_split   = sqrt(mean((predict(fit_random, city_fc[test_rows, ], type = "response") -
+                                     city_fc$visits[test_rows])^2)))
+```
+
+:::
+
+::: {.callout-tip icon="false" title="Where BAVART fits"}
+
+A vector autoregression with trees (BAVART, Section 26.8) forecasts several series jointly, each from the past of all of them. For emergency visits that is more than needed: weather doesn't depend on hospital visits, and tomorrow's temperature comes from a meteorological forecast anyway. A model with visits as the outcome and weather and calendar as external inputs, as here, is the natural structure. Joint models earn their place when several outcomes drive each other, for example visits in neighboring hospitals that share patients.
+
+:::
+
+::: {.further}
+
+**Further reading:** @shmueli2010explain on the difference between explaining and predicting; @hyndman2021forecasting is a free, practical forecasting textbook, including rolling-origin evaluation; @gneiting2014probabilistic on probabilistic forecasts and how to score them; @tashman2000out on out-of-sample evaluation of forecasts.
+
+:::
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- A regression tree predicts the mean in each leaf of a sequence of splits; alone it is a blocky, unstable step function.
+- BART adds up many small trees, each kept shallow by its prior, and samples them by MCMC. The result is a posterior over flexible functions, with interactions found automatically.
+- The prior (split probabilities, leaf shrinkage, residual SD) replaces tuning; soft rules make the fitted functions smooth.
+- Effects are contrasts of predictions, computed on every posterior draw. BART is a strong outcome model for g-computation, especially with the exposure given its own term.
+- In environmental epidemiology, BART suits confounding-heavy cohort questions, effect heterogeneity and mixtures. It doesn't replace time-series, lag, spatial or measurement-error models, and it cannot extrapolate.
+- Prediction estimates unobserved values; forecasting predicts the future from what is known at the origin; neither estimates effects. Evaluate forecasts on later data with rolling origins, never by random splits.
+- Extensions exist for lags (treed DLMs in `dlmtree`), temporal smoothing (tsBART), case-crossover designs (CL-BART), spatial random effects and random slopes (stan4bart). General spatio-temporal BART for health counts is still an open research area.
+
+```{=html}
+<div class="done" data-lesson="lesson-26"><button type="button"></button><span></span></div>
+<script src="assets/bart-engine.js"></script>
+<script src="assets/lesson-26.js"></script>
+```
