@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="A complete analysis from question to report: district-specific distributed lag non-linear models, Bayesian pooling with a BYM2 spatial prior, heat- and cold-attributable visits on every posterior draw, sensitivity analysis and reporting.">
+
+<title>Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling – Statistics for epidemiology</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-26.html" rel="next">
+<link href="./lesson-24.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7eead303e38f083faf515323c8b5fe44.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b468af426e9c805ad947c565d190ce64.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7eead303e38f083faf515323c8b5fe44.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-ccf064502f84f33c623e2a83f91e4349.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-42b405ec74c69eb6010bd27de046b5d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-ccf064502f84f33c623e2a83f91e4349.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="assets/course.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics for epidemiology</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./glossary.html"> 
+<span class="menu-text">Glossary</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./course-plan.html"> 
+<span class="menu-text">Course plan</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-19.html">Part V · Bayesian modeling</a></li><li class="breadcrumb-item"><a href="./lesson-25.html">Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part I · Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-00.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 0 · Welcome: the city, the data and how to use the course</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 1 · Describing data and epidemiological measures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 2 · Probability and conditional probability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 3 · Random variables and probability distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 4 · Sampling, sampling distributions and the central limit theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 5 · Likelihood and estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 6 · Confidence intervals and hypothesis tests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part II · Frequentist regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 7 · Linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 8 · Generalized linear models: logistic and Poisson regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 9 · Confounding, effect modification and interaction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 10 · Model checking, comparison and selection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 11 · Nonlinear effects: categories, polynomials, splines and GAMs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part III · Causal inference, measurement and burden</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 12 · Causal inference: from association to effect</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 13 · Measurement error and misclassification</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 14 · Measuring disease burden</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part IV · Time, space and clustering</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 15 · Time-series regression for health data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-16.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 16 · Distributed lag and distributed lag non-linear models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-17.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 17 · Spatial data and spatial autocorrelation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-18.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 18 · Clustered data and mixed-effects models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part V · Bayesian modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-19.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 19 · Bayesian thinking: from Bayes’ rule to a model equation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-20.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 20 · Priors: what they say and how much they matter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-21.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 21 · Computing the posterior: Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+ <span class="menu-text">lesson-22.qmd - lesson-23.qmd</span>
+  </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-24.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 24 · Bayesian hierarchical models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-25.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part VI · Machine learning meets Bayesian inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-26.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 26 · Bayesian additive regression trees (BART) and bartisan</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">In this lesson</h2>
+   
+  <ul class="collapse">
+  <li><a href="#s1" id="toc-s1" class="nav-link active" data-scroll-target="#s1">25.1 The question, the data and the design</a></li>
+  <li><a href="#s2" id="toc-s2" class="nav-link" data-scroll-target="#s2">25.2 Stage 1: a DLNM in each district</a></li>
+  <li><a href="#s3" id="toc-s3" class="nav-link" data-scroll-target="#s3">25.3 Stage 2: Bayesian pooling with a spatial prior</a></li>
+  <li><a href="#s4" id="toc-s4" class="nav-link" data-scroll-target="#s4">25.4 Burden on every posterior draw</a></li>
+  <li><a href="#s5" id="toc-s5" class="nav-link" data-scroll-target="#s5">25.5 Checking, sensitivity and reporting</a></li>
+  <li><a href="#quiz" id="toc-quiz" class="nav-link" data-scroll-target="#quiz">Check your understanding</a></li>
+  <li><a href="#take" id="toc-take" class="nav-link" data-scroll-target="#take">Key takeaways</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-19.html">Part V · Bayesian modeling</a></li><li class="breadcrumb-item"><a href="./lesson-25.html">Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling</h1>
+<p class="subtitle lead">Part V · Bayesian modeling</p>
+</div>
+
+<div>
+  <div class="description">
+    A complete analysis from question to report: district-specific distributed lag non-linear models, Bayesian pooling with a BYM2 spatial prior, heat- and cold-attributable visits on every posterior draw, sensitivity analysis and reporting.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="meta-pills">
+<p><span>About 5 hours</span> <span>Before this: the whole course, especially Lessons 14, 16, 17, 18 and 24</span> <span>Threads: all five</span></p>
+</div>
+<div class="objectives">
+<p>By the end of this lesson you will be able to</p>
+<ul>
+<li>plan a multi-location temperature–health analysis, and choose between one-stage and two-stage designs;</li>
+<li>fit a distributed lag non-linear model in each district, and summarize it by its cumulative exposure–response curve;</li>
+<li>pool the district curves with a Bayesian hierarchical model whose prior lets neighboring districts borrow strength from each other;</li>
+<li>compute minimum morbidity temperatures, attributable visits and exceedance probabilities on every posterior draw;</li>
+<li>check, stress-test and report the analysis.</li>
+</ul>
+</div>
+<div class="why">
+<p><strong>Why it matters.</strong> A city health department wants to know which districts suffer most from heat, so that cooling centers, outreach and warnings go where they matter. Each district’s own data are too few for a reliable answer; the city-wide answer ignores real differences. This lesson brings the course together to answer the question properly: the DLNM of Lesson 16, the pooling of Lessons 18 and 24, the spatial structure of Lesson 17, and the burden calculations of Lesson 14, with uncertainty carried through every step.</p>
+</div>
+<section id="s1" class="level2">
+<h2 class="anchored" data-anchor-id="s1">25.1 The question, the data and the design</h2>
+<p><strong>The question.</strong> For each of the city’s 12 districts: how do daily emergency visits depend on temperature, accumulated over three weeks of lags; at what temperature is risk lowest; and how many visits each year are attributable to heat and to cold?</p>
+<p><strong>The design.</strong> A <strong>two-stage</strong> analysis, the standard in multi-location studies <span class="citation" data-cites="gasparrini2012multivariate sera2022extended">(<a href="#ref-gasparrini2012multivariate" role="doc-biblioref">Gasparrini et al. 2012</a>; <a href="#ref-sera2022extended" role="doc-biblioref">Sera and Gasparrini 2022</a>)</span>. Stage 1 fits a DLNM in each district separately. Stage 2 pools the districts’ cumulative curves with a Bayesian hierarchical model. A one-stage model, fitting everything at once, is possible in Stan or INLA but much slower; with daily counts in hundreds per district, the two-stage approximation is accurate.</p>
+<p><strong>Two versions of the data.</strong> In the simulated city, all districts share the same underlying sensitivity to heat; only their temperatures and age structures differ. That is a legitimate finding, but it makes the case for spatial modeling hard to see. So the lesson also offers a <strong>vulnerability scenario</strong>. The heat sensitivity there is increased overall and varies between districts, rising with the urban heat island and with deprivation, so that central and deprived districts are much more sensitive. The data are regenerated in the browser; the course data files are unchanged.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Data"><button type="button" id="dReal" aria-pressed="true">The simulated city</button><button type="button" id="dScn" aria-pressed="false">Vulnerability scenario</button></div>
+  <svg id="dMap" viewbox="0 0 520 340" role="img" aria-label="Map of the true relative risk at 30 degrees by district"></svg>
+</div>
+<div class="cpanel"><div class="now" id="dNow"></div></div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="gasparrini2015mortality"><span class="nocase">Gasparrini et al.</span> (<a href="#ref-gasparrini2015mortality" role="doc-biblioref">2015</a>)</span> is a landmark multi-location study using this design; <span class="citation" data-cites="sera2022extended">Sera and Gasparrini (<a href="#ref-sera2022extended" role="doc-biblioref">2022</a>)</span> review extensions of two-stage designs; <span class="citation" data-cites="bhaskaran2013time">Bhaskaran et al. (<a href="#ref-bhaskaran2013time" role="doc-biblioref">2013</a>)</span> on the time-series foundations.</p>
+</div>
+</section>
+<section id="s2" class="level2">
+<h2 class="anchored" data-anchor-id="s2">25.2 Stage 1: a DLNM in each district</h2>
+<p>Each district gets the model of Lesson 16: quasi-Poisson regression of daily visits on a cross-basis of its own temperature (a natural spline in temperature, three degrees of freedom, with knots common to all districts, crossed with a natural spline in lag over 0–21 days), a spline of time with 7 degrees of freedom per year, and day of week. The fitted surface is then <strong>reduced</strong> to its cumulative curve: three coefficients per district, with their 3 × 3 covariance matrix. These 12 small summaries are all that stage 2 needs.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns"><button type="button" id="s1Run">Fit the 12 district DLNMs</button></div>
+  <div class="small" id="s1Prog"></div>
+  <svg id="s1Plot" viewbox="0 0 520 330" role="img" aria-label="District cumulative curves from stage 1"></svg>
+  <div class="legend"><span><i style="background:var(--p1)"></i>stage 1 estimate, 95% CI</span><span><i style="background:var(--c-ink)"></i>truth</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="s1Stats"></div><div class="now" id="s1Now"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[\log\mu_{jt} = \alpha_j + \sum_{k,q}\eta_{jkq}\, w_{jt,kq} + s_j(t) + \gamma_j^\top \mathrm{dow}_t\]</span> <span class="math display">\[\hat\theta_{jk} = \sum_q \hat\eta_{jkq}\sum_{\ell=0}^{21} c_q(\ell), \qquad \log RR_j(x) = \sum_k \hat\theta_{jk}\,\big[b_k(x) - b_k(x_{\text{ref}})\big]\]</span></p>
+<div class="note">
+<p><span class="math inline">\(\hat\theta_j\)</span>: district <span class="math inline">\(j\)</span>’s three cumulative coefficients, with covariance <span class="math inline">\(S_j\)</span>.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cb <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossbasis</span>(d<span class="sc">$</span>temp, <span class="at">lag =</span> <span class="dv">21</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">argvar =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>, <span class="at">knots =</span> kn),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">arglag =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">knots =</span> dlnm<span class="sc">::</span><span class="fu">logknots</span>(<span class="dv">21</span>, <span class="dv">3</span>)))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> cb <span class="sc">+</span> splines<span class="sc">::</span><span class="fu">ns</span>(t, <span class="dv">35</span>) <span class="sc">+</span> dow,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> quasipoisson, <span class="at">data =</span> d)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>red <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossreduce</span>(cb, fit)   <span class="co"># overall</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(red); <span class="fu">vcov</span>(red)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (optional): stage 1 for all districts with dlnm">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (optional): stage 1 for all districts with dlnm
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>dd <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(district_id, district, date) <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">visits =</span> <span class="fu">sum</span>(visits), <span class="at">temp =</span> <span class="fu">first</span>(temp), <span class="at">dow =</span> <span class="fu">first</span>(dow), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(district_id) <span class="sc">|&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">t =</span> <span class="fu">row_number</span>()) <span class="sc">|&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>kn <span class="ot">&lt;-</span> <span class="fu">quantile</span>(dd<span class="sc">$</span>temp, <span class="fu">c</span>(<span class="fl">0.05</span>, <span class="fl">0.35</span>, <span class="fl">0.65</span>, <span class="fl">0.95</span>))    <span class="co"># knots common to all districts</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>stage1 <span class="ot">&lt;-</span> dd <span class="sc">|&gt;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(district_id, district) <span class="sc">|&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_modify</span>(\(d, key) {</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    cb <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossbasis</span>(d<span class="sc">$</span>temp, <span class="at">lag =</span> <span class="dv">21</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>            <span class="at">argvar =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>, <span class="at">knots =</span> kn[<span class="dv">2</span><span class="sc">:</span><span class="dv">3</span>], <span class="at">Boundary.knots =</span> kn[<span class="fu">c</span>(<span class="dv">1</span>, <span class="dv">4</span>)]),</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>            <span class="at">arglag =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>, <span class="at">knots =</span> dlnm<span class="sc">::</span><span class="fu">logknots</span>(<span class="dv">21</span>, <span class="dv">3</span>)))</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>    fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> cb <span class="sc">+</span> splines<span class="sc">::</span><span class="fu">ns</span>(t, <span class="at">df =</span> <span class="dv">35</span>) <span class="sc">+</span> dow, <span class="at">family =</span> quasipoisson, <span class="at">data =</span> d)</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>    red <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossreduce</span>(cb, fit)</span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="fu">tibble</span>(<span class="at">coef =</span> <span class="fu">list</span>(<span class="fu">coef</span>(red)), <span class="at">vcov =</span> <span class="fu">list</span>(<span class="fu">vcov</span>(red)))</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>  }) <span class="sc">|&gt;</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ungroup</span>()</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>stage1<span class="sc">$</span>coef[[<span class="dv">1</span>]]     <span class="co"># three cumulative coefficients for the first district</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;         b1         b2         b3 
+#&gt; -0.1342355 -0.2212185 -0.1205813</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="gasparrini2011distributed">Gasparrini (<a href="#ref-gasparrini2011distributed" role="doc-biblioref">2011</a>)</span> on <code>crossreduce()</code>; <span class="citation" data-cites="gasparrini2012multivariate">Gasparrini et al. (<a href="#ref-gasparrini2012multivariate" role="doc-biblioref">2012</a>)</span> on reducing DLNMs before pooling; <span class="citation" data-cites="gasparrini2010distributed">Gasparrini et al. (<a href="#ref-gasparrini2010distributed" role="doc-biblioref">2010</a>)</span> on the cross-basis.</p>
+</div>
+</section>
+<section id="s3" class="level2">
+<h2 class="anchored" data-anchor-id="s3">25.3 Stage 2: Bayesian pooling with a spatial prior</h2>
+<p>Stage 2 treats each district’s coefficients as a noisy measurement of its true coefficients, θ̂_j ~ N(θ_j, S_j), and models the true ones as a city-wide mean plus a district deviation. The <strong>BYM2 prior</strong> splits each deviation into an unstructured part (any district can differ) and a spatially structured part (neighbors tend to differ in the same way), with a mixing parameter φ, the share of variation that is spatial, estimated from the data. Compare three choices: no pooling (stage 1 as it is), exchangeable pooling (φ = 0, the Bayesian version of Lesson 18), and BYM2.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Pooling"><button type="button" id="pNone" aria-pressed="false">No pooling</button><button type="button" id="pEx" aria-pressed="false">Exchangeable</button><button type="button" id="pBym" aria-pressed="true">BYM2 (spatial)</button></div>
+  <div class="btns"><button type="button" id="s2Run">Run stage 2 (all three)</button></div>
+  <div class="small" id="s2Prog"></div>
+  <svg id="s2Plot" viewbox="0 0 520 330" role="img" aria-label="District curves after pooling"></svg>
+  <div class="legend"><span><i style="background:var(--c-post)"></i>posterior median, 95% CrI</span><span><i style="background:var(--c-ink)"></i>truth</span></div>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="s2Tab"></table></div><div class="now" id="s2Now"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[\hat\theta_j \sim \mathrm{N}(\theta_j, S_j), \qquad \theta_{jk} = \mu_k + \sigma_k\big(\sqrt{1-\phi}\, v_{jk} + \sqrt{\phi}\, u_{jk}\big)\]</span> <span class="math display">\[v_{jk} \sim \mathrm{N}(0, 1), \qquad u_{\cdot k} \sim \text{ICAR (scaled)}, \qquad \sigma_k \sim \text{Half-N}(0, 0.3^2), \quad \phi \sim \mathrm{U}(0, 1)\]</span></p>
+<div class="note">
+<p>ICAR: each district’s <span class="math inline">\(u\)</span> is centered on the average of its neighbors’. Scaling makes <span class="math inline">\(\sigma_k\)</span> comparable whatever the map.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># INLA, one coefficient at a time (sketch)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> theta_hat <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">f</span>(district, <span class="at">model =</span> <span class="st">"bym2"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">graph =</span> g, <span class="at">scale.model =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>INLA<span class="sc">::</span><span class="fu">inla</span>(f, <span class="at">data =</span> s1k, <span class="at">family =</span> <span class="st">"gaussian"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control.family =</span> <span class="fu">list</span>(<span class="at">hyper =</span> <span class="fu">list</span>(<span class="at">prec =</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">initial =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">/</span> se2), <span class="at">fixed =</span> <span class="cn">TRUE</span>))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="s2Report"></span></p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="besag1991bayesian">Besag et al. (<a href="#ref-besag1991bayesian" role="doc-biblioref">1991</a>)</span> introduced the BYM model; <span class="citation" data-cites="riebler2016intuitive">Riebler et al. (<a href="#ref-riebler2016intuitive" role="doc-biblioref">2016</a>)</span> the BYM2 parameterization used here; <span class="citation" data-cites="morris2019bayesian">Morris et al. (<a href="#ref-morris2019bayesian" role="doc-biblioref">2019</a>)</span> implement it in Stan; <span class="citation" data-cites="simpson2017penalising">Simpson et al. (<a href="#ref-simpson2017penalising" role="doc-biblioref">2017</a>)</span> on penalized complexity priors for φ and σ.</p>
+</div>
+</section>
+<section id="s4" class="level2">
+<h2 class="anchored" data-anchor-id="s4">25.4 Burden on every posterior draw</h2>
+<p>Every posterior draw gives a complete set of district curves, so every derived quantity gets a posterior too: each district’s minimum morbidity temperature, its heat- and cold-attributable visits, and the probability that its heat burden exceeds a policy threshold. That last quantity, an <strong>exceedance probability</strong>, is often what decision-makers need: not “what is the burden?” but “how sure are we that it is high here?”.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="bT">Threshold: heat-attributable visits per 100,000 residents per year</label><input type="range" id="bT" min="5" max="400" step="5" value="60"><output id="bTO"></output></div>
+  <svg id="bMap1" viewbox="0 0 520 340" role="img" aria-label="Map of heat-attributable visits"></svg>
+  <svg id="bMap2" viewbox="0 0 520 340" role="img" aria-label="Map of exceedance probabilities"></svg>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="bTab"></table></div><div class="now" id="bNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[\mathrm{AN}_j^{(s)} = \sum_{t:\, T_{jt} &gt; \mathrm{MMT}_j^{(s)}} y_{jt}\Big(1 - e^{-\{f_j^{(s)}(T_{jt}) - f_j^{(s)}(\mathrm{MMT}_j^{(s)})\}}\Big)\]</span> <span class="math display">\[P\big(\mathrm{AN}_j / \mathrm{pop}_j &gt; c \mid y\big) \approx \frac{1}{S}\sum_s 1\{\mathrm{AN}_j^{(s)} / \mathrm{pop}_j &gt; c\}\]</span></p>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for each draw s and district j:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f   <span class="ot">&lt;-</span> B <span class="sc">%*%</span> theta[s, j, ]           <span class="co"># curve</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>mmt <span class="ot">&lt;-</span> grid[<span class="fu">which.min</span>(f)]</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>an  <span class="ot">&lt;-</span> <span class="fu">sum</span>(y_j[temp_j <span class="sc">&gt;</span> mmt] <span class="sc">*</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>           (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>(f_t <span class="sc">-</span> f_mmt))))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># then summarise over draws:</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(an <span class="sc">/</span> pop_j <span class="sc">*</span> <span class="fl">1e5</span> <span class="sc">/</span> years <span class="sc">&gt;</span> <span class="dv">60</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="bReport"></span></p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="gasparrini2014attributable">Gasparrini and Leone (<a href="#ref-gasparrini2014attributable" role="doc-biblioref">2014</a>)</span> on attributable numbers from DLNMs; <span class="citation" data-cites="gasparrini2015mortality"><span class="nocase">Gasparrini et al.</span> (<a href="#ref-gasparrini2015mortality" role="doc-biblioref">2015</a>)</span> on heat and cold burden across locations; <span class="citation" data-cites="rockhill1998use">Rockhill et al. (<a href="#ref-rockhill1998use" role="doc-biblioref">1998</a>)</span> on interpreting attributable fractions.</p>
+</div>
+</section>
+<section id="s5" class="level2">
+<h2 class="anchored" data-anchor-id="s5">25.5 Checking, sensitivity and reporting</h2>
+<p>Before reporting, three checks. <strong>Sensitivity to the prior:</strong> with only 12 districts, the prior on the between-district SDs matters (Lesson 24). <strong>Comparison with simpler analyses:</strong> does the pooled answer agree with Lesson 16’s city-wide curve and Lesson 18’s two-stage estimates? <strong>Comparison with the truth</strong>, available only because the data are simulated: did pooling bring the district curves closer to it?</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="sP">Prior on the between-district SDs σ_k</label><select id="sP"><option value="0.3">half-normal(0, 0.3²), as above</option><option value="1">half-normal(0, 1²), weaker</option><option value="0.1">half-normal(0, 0.1²), stronger pooling</option></select></div>
+  <div class="btns"><button type="button" id="sRun">Refit BYM2 with this prior</button></div>
+  <div class="small" id="sProg"></div>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="sTab"></table></div><div class="now" id="sNow"></div></div>
+</div>
+<p><strong>Reporting the analysis.</strong> A complete report states the question, the two-stage design and every modeling choice (bases, knots, lags, time control), the stage-2 model and its priors, the computation (sampler, iterations, convergence checks), the results with credible intervals and exceedance probabilities, and the sensitivity analyses. The paragraph below is generated from your results.</p>
+<div class="triad">
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="sReport"></span></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Extensions">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Extensions
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A <strong>random-walk prior</strong> on the long-term trend, instead of a spline of time, lets the data choose its smoothness (Lesson 20): in INLA, <code>f(week, model = "rw2")</code>; in brms, <code>s(t, bs = "ps")</code>. A <strong>one-stage model</strong> fits all districts’ daily counts at once, with the BYM2 prior on the cross-basis coefficients; it avoids the stage-2 normal approximation but takes hours rather than seconds. <strong>Effect modifiers</strong> such as deprivation can enter stage 2 as covariates (meta-regression), separating explained from unexplained spatial variation.</p>
+</div>
+</div>
+<p><strong>The five threads, one last time.</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 50%">
+<col style="width: 50%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Thread</th>
+<th>Where it appears in this analysis</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Likelihood</td>
+<td>Each district’s DLNM is a likelihood for its coefficients; stage 2 uses its normal approximation.</td>
+</tr>
+<tr class="even">
+<td>Uncertainty</td>
+<td>Every curve, MMT and attributable number carries a posterior interval, propagated from stage 1 through stage 2.</td>
+</tr>
+<tr class="odd">
+<td>Shrinkage</td>
+<td>District curves are pulled toward the city mean and toward their neighbors, in proportion to how imprecise they are.</td>
+</tr>
+<tr class="even">
+<td>Bias</td>
+<td>Time control by splines guards against seasonal confounding; temperature is measured at district level, not personally (Lesson 13).</td>
+</tr>
+<tr class="odd">
+<td>Frequentist ↔︎ Bayesian</td>
+<td>Stage 1 is a frequentist GLM; stage 2 is Bayesian; the combination is standard practice and can be compared with fully frequentist two-stage meta-analysis.</td>
+</tr>
+</tbody>
+</table>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="kruschke2021bayesian">Kruschke (<a href="#ref-kruschke2021bayesian" role="doc-biblioref">2021</a>)</span> on reporting Bayesian analyses; <span class="citation" data-cites="gelman2020bayesian">Gelman et al. (<a href="#ref-gelman2020bayesian" role="doc-biblioref">2020</a>)</span> on the full Bayesian workflow; <span class="citation" data-cites="riebler2016intuitive">Riebler et al. (<a href="#ref-riebler2016intuitive" role="doc-biblioref">2016</a>)</span> on prior choices for BYM2.</p>
+</div>
+</section>
+<section id="quiz" class="level2">
+<h2 class="anchored" data-anchor-id="quiz">Check your understanding</h2>
+<div class="cw" id="quizzes"></div>
+</section>
+<section id="take" class="level2">
+<h2 class="anchored" data-anchor-id="take">Key takeaways</h2>
+<ul>
+<li>Multi-location temperature studies usually use two stages: a DLNM per location, reduced to its cumulative curve, then pooling.</li>
+<li>Pooling stabilizes district curves; a BYM2 prior lets districts borrow from neighbors as well as from the city, in proportions estimated from the data.</li>
+<li>With few districts, spatial pooling may add little to exchangeable pooling; the data decide, and the result should be reported either way.</li>
+<li>Every derived quantity, including MMTs, attributable visits and exceedance probabilities, is computed on each posterior draw.</li>
+<li>Check prior sensitivity, compare with simpler analyses, and report every modeling choice.</li>
+</ul>
+<div class="done" data-lesson="lesson-25"><button type="button"></button><span></span></div>
+<script src="assets/bayes-engine.js"></script>
+<script src="assets/lesson-25.js"></script>
+
+
+</section>
+<section id="bibliography" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-besag1991bayesian" class="csl-entry" role="listitem">
+Besag, Julian, Jeremy York, and Annie Mollié. 1991. <span>“Bayesian Image Restoration, with Two Applications in Spatial Statistics.”</span> <em>Annals of the Institute of Statistical Mathematics</em> 43 (1): 1–20.
+</div>
+<div id="ref-bhaskaran2013time" class="csl-entry" role="listitem">
+Bhaskaran, Krishnan, Antonio Gasparrini, Shakoor Hajat, Liam Smeeth, and Ben Armstrong. 2013. <span>“Time Series Regression Studies in Environmental Epidemiology.”</span> <em>International Journal of Epidemiology</em> 42 (4): 1187–95. <a href="https://doi.org/10.1093/ije/dyt092">https://doi.org/10.1093/ije/dyt092</a>.
+</div>
+<div id="ref-gasparrini2011distributed" class="csl-entry" role="listitem">
+Gasparrini, Antonio. 2011. <span>“Distributed Lag Linear and Non-Linear Models in <span>R</span>: The Package Dlnm.”</span> <em>Journal of Statistical Software</em> 43 (8): 1–20. <a href="https://doi.org/10.18637/jss.v043.i08">https://doi.org/10.18637/jss.v043.i08</a>.
+</div>
+<div id="ref-gasparrini2010distributed" class="csl-entry" role="listitem">
+Gasparrini, Antonio, Ben Armstrong, and Michael G. Kenward. 2010. <span>“Distributed Lag Non-Linear Models.”</span> <em>Statistics in Medicine</em> 29 (21): 2224–34. <a href="https://doi.org/10.1002/sim.3940">https://doi.org/10.1002/sim.3940</a>.
+</div>
+<div id="ref-gasparrini2012multivariate" class="csl-entry" role="listitem">
+Gasparrini, Antonio, Ben Armstrong, and Michael G. Kenward. 2012. <span>“Multivariate Meta-Analysis for Non-Linear and Other Multi-Parameter Associations.”</span> <em>Statistics in Medicine</em> 31 (29): 3821–39.
+</div>
+<div id="ref-gasparrini2015mortality" class="csl-entry" role="listitem">
+<span class="nocase">Gasparrini, Antonio, Yuming Guo, Masahiro Hashizume, et al.</span> 2015. <span>“Mortality Risk Attributable to High and Low Ambient Temperature: A Multicountry Observational Study.”</span> <em>The Lancet</em> 386 (9991): 369–75. <a href="https://doi.org/10.1016/S0140-6736(14)62114-0">https://doi.org/10.1016/S0140-6736(14)62114-0</a>.
+</div>
+<div id="ref-gasparrini2014attributable" class="csl-entry" role="listitem">
+Gasparrini, Antonio, and Michela Leone. 2014. <span>“Attributable Risk from Distributed Lag Models.”</span> <em>BMC Medical Research Methodology</em> 14: 55.
+</div>
+<div id="ref-gelman2020bayesian" class="csl-entry" role="listitem">
+Gelman, Andrew, Aki Vehtari, Daniel Simpson, et al. 2020. <em>Bayesian Workflow</em>. arXiv:2011.01808.
+</div>
+<div id="ref-kruschke2021bayesian" class="csl-entry" role="listitem">
+Kruschke, John K. 2021. <span>“Bayesian Analysis Reporting Guidelines.”</span> <em>Nature Human Behaviour</em> 5 (10): 1282–91. <a href="https://doi.org/10.1038/s41562-021-01177-7">https://doi.org/10.1038/s41562-021-01177-7</a>.
+</div>
+<div id="ref-morris2019bayesian" class="csl-entry" role="listitem">
+Morris, Mitzi, Katherine Wheeler-Martin, Dan Simpson, Stephen J. Mooney, Andrew Gelman, and Charles DiMaggio. 2019. <span>“Bayesian Hierarchical Spatial Models: Implementing the <span>B</span>esag <span>Y</span>ork <span>M</span>olli<span>é</span> Model in <span>S</span>tan.”</span> <em>Spatial and Spatio-Temporal Epidemiology</em> 31: 100301.
+</div>
+<div id="ref-riebler2016intuitive" class="csl-entry" role="listitem">
+Riebler, Andrea, Sigrunn H. Sørbye, Daniel Simpson, and Håvard Rue. 2016. <span>“An Intuitive <span>B</span>ayesian Spatial Model for Disease Mapping That Accounts for Scaling.”</span> <em>Statistical Methods in Medical Research</em> 25 (4): 1145–65. <a href="https://doi.org/10.1177/0962280216660421">https://doi.org/10.1177/0962280216660421</a>.
+</div>
+<div id="ref-rockhill1998use" class="csl-entry" role="listitem">
+Rockhill, Beverly, Beth Newman, and Clarice Weinberg. 1998. <span>“Use and Misuse of Population Attributable Fractions.”</span> <em>American Journal of Public Health</em> 88 (1): 15–19. <a href="https://doi.org/10.2105/AJPH.88.1.15">https://doi.org/10.2105/AJPH.88.1.15</a>.
+</div>
+<div id="ref-sera2022extended" class="csl-entry" role="listitem">
+Sera, Francesco, and Antonio Gasparrini. 2022. <span>“Extended Two-Stage Designs for Environmental Research.”</span> <em>Environmental Health</em> 21: 41.
+</div>
+<div id="ref-simpson2017penalising" class="csl-entry" role="listitem">
+Simpson, Daniel, Håvard Rue, Andrea Riebler, Thiago G. Martins, and Sigrunn H. Sørbye. 2017. <span>“Penalising Model Component Complexity: A Principled, Practical Approach to Constructing Priors.”</span> <em>Statistical Science</em> 32 (1): 1–28. <a href="https://doi.org/10.1214/16-STS576">https://doi.org/10.1214/16-STS576</a>.
+</div>
+</div></section></div></main> <!-- /main -->
+<script src="assets/course.js"></script>
+<script src="assets/glossary-data.js"></script>
+<script src="assets/glossary-ui.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/danieljeannetot\.github\.io\/stats-epi\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-24.html" class="pagination-link" aria-label="Lesson 24 · Bayesian hierarchical models">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lesson 24 · Bayesian hierarchical models</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./lesson-26.html" class="pagination-link" aria-label="Lesson 26 · Bayesian additive regression trees (BART) and bartisan">
+        <span class="nav-page-text">Lesson 26 · Bayesian additive regression trees (BART) and bartisan</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>All data are simulated. Course text CC BY 4.0, code MIT.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

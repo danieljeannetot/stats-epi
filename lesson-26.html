@@ -1,0 +1,2081 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.10.18">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Regression trees, sums of trees, the BART prior and sampler, BART for causal effects, how BART compares with the models in this course, whether it is fit for purpose in environmental epidemiology, the bartisan package, BART extensions for lags, space and time, and the difference between prediction, forecasting and effect estimation.">
+
+<title>Lesson 26 · Bayesian additive regression trees (BART) and bartisan – Statistics for epidemiology</title>
+<style>
+/* Default styles provided by pandoc.
+** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+*/
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: 1.5em;}
+div.column{flex: auto;}
+@media screen {
+div.columns{gap: min(4vw, 1.5em);}
+div.column{overflow-x: auto;}
+}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+/* CSS for citations */
+div.csl-bib-body { }
+div.csl-entry {
+  clear: both;
+}
+.hanging-indent div.csl-entry {
+  margin-left:2em;
+  text-indent:-2em;
+}
+div.csl-left-margin {
+  min-width:2em;
+  float:left;
+}
+div.csl-right-inline {
+  margin-left:2em;
+  padding-left:1em;
+}
+div.csl-indent {
+  margin-left: 2em;
+}</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./lesson-25.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js" type="module"></script>
+<script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7eead303e38f083faf515323c8b5fe44.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b468af426e9c805ad947c565d190ce64.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-7eead303e38f083faf515323c8b5fe44.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap-ccf064502f84f33c623e2a83f91e4349.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-42b405ec74c69eb6010bd27de046b5d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-ccf064502f84f33c623e2a83f91e4349.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 50,
+  "keyboard-shortcut": [
+    "f",
+    "/",
+    "s"
+  ],
+  "show-item-context": false,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-text-placeholder": "",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+<style>html{ scroll-behavior: smooth; }</style>
+
+  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
+  <script defer="" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-chtml.js" type="text/javascript"></script>
+
+<script type="text/javascript">
+const typesetMath = (el) => {
+  if (window.MathJax) {
+    // MathJax Typeset
+    window.MathJax.typeset([el]);
+  } else if (window.katex) {
+    // KaTeX Render
+    var mathElements = el.getElementsByClassName("math");
+    var macros = [];
+    for (var i = 0; i < mathElements.length; i++) {
+      var texText = mathElements[i].firstChild;
+      if (mathElements[i].tagName == "SPAN" && texText && texText.data) {
+        window.katex.render(texText.data, mathElements[i], {
+          displayMode: mathElements[i].classList.contains('display'),
+          throwOnError: false,
+          macros: macros,
+          fleqn: false
+        });
+      }
+    }
+  }
+}
+window.Quarto = {
+  typesetMath
+};
+</script>
+
+<link rel="stylesheet" href="assets/course.css">
+</head>
+
+<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+    const toggleBodyColorMode = (bsSheetEl) => {
+      const mode = bsSheetEl.getAttribute("data-mode");
+      const bodyEl = window.document.querySelector("body");
+      if (mode === "dark") {
+        bodyEl.classList.add("quarto-dark");
+        bodyEl.classList.remove("quarto-light");
+      } else {
+        bodyEl.classList.add("quarto-light");
+        bodyEl.classList.remove("quarto-dark");
+      }
+    }
+    const toggleBodyColorPrimary = () => {
+      const bsSheetEl = window.document.querySelector("link#quarto-bootstrap:not([rel=disabled-stylesheet])");
+      if (bsSheetEl) {
+        toggleBodyColorMode(bsSheetEl);
+      }
+    }
+    const setColorSchemeToggle = (alternate) => {
+      const toggles = window.document.querySelectorAll('.quarto-color-scheme-toggle');
+      for (let i=0; i < toggles.length; i++) {
+        const toggle = toggles[i];
+        if (toggle) {
+          if (alternate) {
+            toggle.classList.add("alternate");
+          } else {
+            toggle.classList.remove("alternate");
+          }
+        }
+      }
+    };
+    const toggleColorMode = (alternate) => {
+      // Switch the stylesheets
+      const primaryStylesheets = window.document.querySelectorAll('link.quarto-color-scheme:not(.quarto-color-alternate)');
+      const alternateStylesheets = window.document.querySelectorAll('link.quarto-color-scheme.quarto-color-alternate');
+      manageTransitions('#quarto-margin-sidebar .nav-link', false);
+      if (alternate) {
+        // note: dark is layered on light, we don't disable primary!
+        enableStylesheet(alternateStylesheets);
+        for (const sheetNode of alternateStylesheets) {
+          if (sheetNode.id === "quarto-bootstrap") {
+            toggleBodyColorMode(sheetNode);
+          }
+        }
+      } else {
+        disableStylesheet(alternateStylesheets);
+        enableStylesheet(primaryStylesheets)
+        toggleBodyColorPrimary();
+      }
+      manageTransitions('#quarto-margin-sidebar .nav-link', true);
+      // Switch the toggles
+      setColorSchemeToggle(alternate)
+      // Hack to workaround the fact that safari doesn't
+      // properly recolor the scrollbar when toggling (#1455)
+      if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
+        manageTransitions("body", false);
+        window.scrollTo(0, 1);
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          manageTransitions("body", true);
+        }, 40);
+      }
+    }
+    const disableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        stylesheet.rel = 'disabled-stylesheet';
+      }
+    }
+    const enableStylesheet = (stylesheets) => {
+      for (let i=0; i < stylesheets.length; i++) {
+        const stylesheet = stylesheets[i];
+        if(stylesheet.rel !== 'stylesheet') { // for Chrome, which will still FOUC without this check
+          stylesheet.rel = 'stylesheet';
+        }
+      }
+    }
+    const manageTransitions = (selector, allowTransitions) => {
+      const els = window.document.querySelectorAll(selector);
+      for (let i=0; i < els.length; i++) {
+        const el = els[i];
+        if (allowTransitions) {
+          el.classList.remove('notransition');
+        } else {
+          el.classList.add('notransition');
+        }
+      }
+    }
+    const isFileUrl = () => {
+      return window.location.protocol === 'file:';
+    }
+    const hasAlternateSentinel = () => {
+      let styleSentinel = getColorSchemeSentinel();
+      if (styleSentinel !== null) {
+        return styleSentinel === "alternate";
+      } else {
+        return false;
+      }
+    }
+    const setStyleSentinel = (alternate) => {
+      const value = alternate ? "alternate" : "default";
+      if (!isFileUrl()) {
+        window.localStorage.setItem("quarto-color-scheme", value);
+      } else {
+        localAlternateSentinel = value;
+      }
+    }
+    const getColorSchemeSentinel = () => {
+      if (!isFileUrl()) {
+        const storageValue = window.localStorage.getItem("quarto-color-scheme");
+        return storageValue != null ? storageValue : localAlternateSentinel;
+      } else {
+        return localAlternateSentinel;
+      }
+    }
+    const toggleGiscusIfUsed = (isAlternate, darkModeDefault) => {
+      const baseTheme = document.querySelector('#giscus-base-theme')?.value ?? 'light';
+      const alternateTheme = document.querySelector('#giscus-alt-theme')?.value ?? 'dark';
+      let newTheme = '';
+      if(authorPrefersDark) {
+        newTheme = isAlternate ? baseTheme : alternateTheme;
+      } else {
+        newTheme = isAlternate ? alternateTheme : baseTheme;
+      }
+      const changeGiscusTheme = () => {
+        // From: https://github.com/giscus/giscus/issues/336
+        const sendMessage = (message) => {
+          const iframe = document.querySelector('iframe.giscus-frame');
+          if (!iframe) return;
+          iframe.contentWindow.postMessage({ giscus: message }, 'https://giscus.app');
+        }
+        sendMessage({
+          setConfig: {
+            theme: newTheme
+          }
+        });
+      }
+      const isGiscussLoaded = window.document.querySelector('iframe.giscus-frame') !== null;
+      if (isGiscussLoaded) {
+        changeGiscusTheme();
+      }
+    };
+    const authorPrefersDark = false;
+    const darkModeDefault = authorPrefersDark;
+      document.querySelector('link#quarto-text-highlighting-styles.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+      document.querySelector('link#quarto-bootstrap.quarto-color-scheme-extra').rel = 'disabled-stylesheet';
+    let localAlternateSentinel = darkModeDefault ? 'alternate' : 'default';
+    // Dark / light mode switch
+    window.quartoToggleColorScheme = () => {
+      // Read the current dark / light value
+      let toAlternate = !hasAlternateSentinel();
+      toggleColorMode(toAlternate);
+      setStyleSentinel(toAlternate);
+      toggleGiscusIfUsed(toAlternate, darkModeDefault);
+      window.dispatchEvent(new Event('resize'));
+    };
+    // Switch to dark mode if need be
+    if (hasAlternateSentinel()) {
+      toggleColorMode(true);
+    } else {
+      toggleColorMode(false);
+    }
+  </script>
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container mx-auto">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">Statistics for epidemiology</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll me-auto">
+  <li class="nav-item">
+    <a class="nav-link" href="./index.html"> 
+<span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./glossary.html"> 
+<span class="menu-text">Glossary</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./course-plan.html"> 
+<span class="menu-text">Course plan</span></a>
+  </li>  
+</ul>
+          </div> <!-- /navcollapse -->
+            <div class="quarto-navbar-tools">
+  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+</div>
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-26.html">Part VI · Machine learning meets Bayesian inference</a></li><li class="breadcrumb-item"><a href="./lesson-26.html">Lesson 26 · Bayesian additive regression trees (BART) and bartisan</a></li></ol></nav>
+        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part I · Foundations</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-00.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 0 · Welcome: the city, the data and how to use the course</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-01.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 1 · Describing data and epidemiological measures</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-02.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 2 · Probability and conditional probability</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-03.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 3 · Random variables and probability distributions</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-04.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 4 · Sampling, sampling distributions and the central limit theorem</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-05.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 5 · Likelihood and estimation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-06.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 6 · Confidence intervals and hypothesis tests</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part II · Frequentist regression</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-07.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 7 · Linear regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-08.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 8 · Generalized linear models: logistic and Poisson regression</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-09.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 9 · Confounding, effect modification and interaction</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-10.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 10 · Model checking, comparison and selection</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-11.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 11 · Nonlinear effects: categories, polynomials, splines and GAMs</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part III · Causal inference, measurement and burden</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-12.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 12 · Causal inference: from association to effect</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-13.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 13 · Measurement error and misclassification</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-14.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 14 · Measuring disease burden</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part IV · Time, space and clustering</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-15.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 15 · Time-series regression for health data</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-16.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 16 · Distributed lag and distributed lag non-linear models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-17.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 17 · Spatial data and spatial autocorrelation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-18.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 18 · Clustered data and mixed-effects models</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part V · Bayesian modeling</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-19.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 19 · Bayesian thinking: from Bayes’ rule to a model equation</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-20.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 20 · Priors: what they say and how much they matter</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-21.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 21 · Computing the posterior: Markov chain Monte Carlo</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+ <span class="menu-text">lesson-22.qmd - lesson-23.qmd</span>
+  </li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-24.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 24 · Bayesian hierarchical models</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-25.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
+ <span class="menu-text">Part VI · Machine learning meets Bayesian inference</span></a>
+          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
+            <i class="bi bi-chevron-right ms-2"></i>
+          </a> 
+      </div>
+      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-26.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Lesson 26 · Bayesian additive regression trees (BART) and bartisan</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">In this lesson</h2>
+   
+  <ul class="collapse">
+  <li><a href="#s1" id="toc-s1" class="nav-link active" data-scroll-target="#s1">26.1 One regression tree</a></li>
+  <li><a href="#s2" id="toc-s2" class="nav-link" data-scroll-target="#s2">26.2 From one tree to a sum of trees</a></li>
+  <li><a href="#s3" id="toc-s3" class="nav-link" data-scroll-target="#s3">26.3 What makes it Bayesian: the prior</a></li>
+  <li><a href="#s4" id="toc-s4" class="nav-link" data-scroll-target="#s4">26.4 How BART compares with the models in this course</a></li>
+  <li><a href="#s5" id="toc-s5" class="nav-link" data-scroll-target="#s5">26.5 BART for causal effects</a></li>
+  <li><a href="#s6" id="toc-s6" class="nav-link" data-scroll-target="#s6">26.6 Is BART fit for purpose in environmental epidemiology?</a></li>
+  <li><a href="#s7" id="toc-s7" class="nav-link" data-scroll-target="#s7">26.7 BART in practice with bartisan</a></li>
+  <li><a href="#s8" id="toc-s8" class="nav-link" data-scroll-target="#s8">26.8 Extensions for space, time, lags and space–time</a></li>
+  <li><a href="#s9" id="toc-s9" class="nav-link" data-scroll-target="#s9">26.9 Prediction, forecasting and effect estimation</a></li>
+  <li><a href="#quiz" id="toc-quiz" class="nav-link" data-scroll-target="#quiz">Check your understanding</a></li>
+  <li><a href="#take" id="toc-take" class="nav-link" data-scroll-target="#take">Key takeaways</a></li>
+  <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-26.html">Part VI · Machine learning meets Bayesian inference</a></li><li class="breadcrumb-item"><a href="./lesson-26.html">Lesson 26 · Bayesian additive regression trees (BART) and bartisan</a></li></ol></nav>
+<div class="quarto-title">
+<h1 class="title">Lesson 26 · Bayesian additive regression trees (BART) and bartisan</h1>
+<p class="subtitle lead">Part VI · Machine learning meets Bayesian inference</p>
+</div>
+
+<div>
+  <div class="description">
+    Regression trees, sums of trees, the BART prior and sampler, BART for causal effects, how BART compares with the models in this course, whether it is fit for purpose in environmental epidemiology, the bartisan package, BART extensions for lags, space and time, and the difference between prediction, forecasting and effect estimation.
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<div class="meta-pills">
+<p><span>About 4 hours</span> <span>Before this: Lessons 11, 12, 16, 18 and 19–22</span> <span>Threads: shrinkage · bias · frequentist ↔︎ Bayesian</span></p>
+</div>
+<div class="objectives">
+<p>By the end of this lesson you will be able to</p>
+<ul>
+<li>explain what a regression tree is, and why a single tree is a poor model on its own;</li>
+<li>describe BART as a sum of many small trees, each kept small by a prior;</li>
+<li>explain what the BART prior does, and why BART needs little tuning;</li>
+<li>use BART as the outcome model in g-computation, and explain regularization-induced confounding and how separate exposure terms address it;</li>
+<li>compare BART with the GLMs, splines, DLNMs and hierarchical models of this course;</li>
+<li>judge where BART is, and is not, fit for purpose in environmental epidemiology;</li>
+<li>fit, check and interpret a BART model with the bartisan package;</li>
+<li>choose among BART extensions for lagged, temporal, spatial and clustered data;</li>
+<li>distinguish prediction, forecasting and effect estimation, and evaluate a forecast honestly.</li>
+</ul>
+</div>
+<div class="why">
+<p><strong>Why it matters.</strong> Every model so far has asked you to choose its shape: which terms are linear, where the splines bend, which variables interact. When the confounders are many and their effects unknown, those choices are where bias creeps in. BART takes a different route. It learns the shape from the data, yet stays a Bayesian model, so it returns posterior draws and credible intervals for anything you compute from it. That combination has made it one of the most successful methods for estimating causal effects. It is not, however, a universal replacement for the structured models of Parts II to V, and knowing why is as important as knowing how to use it.</p>
+</div>
+<section id="s1" class="level2">
+<h2 class="anchored" data-anchor-id="s1">26.1 One regression tree</h2>
+<p>A <strong>regression tree</strong> splits the data with a sequence of yes/no questions (“is temperature below 3.2°C?”) and predicts the average outcome in each final group, or <strong>leaf</strong>. The result is a step function. A greedy algorithm (CART) chooses each split to reduce the squared error as much as possible. Make the tree deeper and watch it go from too crude to fitting noise.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="tD">Tree depth</label><input type="range" id="tD" min="1" max="8" value="2"><output id="tDO"></output></div>
+  <div class="ctrl"><label for="tN">Days used to grow the tree</label><input type="range" id="tN" min="60" max="1827" step="1" value="1827"><output id="tNO"></output></div>
+  <svg id="tPlot" viewbox="0 0 520 300" role="img" aria-label="A regression tree's step function"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="tStats"></div><div class="now" id="tNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[g(x; T, M) = \mu_b \ \text{ if } x \text{ falls in leaf } b\]</span></p>
+<div class="note">
+<p><span class="math inline">\(T\)</span> = the tree’s splitting rules; <span class="math inline">\(M = (\mu_1, \dots, \mu_B)\)</span> = one value per leaf.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> rpart<span class="sc">::</span><span class="fu">rpart</span>(visits <span class="sc">~</span> temp,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> city_daily,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>                     <span class="at">control =</span> rpart<span class="sc">::</span><span class="fu">rpart.control</span>(</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                       <span class="at">maxdepth =</span> <span class="dv">3</span>, <span class="at">cp =</span> <span class="dv">0</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (optional): a single regression tree with rpart">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (optional): a single regression tree with rpart
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-1" class="callout-1-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>city_daily <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">|&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">visits =</span> <span class="fu">sum</span>(visits), <span class="at">temp =</span> <span class="fu">first</span>(temp_city), <span class="at">.groups =</span> <span class="st">"drop"</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>tree <span class="ot">&lt;-</span> rpart<span class="sc">::</span><span class="fu">rpart</span>(visits <span class="sc">~</span> temp, <span class="at">data =</span> city_daily,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                     <span class="at">control =</span> rpart<span class="sc">::</span><span class="fu">rpart.control</span>(<span class="at">maxdepth =</span> <span class="dv">3</span>, <span class="at">cp =</span> <span class="dv">0</span>, <span class="at">minbucket =</span> <span class="dv">20</span>))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>tree</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; n= 1827 
+#&gt; 
+#&gt; node), split, n, deviance, yval
+#&gt;       * denotes terminal node
+#&gt; 
+#&gt;  1) root 1827 11381890.0 435.3142  
+#&gt;    2) temp&gt;=11.465 949  1583977.0 377.5458  
+#&gt;      4) temp&gt;=14.105 793   993965.4 370.5322  
+#&gt;        8) temp&gt;=16.435 658   820934.0 368.0000 *
+#&gt;        9) temp&lt; 16.435 135   148248.9 382.8741 *
+#&gt;      5) temp&lt; 14.105 156   352706.8 413.1987  
+#&gt;       10) temp&gt;=12.385 104   188289.7 409.0577 *
+#&gt;       11) temp&lt; 12.385 52   159067.0 421.4808 *
+#&gt;    3) temp&lt; 11.465 878  3207847.0 497.7540  
+#&gt;      6) temp&gt;=5.15 390  1060374.0 464.5615  
+#&gt;       12) temp&gt;=7.925 206   405157.3 448.9417 *
+#&gt;       13) temp&lt; 7.925 184   548688.6 482.0489 *
+#&gt;      7) temp&lt; 5.15 488  1374405.0 524.2807  
+#&gt;       14) temp&gt;=2.035 238   675162.7 512.5588 *
+#&gt;       15) temp&lt; 2.035 250   635407.6 535.4400 *</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="breiman1984classification">Breiman et al. (<a href="#ref-breiman1984classification" role="doc-biblioref">1984</a>)</span> introduced CART; <span class="citation" data-cites="hastie2009elements">Hastie et al. (<a href="#ref-hastie2009elements" role="doc-biblioref">2009</a>)</span> explain trees, their instability and their ensembles; <span class="citation" data-cites="breiman2001random">Breiman (<a href="#ref-breiman2001random" role="doc-biblioref">2001</a>)</span> introduced random forests, which average many deep trees.</p>
+</div>
+</section>
+<section id="s2" class="level2">
+<h2 class="anchored" data-anchor-id="s2">26.2 From one tree to a sum of trees</h2>
+<p>A single tree is unstable and blocky. <strong>BART</strong> instead adds up many small trees. Each tree, kept to two or three leaves by its prior, explains only a little; the sum can approximate smooth curves and interactions. Because BART is fitted by MCMC, each iteration gives a whole new set of trees, so the result is a posterior distribution of curves, with credible bands. Fit it, and compare with the spline of Lesson 11.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="bM">Number of trees, m</label><select id="bM"><option>1</option><option>5</option><option>20</option><option selected="">50</option><option>200</option></select></div>
+  <div class="btns"><button type="button" id="bRun">Fit BART (600 MCMC iterations)</button><label class="small"><input type="checkbox" id="bSpl" checked=""> show the spline fit</label></div>
+  <div class="small" id="bProg"></div>
+  <svg id="bPlot" viewbox="0 0 520 300" role="img" aria-label="BART fit with credible band"></svg>
+  <div class="legend"><span><i style="background:var(--c-post)"></i>BART posterior mean and 95% band</span><span><i style="background:var(--p2)"></i>a few single posterior draws</span><span><i style="background:var(--p1)"></i>natural spline (Lesson 11)</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="bStats"></div><div class="now" id="bNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[y_i = f(x_i) + \varepsilon_i, \qquad f(x) = \sum_{j=1}^{m} g(x; T_j, M_j), \qquad \varepsilon_i \sim \mathrm{Normal}(0, \sigma^2)\]</span></p>
+<div class="note">
+<p>Each tree is updated in turn against the residual left by the others (“Bayesian backfitting”), by Metropolis–Hastings moves that grow or prune a leaf.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> bartisan<span class="sc">::</span><span class="fu">bartisan</span>(</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  visits <span class="sc">~</span> temp, <span class="at">data =</span> city_daily,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">family =</span> <span class="fu">gaussian</span>(),</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">control =</span> bartisan<span class="sc">::</span><span class="fu">bartisan_control</span>(</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">num_trees =</span> <span class="dv">50</span>, <span class="at">gate =</span> <span class="st">"hard"</span>))</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>bartisan<span class="sc">::</span><span class="fu">partial_dependence</span>(fit, <span class="sc">~</span> temp) <span class="sc">|&gt;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="bReport"></span></p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="chipman2010bart">Chipman et al. (<a href="#ref-chipman2010bart" role="doc-biblioref">2010</a>)</span> is the original BART paper; <span class="citation" data-cites="hill2020bart">Hill et al. (<a href="#ref-hill2020bart" role="doc-biblioref">2020</a>)</span> review the model, its extensions and applications; <span class="citation" data-cites="linero2025generalized">Linero (<a href="#ref-linero2025generalized" role="doc-biblioref">2025</a>)</span> extends BART beyond Gaussian outcomes, the method bartisan implements.</p>
+</div>
+</section>
+<section id="s3" class="level2">
+<h2 class="anchored" data-anchor-id="s3">26.3 What makes it Bayesian: the prior</h2>
+<p>BART’s strength comes from its prior, which does the job that tuning does in other machine learning methods. A node at depth d splits with probability γ(1 + d)<sup>−β</sup>, so trees stay shallow. Leaf values are normal with a standard deviation that shrinks as more trees are added, so that no single tree dominates (the parameter k controls how hard). The residual SD gets its own prior. Change the settings and draw functions from the prior alone, the prior predictive check of Lesson 20 for a forest.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pG">γ (base probability of a split)</label><input type="range" id="pG" min="0.3" max="0.99" step="0.01" value="0.95"><output id="pGO"></output></div>
+  <div class="ctrl"><label for="pB">β (how fast splitting falls with depth)</label><input type="range" id="pB" min="0" max="4" step="0.1" value="2"><output id="pBO"></output></div>
+  <div class="ctrl"><label for="pK">k (leaf shrinkage)</label><input type="range" id="pK" min="0.5" max="5" step="0.1" value="2"><output id="pKO"></output></div>
+  <div class="ctrl"><label for="pM">Number of trees, m</label><select id="pM"><option>1</option><option>10</option><option selected="">50</option><option>200</option></select></div>
+  <svg id="pFun" viewbox="0 0 520 240" role="img" aria-label="Functions drawn from the BART prior"></svg>
+</div>
+<div class="cpanel"><svg id="pSize" viewbox="0 0 520 200" role="img" aria-label="Prior distribution of tree sizes"></svg><svg id="pGate" viewbox="0 0 520 170" role="img" aria-label="Hard and soft decision rules"></svg><div class="ctrl"><label for="pBw">Soft-rule bandwidth τ</label><input type="range" id="pBw" min="0.01" max="0.3" step="0.01" value="0.08"><output id="pBwO"></output></div><div class="now" id="pNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[P(\text{node at depth } d \text{ splits}) = \gamma (1 + d)^{-\beta}, \qquad \gamma = 0.95,\ \beta = 2\]</span> <span class="math display">\[\mu_b \sim \mathrm{Normal}\!\left(0, \sigma_\mu^2\right), \qquad \sigma_\mu = \frac{0.5}{k\sqrt{m}} \ \text{(outcome scaled to } [-0.5, 0.5])\]</span> <span class="math display">\[\text{soft rule: } P(\text{go left}) = \psi\!\left(\frac{c - x_j}{\tau}\right)\]</span></p>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>bartisan<span class="sc">::</span><span class="fu">bartisan_control</span>(</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">num_trees =</span> <span class="dv">50</span>,</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">gamma =</span> <span class="fl">0.95</span>, <span class="at">beta =</span> <span class="dv">2</span>, <span class="at">k =</span> <span class="dv">2</span>,</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">gate =</span> <span class="st">"smoothstep"</span>,   <span class="co"># soft rules (default)</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">sparsity =</span> <span class="cn">FALSE</span>)      <span class="co"># DART prior off</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Bayesian connection">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Bayesian connection
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>This is Lesson 20’s idea taken to its limit. Instead of a prior on the coefficients of a chosen equation, BART puts a prior on the equation itself: on which variables are split, where, how deeply, and by how much. The prior regularizes so strongly toward small trees that the defaults work across a wide range of problems, which is why BART rarely needs cross-validation.</p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="chipman2010bart">Chipman et al. (<a href="#ref-chipman2010bart" role="doc-biblioref">2010</a>)</span> justify the default prior; <span class="citation" data-cites="linero2018soft">Linero and Yang (<a href="#ref-linero2018soft" role="doc-biblioref">2018</a>)</span> introduced soft decision rules, the default in bartisan; <span class="citation" data-cites="linero2018dart">Linero (<a href="#ref-linero2018dart" role="doc-biblioref">2018</a>)</span> introduced the Dirichlet sparsity prior (DART) for variable selection.</p>
+</div>
+</section>
+<section id="s4" class="level2">
+<h2 class="anchored" data-anchor-id="s4">26.4 How BART compares with the models in this course</h2>
+<p>BART is easiest to understand by placing it next to the methods you already know.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+<col style="width: 16%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>GLM (Lessons 8, 22)</th>
+<th>Splines and GAMs (Lesson 11)</th>
+<th>DLNM (Lesson 16)</th>
+<th>Mixed models (Lessons 18, 24)</th>
+<th>BART (this lesson)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Shape of each effect</strong></td>
+<td>chosen by you (usually linear)</td>
+<td>smooth curves, flexibility chosen or penalized</td>
+<td>smooth surface in exposure and lag</td>
+<td>as in the fixed part</td>
+<td>learned from the data</td>
+</tr>
+<tr class="even">
+<td><strong>Interactions</strong></td>
+<td>only those you add</td>
+<td>only those you add</td>
+<td>exposure × lag, by design</td>
+<td>random slopes you specify</td>
+<td>found automatically</td>
+</tr>
+<tr class="odd">
+<td><strong>Output</strong></td>
+<td>coefficients</td>
+<td>curves</td>
+<td>curves and surfaces</td>
+<td>coefficients and group effects</td>
+<td>predictions; effects are contrasts of predictions</td>
+</tr>
+<tr class="even">
+<td><strong>Uncertainty</strong></td>
+<td>SEs or posterior</td>
+<td>SEs or posterior</td>
+<td>SEs or simulation</td>
+<td>SEs or posterior</td>
+<td>full posterior</td>
+</tr>
+<tr class="odd">
+<td><strong>Regularization</strong></td>
+<td>none, or priors</td>
+<td>penalty</td>
+<td>penalty or knot choice</td>
+<td>shrinkage of group effects</td>
+<td>prior on tree size and leaf values</td>
+</tr>
+<tr class="even">
+<td><strong>Dependence between observations</strong></td>
+<td>modeled if specified</td>
+<td>modeled if specified</td>
+<td>time handled by design</td>
+<td>clustering modeled</td>
+<td>random intercepts only (in bartisan)</td>
+</tr>
+<tr class="odd">
+<td><strong>Beyond the data’s range</strong></td>
+<td>follows the equation</td>
+<td>linear beyond outer knots</td>
+<td>as splines</td>
+<td>as the fixed part</td>
+<td>flat: the last leaf continues</td>
+</tr>
+<tr class="even">
+<td><strong>Best when</strong></td>
+<td>the form is known</td>
+<td>one smooth effect</td>
+<td>lagged nonlinear exposure</td>
+<td>clustered data</td>
+<td>many confounders, unknown form, heterogeneity</td>
+</tr>
+</tbody>
+</table>
+<p>Compared with other tree ensembles, BART sums trees (as boosting does) rather than averaging them (as random forests do), and it is Bayesian: the prior replaces tuning, and every quantity comes with a posterior. Compared with Bayesian kernel machine regression <span class="citation" data-cites="bobb2015bayesian">(<a href="#ref-bobb2015bayesian" role="doc-biblioref">Bobb et al. 2015</a>)</span>, the standard flexible model for environmental mixtures, BART scales better to many variables and finds interactions through splits rather than through a kernel.</p>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="hill2020bart">Hill et al. (<a href="#ref-hill2020bart" role="doc-biblioref">2020</a>)</span> compare BART with other machine learning methods; <span class="citation" data-cites="tan2019bayesian">Tan and Roy (<a href="#ref-tan2019bayesian" role="doc-biblioref">2019</a>)</span> on combining BART with parametric terms (the General BART model); <span class="citation" data-cites="deshpande2026vcbart">Deshpande et al. (<a href="#ref-deshpande2026vcbart" role="doc-biblioref">2026</a>)</span> on varying-coefficient BART.</p>
+</div>
+</section>
+<section id="s5" class="level2">
+<h2 class="anchored" data-anchor-id="s5">26.5 BART for causal effects</h2>
+<p>BART’s best-known success is as the outcome model in <strong>g-computation</strong> <span class="citation" data-cites="hill2011bayesian">(<a href="#ref-hill2011bayesian" role="doc-biblioref">Hill 2011</a>)</span>, the method of Lesson 12: fit a flexible model for the outcome given exposure and confounders, predict every child’s risk under two exposure levels, and average. Here BART is fitted to all 5,000 children with a probit link, asking Lesson 12’s question: how many cases of asthma per 1,000 children would a 10 µg/m³ reduction in NO₂ prevent? The true answer, known from the simulation, is about 15.</p>
+<p>Two versions are compared. In the first, NO₂ is just one more variable the trees can split on. In the second, NO₂ gets its own linear term, and the trees model only the confounders: the semiparametric model that bartisan writes as <code>vc(no2, ~ 1)</code>.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Model"><button type="button" id="cIn" aria-pressed="true">NO₂ inside the trees</button><button type="button" id="cLin" aria-pressed="false">NO₂ as its own linear term</button></div>
+  <div class="btns"><button type="button" id="cRun">Fit (about 5 seconds)</button></div>
+  <div class="small" id="cProg"></div>
+  <svg id="cPlot" viewbox="0 0 520 240" role="img" aria-label="Estimates of cases prevented"></svg>
+  <svg id="cCate" viewbox="0 0 520 220" role="img" aria-label="Child-level effects by SES"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="cStats"></div><div class="now" id="cNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[\Phi^{-1}\big(P(Y_i = 1)\big) = f(x_i, z_i) \quad \text{or} \quad \beta\, x_i + f(z_i)\]</span> <span class="math display">\[\Delta^{(s)} = \frac{1}{n}\sum_i\Big[\Phi\big(f^{(s)}(x_i, z_i)\big) - \Phi\big(f^{(s)}(x_i - 10, z_i)\big)\Big]\]</span></p>
+<div class="note">
+<p><span class="math inline">\(x\)</span> = NO₂, <span class="math inline">\(z\)</span> = confounders; one value of <span class="math inline">\(\Delta\)</span> per posterior draw <span class="math inline">\(s\)</span>.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> bartisan<span class="sc">::</span><span class="fu">bartisan</span>(</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  asthma <span class="sc">~</span> ses <span class="sc">+</span> green <span class="sc">+</span> parent_smoke <span class="sc">+</span> sex <span class="sc">+</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">vc</span>(no2, <span class="sc">~</span> <span class="dv">1</span>),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> cohort, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="st">"probit"</span>))</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>marginaleffects<span class="sc">::</span><span class="fu">avg_comparisons</span>(fit,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">variables =</span> <span class="fu">list</span>(<span class="at">no2 =</span> <span class="sc">-</span><span class="dv">10</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="cReport"></span></p>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled" title="Regularization-induced confounding">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Regularization-induced confounding
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>When the exposure is strongly predicted by the confounders, as NO₂ is by district traffic, green space and SES here, a single forest has trouble separating their effects. Its shrinkage pulls the estimated exposure effect toward zero and blurs it with confounding <span class="citation" data-cites="hahn2020bayesian">(<a href="#ref-hahn2020bayesian" role="doc-biblioref">Hahn et al. 2020</a>)</span>. The remedies are the ones bartisan builds in: give the exposure its own term (<code>vc()</code>), or use a Bayesian causal forest (<code>bcf()</code>), which also adds an estimated propensity score as a predictor. Neither removes the need for the identification assumptions of Lesson 12: BART adjusts for the confounders you give it, not for those you omit.</p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="hill2011bayesian">Hill (<a href="#ref-hill2011bayesian" role="doc-biblioref">2011</a>)</span> introduced BART for causal inference; <span class="citation" data-cites="hahn2020bayesian">Hahn et al. (<a href="#ref-hahn2020bayesian" role="doc-biblioref">2020</a>)</span> on regularization-induced confounding and Bayesian causal forests; <span class="citation" data-cites="dorie2019automated">Dorie et al. (<a href="#ref-dorie2019automated" role="doc-biblioref">2019</a>)</span> report a large competition in which BART-based methods were among the most accurate.</p>
+</div>
+</section>
+<section id="s6" class="level2">
+<h2 class="anchored" data-anchor-id="s6">26.6 Is BART fit for purpose in environmental epidemiology?</h2>
+<p>One property deserves a demonstration before the overall verdict. Health impact projections under climate change, or for a colder or hotter city, need predictions at temperatures the data never covered. What do models predict beyond the range they were fitted on? Fit to milder days only, then compare the predictions for colder or hotter days with a reference fitted to all days.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="xDir">Extrapolate to</label><select id="xDir"><option value="cold" selected="">colder days (fit to days above the cut-off)</option><option value="heat">hotter days (fit to days below the cut-off)</option></select></div>
+  <div class="ctrl"><label for="xC">Cut-off temperature</label><input type="range" id="xC" min="-2" max="10" step="0.5" value="5"><output id="xCO"></output></div>
+  <div class="btns"><button type="button" id="xRun">Fit BART and a spline GLM</button></div>
+  <div class="small" id="xProg"></div>
+  <svg id="xPlot" viewbox="0 0 520 300" role="img" aria-label="Extrapolation beyond the fitted range"></svg>
+  <div class="legend"><span><i style="background:var(--c-post)"></i>BART</span><span><i style="background:var(--p1)"></i>spline GLM</span><span><i style="background:var(--c-ink)"></i>spline fitted to all days (reference)</span></div>
+</div>
+<div class="cpanel"><div class="statgrid" id="xStats"></div><div class="now" id="xNow"></div></div>
+</div>
+<p><strong>The verdict, task by task.</strong></p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Task</th>
+<th>Fit for purpose?</th>
+<th>Why</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Adjusting for many confounders of unknown form (cohorts, cross-sectional studies)</td>
+<td><strong>Yes</strong>, often the best option</td>
+<td>No functional form to misspecify; strong record in causal benchmarks. Give the exposure its own term (<code>vc()</code>, <code>bcf()</code>).</td>
+</tr>
+<tr class="even">
+<td>Who is most vulnerable: effect heterogeneity</td>
+<td><strong>Yes</strong></td>
+<td>Bayesian causal forests estimate conditional effects with honest uncertainty, and are used in air pollution studies of vulnerability.</td>
+</tr>
+<tr class="odd">
+<td>Mixtures of several pollutants</td>
+<td><strong>Yes</strong>, with care</td>
+<td>Finds nonlinear joint effects and interactions; compare with BKMR. Correlated pollutants remain hard to separate for any method.</td>
+</tr>
+<tr class="even">
+<td>Exposure–response curves to report and use in burden estimates</td>
+<td><strong>Partly</strong></td>
+<td>Curves are partial dependence summaries, not parameters. Soft rules and <code>x_transform = "range"</code> help; splines remain easier to report and compare.</td>
+</tr>
+<tr class="odd">
+<td>Daily time series (Lesson 15)</td>
+<td><strong>Not plain BART</strong></td>
+<td>Residual autocorrelation is not modeled, and season and trend must be entered as predictors. A spline-based quasi-Poisson model is simpler; for effect heterogeneity in a case-crossover design, see CL-BART in 26.8.</td>
+</tr>
+<tr class="even">
+<td>Lagged effects (Lesson 16)</td>
+<td><strong>Not plain BART</strong>: use treed DLMs</td>
+<td>Lag structure isn’t built in. The <code>dlmtree</code> package provides tree-based DLMs and DLNMs, which are good at finding sharp critical windows (26.8).</td>
+</tr>
+<tr class="odd">
+<td>Spatial data (Lessons 17, 25)</td>
+<td><strong>Limited in bartisan</strong></td>
+<td>Random intercepts but no spatial (CAR/BYM2) structure; neighboring areas are treated as unrelated. Spatial BART variants exist as research software (26.8).</td>
+</tr>
+<tr class="even">
+<td>Clustered data (schools, districts)</td>
+<td><strong>Yes, partly</strong></td>
+<td>Random intercepts are supported; random slopes are not.</td>
+</tr>
+<tr class="odd">
+<td>Projecting to unseen exposures (future heat, new policies, other climates)</td>
+<td><strong>No</strong></td>
+<td>Trees predict a constant beyond the data. Every model’s projection there is an assumption; BART’s is “nothing changes”, and its credible band doesn’t flag it.</td>
+</tr>
+<tr class="even">
+<td>Measurement error (Lesson 13)</td>
+<td><strong>No</strong></td>
+<td>BART models the measured exposure, and inherits its errors and their attenuation.</td>
+</tr>
+<tr class="odd">
+<td>Small samples, rare outcomes, weak effects</td>
+<td><strong>Caution</strong></td>
+<td>Strong shrinkage pulls weak effects toward zero; credible intervals are wide. A well-specified parametric model is more efficient when it is right.</td>
+</tr>
+</tbody>
+</table>
+<p>So BART is a strong tool for the confounding-heavy, heterogeneity-seeking questions of cohort and cross-sectional environmental studies, especially as the outcome or propensity model inside a causal estimator. It does not replace the structured models of this course where time, space, lags, measurement error or extrapolation are central. There, the structure is the scientific content, and BART would have to rediscover it from data, or couldn’t. A productive middle way is semiparametric: a parametric exposure term, or a lag structure, with BART for everything else.</p>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="mork2022treed">Mork and Wilson (<a href="#ref-mork2022treed" role="doc-biblioref">2022</a>)</span> introduced treed distributed lag nonlinear models; <span class="citation" data-cites="mork2023estimating">Mork and Wilson (<a href="#ref-mork2023estimating" role="doc-biblioref">2023</a>)</span> extended them to mixtures; <span class="citation" data-cites="mork2024heterogeneous">Mork et al. (<a href="#ref-mork2024heterogeneous" role="doc-biblioref">2024</a>)</span> use BART to find who is most affected by prenatal air pollution; <span class="citation" data-cites="bobb2015bayesian">Bobb et al. (<a href="#ref-bobb2015bayesian" role="doc-biblioref">2015</a>)</span> describe BKMR for mixtures.</p>
+</div>
+</section>
+<section id="s7" class="level2">
+<h2 class="anchored" data-anchor-id="s7">26.7 BART in practice with bartisan</h2>
+<p>The <strong>bartisan</strong> package <span class="citation" data-cites="greifer2026bartisan">(<a href="#ref-greifer2026bartisan" role="doc-biblioref">Greifer 2026</a>)</span> fits BART with a <code>glm()</code>-like interface: a formula, a data frame and a family. It implements Linero’s sampler <span class="citation" data-cites="linero2025generalized">(<a href="#ref-linero2025generalized" role="doc-biblioref">Linero 2025</a>)</span>, which extends BART to outcomes standard BART can’t handle directly: Poisson and negative binomial counts, binomial with a logit link, gamma, beta, ordinal and survival outcomes. Its defaults include soft decision rules, a smooth predictor transform, and native handling of missing predictor values. A typical analysis has five steps.</p>
+<ol type="1">
+<li><strong>Fit</strong>, choosing the family as for a GLM, and giving the exposure its own term if its effect is the goal.</li>
+<li><strong>Check convergence</strong> with several chains and <code>diagnose()</code>. Diagnose the reported quantity itself, not just the forest. Per-observation R-hat values for the fitted function are often above 1.05 in BART even when reported contrasts are fine.</li>
+<li><strong>Look at the fit</strong>: posterior predictive checks with <code>pp_check()</code>, partial dependence plots, and variable importance (as a rough guide only).</li>
+<li><strong>Estimate</strong> the quantity of interest by contrasting predictions: <code>estimate_effect()</code> for a binary exposure, or <code>marginaleffects::avg_comparisons()</code> for any contrast.</li>
+<li><strong>Compare</strong> with simpler models by leave-one-out cross-validation (<code>loo()</code>), and report sensitivity to the main settings.</li>
+</ol>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (not run when the site builds): a bartisan workflow for the cohort and the time series">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (not run when the site builds): a bartisan workflow for the cohort and the time series
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">"bartisan"</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(bartisan)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>future<span class="sc">::</span><span class="fu">plan</span>(<span class="st">"multisession"</span>, <span class="at">workers =</span> <span class="dv">4</span>)     <span class="co"># run chains in parallel</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">26</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Cohort: asthma, with NO2 given its own (constant) coefficient</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">bartisan</span>(asthma <span class="sc">~</span> ses <span class="sc">+</span> green <span class="sc">+</span> parent_smoke <span class="sc">+</span> sex <span class="sc">+</span> <span class="fu">vc</span>(no2_modeled, <span class="sc">~</span> <span class="dv">1</span>),</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>                <span class="at">data =</span> cohort, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">chains =</span> <span class="dv">4</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a><span class="fu">diagnose</span>(fit)                                   <span class="co"># convergence of the fit</span></span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. The effect of a 10 ug/m3 reduction, as a posterior risk difference</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>eff <span class="ot">&lt;-</span> marginaleffects<span class="sc">::</span><span class="fu">avg_comparisons</span>(fit, <span class="at">variables =</span> <span class="fu">list</span>(<span class="at">no2_modeled =</span> <span class="sc">-</span><span class="dv">10</span>))</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>eff</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Let the effect vary with SES and green space instead (effect heterogeneity)</span></span>
+<span id="cb7-17"><a href="#cb7-17" aria-hidden="true" tabindex="-1"></a>fit_vc <span class="ot">&lt;-</span> <span class="fu">bartisan</span>(asthma <span class="sc">~</span> ses <span class="sc">+</span> green <span class="sc">+</span> parent_smoke <span class="sc">+</span> sex <span class="sc">+</span> <span class="fu">vc</span>(no2_modeled, <span class="sc">~</span> ses <span class="sc">+</span> green),</span>
+<span id="cb7-18"><a href="#cb7-18" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> cohort, <span class="at">family =</span> <span class="fu">binomial</span>(), <span class="at">chains =</span> <span class="dv">4</span>)</span>
+<span id="cb7-19"><a href="#cb7-19" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(loo)</span>
+<span id="cb7-20"><a href="#cb7-20" aria-hidden="true" tabindex="-1"></a><span class="fu">loo_compare</span>(<span class="fu">list</span>(<span class="at">constant =</span> <span class="fu">loo</span>(fit), <span class="at">varying =</span> <span class="fu">loo</span>(fit_vc)))</span>
+<span id="cb7-21"><a href="#cb7-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-22"><a href="#cb7-22" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Daily counts: negative binomial BART with a random intercept per district</span></span>
+<span id="cb7-23"><a href="#cb7-23" aria-hidden="true" tabindex="-1"></a>district_daily <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span></span>
+<span id="cb7-24"><a href="#cb7-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date, district) <span class="sc">|&gt;</span></span>
+<span id="cb7-25"><a href="#cb7-25" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">visits =</span> <span class="fu">sum</span>(visits), <span class="at">temp =</span> <span class="fu">first</span>(temp), <span class="at">pm25 =</span> <span class="fu">first</span>(pm25),</span>
+<span id="cb7-26"><a href="#cb7-26" aria-hidden="true" tabindex="-1"></a>            <span class="at">dow =</span> <span class="fu">first</span>(dow), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb7-27"><a href="#cb7-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">doy =</span> <span class="fu">yday</span>(date), <span class="at">t =</span> <span class="fu">as.numeric</span>(date <span class="sc">-</span> <span class="fu">min</span>(date)))</span>
+<span id="cb7-28"><a href="#cb7-28" aria-hidden="true" tabindex="-1"></a>fit_ts <span class="ot">&lt;-</span> <span class="fu">bartisan</span>(visits <span class="sc">~</span> temp <span class="sc">+</span> pm25 <span class="sc">+</span> doy <span class="sc">+</span> t <span class="sc">+</span> dow <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> district),</span>
+<span id="cb7-29"><a href="#cb7-29" aria-hidden="true" tabindex="-1"></a>                   <span class="at">data =</span> district_daily, <span class="at">family =</span> <span class="fu">negbin</span>())</span>
+<span id="cb7-30"><a href="#cb7-30" aria-hidden="true" tabindex="-1"></a><span class="fu">partial_dependence</span>(fit_ts, <span class="sc">~</span> temp) <span class="sc">|&gt;</span> <span class="fu">plot</span>()</span>
+<span id="cb7-31"><a href="#cb7-31" aria-hidden="true" tabindex="-1"></a><span class="fu">pp_check</span>(fit_ts)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<p>Two cautions apply to the time-series example. Its residuals are not modeled as autocorrelated. And the temperature curve is a same-day association, not the cumulative lagged effect a DLNM estimates (Lesson 16); for lags, use <code>dlmtree</code>. The bartisan documentation is detailed and candid about limitations, including mixing of the fitted function and the leaf scale. Read its “Generalized BART with bartisan” and FAQ vignettes before a first serious analysis.</p>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="greifer2026bartisan">Greifer (<a href="#ref-greifer2026bartisan" role="doc-biblioref">2026</a>)</span> is the package, with extensive vignettes; <span class="citation" data-cites="kapelner2015prediction">Kapelner and Bleich (<a href="#ref-kapelner2015prediction" role="doc-biblioref">2015</a>)</span> on BART with missing predictors; <span class="citation" data-cites="chernozhukov2018double">Chernozhukov et al. (<a href="#ref-chernozhukov2018double" role="doc-biblioref">2018</a>)</span> on using BART predictions inside double/debiased machine learning for frequentist inference.</p>
+</div>
+</section>
+<section id="s8" class="level2">
+<h2 class="anchored" data-anchor-id="s8">26.8 Extensions for space, time, lags and space–time</h2>
+<p>Plain BART assumes independent observations and has no notion of lags, neighbors or smoothness over time. A growing literature extends it for exactly the structures of Part IV. They differ a great deal in maturity: some are published with maintained R packages, others exist only as papers with research code, and a general spatio-temporal BART for health counts doesn’t yet exist.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Structure</th>
+<th>Extension</th>
+<th>How it works</th>
+<th>Software and maturity</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Lags: DLM and DLNM</strong> (Lesson 16)</td>
+<td>Treed distributed lag models: TDLM (linear), TDLNM (nonlinear), TDLMM (mixtures of lagged exposures), HDLM (lag effects that vary across people), monotone DLMs <span class="citation" data-cites="mork2022treed mork2023estimating mork2024heterogeneous">(<a href="#ref-mork2022treed" role="doc-biblioref">Mork and Wilson 2022</a>, <a href="#ref-mork2023estimating" role="doc-biblioref">2023</a>; <a href="#ref-mork2024heterogeneous" role="doc-biblioref">Mork et al. 2024</a>)</span></td>
+<td>Trees split the lag axis (and, for TDLNM, the exposure axis) into blocks of constant effect, so the exposure–lag–response surface is built from rectangles instead of a spline cross-basis. Good at sharp critical windows; spline DLNMs remain smoother where the truth is smooth.</td>
+<td><strong>Published; CRAN package <code>dlmtree</code></strong> <span class="citation" data-cites="mork2026dlmtree">(<a href="#ref-mork2026dlmtree" role="doc-biblioref">Mork et al. 2026</a>)</span>. Families: Gaussian, binomial (logit) and zero-inflated negative binomial. Designed for birth cohorts with weekly exposures; applicable to daily series. The authors recommend long chains (at least 5,000 burn-in and 15,000 sampling iterations).</td>
+</tr>
+<tr class="even">
+<td><strong>Smooth effects over time, lag or age</strong></td>
+<td>BART with targeted smoothing (tsBART) <span class="citation" data-cites="starling2020bart">(<a href="#ref-starling2020bart" role="doc-biblioref">Starling et al. 2020</a>)</span></td>
+<td>Each leaf holds a smooth function of one “target” variable, with a Gaussian process prior, instead of a single number. The fit is smooth in time (or lag, or gestational age) while staying fully flexible in the other covariates.</td>
+<td><strong>Published; R package <code>tsbart</code>.</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Case-crossover designs</strong> (Lesson 15)</td>
+<td>Conditional logistic BART (CL-BART) <span class="citation" data-cites="englert2025estimating">(<a href="#ref-englert2025estimating" role="doc-biblioref">Englert et al. 2025a</a>)</span></td>
+<td>BART inside the conditional likelihood of a time-stratified case-crossover design, so effects of acute exposures can vary flexibly with individual characteristics while time-invariant confounders cancel out. Applied to heat waves and Alzheimer’s disease.</td>
+<td><strong>Published (JASA, 2025)</strong>; check the paper for code availability.</td>
+</tr>
+<tr class="even">
+<td><strong>Daily counts with exposure mixtures</strong></td>
+<td>Soft BART as one component of a larger count model <span class="citation" data-cites="englert2025modeling">(<a href="#ref-englert2025modeling" role="doc-biblioref">Englert et al. 2025b</a>)</span></td>
+<td>A soft-BART exposure–risk surface for several pollutants and temperature, inside a model for daily emergency visits, summarized with accumulated local effects.</td>
+<td><strong>Published (Statistics in Medicine, 2025).</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>Correlated errors in time or space</strong></td>
+<td>Correlated BART and GP-CBART <span class="citation" data-cites="lu2025gaussian">(<a href="#ref-lu2025gaussian" role="doc-biblioref">Lu and McCulloch 2025</a>)</span></td>
+<td>BART for the mean, with a Gaussian process for the correlation between observations, rather than independent errors.</td>
+<td><strong>Preprint.</strong></td>
+</tr>
+<tr class="even">
+<td><strong>Forecasting several series</strong></td>
+<td>Bayesian additive vector autoregressive trees (BAVART) <span class="citation" data-cites="huber2022inference">(<a href="#ref-huber2022inference" role="doc-biblioref">Huber and Rossini 2022</a>)</span></td>
+<td>A vector autoregression whose dependence on past values is a sum of trees. Built for economic forecasting, not health effects.</td>
+<td><strong>Published</strong>, econometrics.</td>
+</tr>
+<tr class="odd">
+<td><strong>Areal spatial data</strong> (Lessons 17, 25)</td>
+<td>Spatially adjusted BART <span class="citation" data-cites="muller2007spatially">(<a href="#ref-muller2007spatially" role="doc-biblioref">Müller et al. 2007</a>)</span>; BART for sparse spatial observations <span class="citation" data-cites="kim2022bayesian">(<a href="#ref-kim2022bayesian" role="doc-biblioref">Kim 2022</a>)</span></td>
+<td>BART for the covariates plus spatial random effects with a CAR prior: the BART analogue of the disease-mapping models of Lesson 25. The General BART framework <span class="citation" data-cites="tan2019bayesian">(<a href="#ref-tan2019bayesian" role="doc-biblioref">Tan and Roy 2019</a>)</span> shows how to add a BART component to such models.</td>
+<td><strong>Published</strong>; no maintained package that I could find.</td>
+</tr>
+<tr class="even">
+<td><strong>Point-referenced (geostatistical) data</strong></td>
+<td>BARTSIMP <span class="citation" data-cites="jiang2025bartsimp">(<a href="#ref-jiang2025bartsimp" role="doc-biblioref">Jiang and Wakefield 2025</a>)</span>; GP-BART <span class="citation" data-cites="maia2024gpbart">(<a href="#ref-maia2024gpbart" role="doc-biblioref">Maia et al. 2024</a>)</span></td>
+<td>BARTSIMP adds a Gaussian random field, handled by INLA within MCMC. GP-BART puts Gaussian processes in the leaves, giving smooth surfaces over coordinates.</td>
+<td>BARTSIMP: <strong>preprint</strong>. GP-BART: <strong>published</strong>, R package <code>gpbart</code> on GitHub; computationally very demanding.</td>
+</tr>
+<tr class="odd">
+<td><strong>Spatially varying effects</strong></td>
+<td>Varying-coefficient BART (VCBART) <span class="citation" data-cites="deshpande2026vcbart">(<a href="#ref-deshpande2026vcbart" role="doc-biblioref">Deshpande et al. 2026</a>)</span>, applied to spatially varying pollution-mixture effects <span class="citation" data-cites="englert2025spatially">(<a href="#ref-englert2025spatially" role="doc-biblioref">Englert and Chang 2025</a>)</span></td>
+<td>The exposure coefficient is itself a forest, so its value can vary by area (and with area characteristics).</td>
+<td>VCBART: <strong>published</strong>; the spatial application is a <strong>preprint</strong>. bartisan’s <code>vc()</code> fits the same kind of model.</td>
+</tr>
+<tr class="even">
+<td><strong>Multilevel structure with random slopes</strong> (Lesson 18)</td>
+<td>stan4bart <span class="citation" data-cites="dorie2022stan">(<a href="#ref-dorie2022stan" role="doc-biblioref">Dorie et al. 2022</a>)</span></td>
+<td>BART for the nonlinear part, with lme4-style random intercepts and random slopes sampled by Stan.</td>
+<td><strong>Published; CRAN package <code>stan4bart</code>.</strong> Continuous and binary (probit) outcomes.</td>
+</tr>
+<tr class="odd">
+<td><strong>Space–time together</strong></td>
+<td>No established method for health counts</td>
+<td>Options today: (1) combine the pieces above in a custom model, using the General BART framework; (2) in bartisan, exchangeable random intercepts for district and district × period, plus time and coordinates as tree predictors, which captures heterogeneity but not spatial smoothing; (3) keep the structured model of Lesson 25 for space and time, and use BART only where flexibility is needed, such as the confounder adjustment.</td>
+<td><strong>Open research area.</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>What this means for the course’s two examples.</strong></p>
+<ul>
+<li><strong>Example A (daily visits by district).</strong> The reference analysis remains the spline DLNM of Lesson 16 with the spatial pooling of Lesson 25. A treed DLNM from <code>dlmtree</code> is a credible sensitivity analysis for the lag structure, especially if heat or cold effects might switch on and off sharply. CL-BART is the tool if the question is who is most affected by heat.</li>
+<li><strong>Example B (the cohort).</strong> bartisan with a school random intercept handles clustering. stan4bart adds random slopes, for example an NO₂ effect varying by district. VCBART-type varying coefficients map spatially varying effects.</li>
+</ul>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (not run when the site builds): a treed DLNM and a multilevel BART">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-5-contents" aria-controls="callout-5" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (not run when the site builds): a treed DLNM and a multilevel BART
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-5" class="callout-5-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Treed distributed lag nonlinear model for daily city visits (dlmtree).</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Check ?dlmtree for the argument names in your installed version.</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dlmtree)</span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>city_daily <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">|&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">visits =</span> <span class="fu">sum</span>(visits), <span class="at">temp =</span> <span class="fu">first</span>(temp_city), <span class="at">dow =</span> <span class="fu">first</span>(dow), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">t =</span> <span class="fu">row_number</span>())</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="dv">21</span></span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>lagmat <span class="ot">&lt;-</span> <span class="fu">sapply</span>(<span class="dv">0</span><span class="sc">:</span>L, \(l) dplyr<span class="sc">::</span><span class="fu">lag</span>(city_daily<span class="sc">$</span>temp, l))   <span class="co"># columns: lag 0, 1, ..., 21</span></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>keep <span class="ot">&lt;-</span> <span class="fu">complete.cases</span>(lagmat)</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>fit_tdlnm <span class="ot">&lt;-</span> <span class="fu">dlmtree</span>(visits <span class="sc">~</span> splines<span class="sc">::</span><span class="fu">ns</span>(t, <span class="at">df =</span> <span class="dv">35</span>) <span class="sc">+</span> dow,   <span class="co"># season, trend, weekday</span></span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>                     <span class="at">data =</span> city_daily[keep, ],</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>                     <span class="at">exposure.data =</span> lagmat[keep, ],</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>                     <span class="at">dlm.type =</span> <span class="st">"nonlinear"</span>,                     <span class="co"># TDLNM</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>                     <span class="at">family =</span> <span class="st">"zinb"</span>,                            <span class="co"># counts</span></span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>                     <span class="at">control.mcmc =</span> <span class="fu">list</span>(<span class="at">n.burn =</span> <span class="dv">5000</span>, <span class="at">n.iter =</span> <span class="dv">15000</span>, <span class="at">n.thin =</span> <span class="dv">5</span>))</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="co"># cenval = reference temperature for the contrasts (the default is 0, which means 0°C here)</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> <span class="fu">summary</span>(fit_tdlnm, <span class="at">cenval =</span> <span class="dv">20</span>)</span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(s)                              <span class="co"># exposure-lag-response surface, as in Lesson 16</span></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(s, <span class="at">plot.type =</span> <span class="st">"cumulative"</span>)    <span class="co"># cumulative effect by temperature</span></span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(s, <span class="at">plot.type =</span> <span class="st">"effect"</span>)        <span class="co"># where the credible interval excludes zero</span></span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a><span class="fu">diagnose</span>(s)                          <span class="co"># shiny app with trace plots and convergence checks</span></span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Multilevel BART with a random NO2 slope by district (stan4bart; probit for binary outcomes)</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(stan4bart)</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>fit_ml <span class="ot">&lt;-</span> <span class="fu">stan4bart</span>(asthma <span class="sc">~</span> <span class="fu">bart</span>(ses <span class="sc">+</span> green <span class="sc">+</span> parent_smoke <span class="sc">+</span> sex) <span class="sc">+</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>                      <span class="fu">I</span>(no2_modeled <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">+</span> <span class="fu">I</span>(no2_modeled <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">|</span> district_id),</span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>                    <span class="at">data =</span> cohort, <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">cores =</span> <span class="dv">4</span>, <span class="at">seed =</span> <span class="dv">26</span>)</span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a><span class="fu">fixef</span>(fit_ml)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="mork2022treed">Mork and Wilson (<a href="#ref-mork2022treed" role="doc-biblioref">2022</a>)</span> and <span class="citation" data-cites="mork2023estimating">Mork and Wilson (<a href="#ref-mork2023estimating" role="doc-biblioref">2023</a>)</span> on treed distributed lag models; <span class="citation" data-cites="englert2025estimating">Englert et al. (<a href="#ref-englert2025estimating" role="doc-biblioref">2025a</a>)</span> on BART for case-crossover designs; <span class="citation" data-cites="tan2019bayesian">Tan and Roy (<a href="#ref-tan2019bayesian" role="doc-biblioref">2019</a>)</span> on adding BART to existing hierarchical models; <span class="citation" data-cites="dorie2022stan">Dorie et al. (<a href="#ref-dorie2022stan" role="doc-biblioref">2022</a>)</span> on multilevel BART.</p>
+</div>
+</section>
+<section id="s9" class="level2">
+<h2 class="anchored" data-anchor-id="s9">26.9 Prediction, forecasting and effect estimation</h2>
+<p>Three different questions are easily confused, because the same models can be used for all of them.</p>
+<ul>
+<li><strong>Effect estimation</strong> asks <em>what would happen if the exposure were different</em>. It is a question about counterfactuals (Lessons 9 and 12). A good model is one that removes confounding, even if it predicts poorly.</li>
+<li><strong>Prediction</strong> asks <em>what is the value of something we haven’t observed</em>, given what we have. The unknown need not lie in the future: a child’s asthma risk from their characteristics, the NO₂ at a home with no monitor (the exposure models of Lesson 13), or the number of visits yesterday that hasn’t been reported yet (“nowcasting”). A good model is one that is accurate for new cases.</li>
+<li><strong>Forecasting</strong> is prediction of the <strong>future</strong> of a time-ordered process. It is defined by a <strong>forecast origin</strong> (the moment the forecast is made), a <strong>horizon</strong> (how far ahead) and an <strong>information set</strong> (what is known at the origin). Anything not yet known at the origin, including tomorrow’s temperature, must itself be forecast.</li>
+</ul>
+<p>Every forecast is a prediction; not every prediction is a forecast; and neither is an effect estimate.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+<col style="width: 25%">
+</colgroup>
+<thead>
+<tr class="header">
+<th></th>
+<th>Effect estimation</th>
+<th>Prediction</th>
+<th>Forecasting</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Question</strong></td>
+<td>What if the exposure changed?</td>
+<td>What is this unobserved value?</td>
+<td>What will happen next?</td>
+</tr>
+<tr class="even">
+<td><strong>Information allowed</strong></td>
+<td>Anything that removes confounding</td>
+<td>Anything known for the case being predicted</td>
+<td>Only what is known at the forecast origin</td>
+</tr>
+<tr class="odd">
+<td><strong>Past outcome as a predictor</strong></td>
+<td>Usually harmful: it can absorb part of the effect</td>
+<td>Allowed if known</td>
+<td>Usually the strongest predictor</td>
+</tr>
+<tr class="even">
+<td><strong>Evaluation</strong></td>
+<td>Bias and coverage against the truth (in simulation); sensitivity analyses</td>
+<td>Accuracy on new cases, e.g.&nbsp;cross-validation</td>
+<td>Accuracy on later periods: rolling-origin backtests</td>
+</tr>
+<tr class="odd">
+<td><strong>A good model</strong></td>
+<td>Captures the causal structure</td>
+<td>Predicts accurately</td>
+<td>Predicts accurately, with honest uncertainty that grows with the horizon</td>
+</tr>
+<tr class="even">
+<td><strong>In this course</strong></td>
+<td>Heat effects (Lessons 15–16), NO₂ and asthma (Lessons 9, 12)</td>
+<td>Exposure models, risk scores</td>
+<td>Tomorrow’s emergency visits (this section)</td>
+</tr>
+</tbody>
+</table>
+<div class="callout callout-style-default callout-warning callout-titled" title="Common pitfalls">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Warning</span>Common pitfalls
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>Using information a real forecaster wouldn’t have (<strong>data leakage</strong>): the observed temperature of the forecast day, data that are reported late, or features computed with future data. A natural spline of time, as in Lessons 15–16, uses the whole series, which is fine for effect estimation but leaks the future into a forecast; calendar terms such as day of year are safe because the calendar is known in advance. Evaluating forecasts by <strong>random cross-validation</strong>, which lets neighboring days inform each other. Judging a forecaster by its <strong>in-sample fit</strong>. And reading a predictor’s importance in a forecasting model as a <strong>causal effect</strong>.</p>
+</div>
+</div>
+<p><strong>A forecasting backtest.</strong> The task is to forecast the city’s emergency visits 1 or 7 days ahead, with three forecasters:</p>
+<ul>
+<li>a <strong>naive benchmark</strong>: the count on the same weekday a week earlier;</li>
+<li>a <strong>quasi-Poisson GLM</strong> with a temperature spline, calendar terms and recent visits;</li>
+<li><strong>BART</strong>, using the same information (on the log scale).</li>
+</ul>
+<p>Each model is fitted to all data before an origin and refitted every six months from January 2023, so every forecast uses only the past. Temperature for the forecast days comes from a simulated weather forecast whose error grows with lead time, unless you choose to cheat. One more fact matters: the test period contains a heat wave in July 2023 that peaked at 31.8°C, hotter than any day in 2020–2022.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="fH">Horizon</label><select id="fH"><option value="1">1 day ahead</option><option value="7">7 days ahead</option></select></div>
+  <div class="ctrl"><label for="fW">Temperature for forecast days</label><select id="fW"><option value="fc">a weather forecast, with error (realistic)</option><option value="oracle">the temperature actually observed (leakage)</option></select></div>
+  <div class="ctrl"><label for="fV">Show</label><select id="fV"><option value="hw">the July 2023 heat wave</option><option value="all">the whole test period, 2023–2024</option></select></div>
+  <div class="btns"><button type="button" id="fRun">Run the backtest (about 2 seconds)</button></div>
+  <div class="small" id="fProg"></div>
+  <svg id="fPlot" viewbox="0 0 520 300" role="img" aria-label="Forecasts against observed visits"></svg>
+  <div class="legend"><span><i style="background:var(--c-ink)"></i>observed</span><span><i style="background:var(--c-lik)"></i>naive</span><span><i style="background:var(--p1)"></i>GLM, with 90% interval</span><span><i style="background:var(--c-post)"></i>BART, with 90% interval</span></div>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="fTab"></table></div><div class="now" id="fNow"></div></div>
+</div>
+<div class="triad">
+<div class="a">
+<div class="lab">
+<p><span class="k">A</span>Standard notation</p>
+</div>
+<p><span class="math display">\[\hat y_{t+h \mid t} = E\big[Y_{t+h} \mid \mathcal{F}_t\big]\]</span> <span class="math display">\[\mathrm{RMSE}_h = \sqrt{\frac{1}{|\mathcal{T}|}\sum_{t \in \mathcal{T}} \big(y_{t+h} - \hat y_{t+h \mid t}\big)^2}\]</span></p>
+<div class="note">
+<p><span class="math inline">\(\mathcal{F}_t\)</span>: everything known at origin <span class="math inline">\(t\)</span>; <span class="math inline">\(h\)</span>: horizon; <span class="math inline">\(\mathcal{T}\)</span>: forecast origins in the test period, never used for fitting.</p>
+</div>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">B</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (k <span class="cf">in</span> <span class="fu">seq_along</span>(origins[<span class="sc">-</span><span class="dv">1</span>])) {</span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  train <span class="ot">&lt;-</span> <span class="fu">filter</span>(city, date <span class="sc">&lt;</span>  origins[k])</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  test  <span class="ot">&lt;-</span> <span class="fu">filter</span>(city, date <span class="sc">&gt;=</span> origins[k],</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>                        date <span class="sc">&lt;</span>  origins[k <span class="sc">+</span> <span class="dv">1</span>])</span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(f, <span class="at">family =</span> quasipoisson,</span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>             <span class="at">data =</span> train)</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  test<span class="sc">$</span>forecast <span class="ot">&lt;-</span> <span class="fu">predict</span>(fit, test,</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>                           <span class="at">type =</span> <span class="st">"response"</span>)</span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+<div class="c">
+<div class="lab">
+<p><span class="k">C</span>How it’s reported</p>
+</div>
+<p><span id="fReport"></span></p>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (optional): a rolling-origin backtest, and why random splits mislead">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-7-contents" aria-controls="callout-7" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (optional): a rolling-origin backtest, and why random splits mislead
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-7" class="callout-7-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>city_fc <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">|&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">visits =</span> <span class="fu">sum</span>(visits), <span class="at">temp =</span> <span class="fu">first</span>(temp_city), <span class="at">dow =</span> <span class="fu">first</span>(dow),</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>            <span class="at">holiday =</span> <span class="fu">first</span>(holiday), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">doy =</span> <span class="fu">yday</span>(date),</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>         <span class="at">temp03 =</span> (temp <span class="sc">+</span> <span class="fu">lag</span>(temp) <span class="sc">+</span> <span class="fu">lag</span>(temp, <span class="dv">2</span>) <span class="sc">+</span> <span class="fu">lag</span>(temp, <span class="dv">3</span>)) <span class="sc">/</span> <span class="dv">4</span>,  <span class="co"># observed: an oracle</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">lag1 =</span> <span class="fu">log</span>(<span class="fu">lag</span>(visits)), <span class="at">lag7 =</span> <span class="fu">log</span>(<span class="fu">lag</span>(visits, <span class="dv">7</span>))) <span class="sc">|&gt;</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(lag7), <span class="sc">!</span><span class="fu">is.na</span>(temp03))</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>f_fc <span class="ot">&lt;-</span> visits <span class="sc">~</span> splines<span class="sc">::</span><span class="fu">ns</span>(temp03, <span class="at">df =</span> <span class="dv">3</span>) <span class="sc">+</span> <span class="fu">sin</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> doy <span class="sc">/</span> <span class="fl">365.25</span>) <span class="sc">+</span> <span class="fu">cos</span>(<span class="dv">2</span> <span class="sc">*</span> pi <span class="sc">*</span> doy <span class="sc">/</span> <span class="fl">365.25</span>) <span class="sc">+</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  dow <span class="sc">+</span> holiday <span class="sc">+</span> lag1 <span class="sc">+</span> lag7</span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>origins <span class="ot">&lt;-</span> <span class="fu">as.Date</span>(<span class="fu">c</span>(<span class="st">"2023-01-01"</span>, <span class="st">"2023-07-01"</span>, <span class="st">"2024-01-01"</span>, <span class="st">"2024-07-01"</span>, <span class="st">"2025-01-01"</span>))</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>backtest <span class="ot">&lt;-</span> <span class="fu">map</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">4</span>, \(k) {</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  train <span class="ot">&lt;-</span> <span class="fu">filter</span>(city_fc, date <span class="sc">&lt;</span> origins[k])</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  test  <span class="ot">&lt;-</span> <span class="fu">filter</span>(city_fc, date <span class="sc">&gt;=</span> origins[k], date <span class="sc">&lt;</span> origins[k <span class="sc">+</span> <span class="dv">1</span>])</span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(f_fc, <span class="at">family =</span> quasipoisson, <span class="at">data =</span> train)</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(test, <span class="at">forecast =</span> <span class="fu">predict</span>(fit, <span class="at">newdata =</span> test, <span class="at">type =</span> <span class="st">"response"</span>))</span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>}) <span class="sc">|&gt;</span> <span class="fu">bind_rows</span>()</span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a><span class="co"># a random 80/20 split of all days, which ignores time order</span></span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">26</span>)</span>
+<span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a>test_rows <span class="ot">&lt;-</span> <span class="fu">sample</span>(<span class="fu">nrow</span>(city_fc), <span class="fu">round</span>(<span class="fl">0.2</span> <span class="sc">*</span> <span class="fu">nrow</span>(city_fc)))</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>fit_random <span class="ot">&lt;-</span> <span class="fu">glm</span>(f_fc, <span class="at">family =</span> quasipoisson, <span class="at">data =</span> city_fc[<span class="sc">-</span>test_rows, ])</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="fu">tibble</span>(</span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>  <span class="at">rmse_rolling_origin =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((backtest<span class="sc">$</span>forecast <span class="sc">-</span> backtest<span class="sc">$</span>visits)<span class="sc">^</span><span class="dv">2</span>)),</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>  <span class="at">rmse_naive          =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((<span class="fu">exp</span>(backtest<span class="sc">$</span>lag7) <span class="sc">-</span> backtest<span class="sc">$</span>visits)<span class="sc">^</span><span class="dv">2</span>)),</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  <span class="at">rmse_random_split   =</span> <span class="fu">sqrt</span>(<span class="fu">mean</span>((<span class="fu">predict</span>(fit_random, city_fc[test_rows, ], <span class="at">type =</span> <span class="st">"response"</span>) <span class="sc">-</span></span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>                                     city_fc<span class="sc">$</span>visits[test_rows])<span class="sc">^</span><span class="dv">2</span>)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt; # A tibble: 1 × 3
+#&gt;   rmse_rolling_origin rmse_naive rmse_random_split
+#&gt;                 &lt;dbl&gt;      &lt;dbl&gt;             &lt;dbl&gt;
+#&gt; 1                30.4       41.9              30.4</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Where BAVART fits">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Tip</span>Where BAVART fits
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>A vector autoregression with trees (BAVART, Section 26.8) forecasts several series jointly, each from the past of all of them. For emergency visits that is more than needed: weather doesn’t depend on hospital visits, and tomorrow’s temperature comes from a meteorological forecast anyway. A model with visits as the outcome and weather and calendar as external inputs, as here, is the natural structure. Joint models earn their place when several outcomes drive each other, for example visits in neighboring hospitals that share patients.</p>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="shmueli2010explain">Shmueli (<a href="#ref-shmueli2010explain" role="doc-biblioref">2010</a>)</span> on the difference between explaining and predicting; <span class="citation" data-cites="hyndman2021forecasting">Hyndman and Athanasopoulos (<a href="#ref-hyndman2021forecasting" role="doc-biblioref">2021</a>)</span> is a free, practical forecasting textbook, including rolling-origin evaluation; <span class="citation" data-cites="gneiting2014probabilistic">Gneiting and Katzfuss (<a href="#ref-gneiting2014probabilistic" role="doc-biblioref">2014</a>)</span> on probabilistic forecasts and how to score them; <span class="citation" data-cites="tashman2000out">Tashman (<a href="#ref-tashman2000out" role="doc-biblioref">2000</a>)</span> on out-of-sample evaluation of forecasts.</p>
+</div>
+</section>
+<section id="quiz" class="level2">
+<h2 class="anchored" data-anchor-id="quiz">Check your understanding</h2>
+<div class="cw" id="quizzes"></div>
+</section>
+<section id="take" class="level2">
+<h2 class="anchored" data-anchor-id="take">Key takeaways</h2>
+<ul>
+<li>A regression tree predicts the mean in each leaf of a sequence of splits; alone it is a blocky, unstable step function.</li>
+<li>BART adds up many small trees, each kept shallow by its prior, and samples them by MCMC. The result is a posterior over flexible functions, with interactions found automatically.</li>
+<li>The prior (split probabilities, leaf shrinkage, residual SD) replaces tuning; soft rules make the fitted functions smooth.</li>
+<li>Effects are contrasts of predictions, computed on every posterior draw. BART is a strong outcome model for g-computation, especially with the exposure given its own term.</li>
+<li>In environmental epidemiology, BART suits confounding-heavy cohort questions, effect heterogeneity and mixtures. It doesn’t replace time-series, lag, spatial or measurement-error models, and it cannot extrapolate.</li>
+<li>Prediction estimates unobserved values; forecasting predicts the future from what is known at the origin; neither estimates effects. Evaluate forecasts on later data with rolling origins, never by random splits.</li>
+<li>Extensions exist for lags (treed DLMs in <code>dlmtree</code>), temporal smoothing (tsBART), case-crossover designs (CL-BART), spatial random effects and random slopes (stan4bart). General spatio-temporal BART for health counts is still an open research area.</li>
+</ul>
+<div class="done" data-lesson="lesson-26"><button type="button"></button><span></span></div>
+<script src="assets/bart-engine.js"></script>
+<script src="assets/lesson-26.js"></script>
+
+
+</section>
+<section id="bibliography" class="level1 unnumbered">
+
+
+</section>
+
+<div id="quarto-appendix" class="default"><section class="quarto-appendix-contents" role="doc-bibliography" id="quarto-bibliography"><h2 class="anchored quarto-appendix-heading">References</h2><div id="refs" class="references csl-bib-body hanging-indent" role="list">
+<div id="ref-bobb2015bayesian" class="csl-entry" role="listitem">
+Bobb, Jennifer F., Linda Valeri, Birgit Claus Henn, et al. 2015. <span>“<span>B</span>ayesian Kernel Machine Regression for Estimating the Health Effects of Multi-Pollutant Mixtures.”</span> <em>Biostatistics</em> 16 (3): 493–508. <a href="https://doi.org/10.1093/biostatistics/kxu058">https://doi.org/10.1093/biostatistics/kxu058</a>.
+</div>
+<div id="ref-breiman2001random" class="csl-entry" role="listitem">
+Breiman, Leo. 2001. <span>“Random Forests.”</span> <em>Machine Learning</em> 45 (1): 5–32.
+</div>
+<div id="ref-breiman1984classification" class="csl-entry" role="listitem">
+Breiman, Leo, Jerome H. Friedman, Richard A. Olshen, and Charles J. Stone. 1984. <em>Classification and Regression Trees</em>. Wadsworth.
+</div>
+<div id="ref-chernozhukov2018double" class="csl-entry" role="listitem">
+Chernozhukov, Victor, Denis Chetverikov, Mert Demirer, et al. 2018. <span>“Double/Debiased Machine Learning for Treatment and Structural Parameters.”</span> <em>The Econometrics Journal</em> 21 (1): C1–68. <a href="https://doi.org/10.1111/ectj.12097">https://doi.org/10.1111/ectj.12097</a>.
+</div>
+<div id="ref-chipman2010bart" class="csl-entry" role="listitem">
+Chipman, Hugh A., Edward I. George, and Robert E. McCulloch. 2010. <span>“<span>BART</span>: Bayesian Additive Regression Trees.”</span> <em>The Annals of Applied Statistics</em> 4 (1): 266–98. <a href="https://doi.org/10.1214/09-AOAS285">https://doi.org/10.1214/09-AOAS285</a>.
+</div>
+<div id="ref-deshpande2026vcbart" class="csl-entry" role="listitem">
+Deshpande, Sameer K., Ray Bai, Cecilia Balocchi, Jennifer E. Starling, and Jordan Weiss. 2026. <span>“<span>VCBART</span>: Bayesian Trees for Varying Coefficients.”</span> <em>Bayesian Analysis</em> 21 (1): 281–308. <a href="https://doi.org/10.1214/24-BA1470">https://doi.org/10.1214/24-BA1470</a>.
+</div>
+<div id="ref-dorie2019automated" class="csl-entry" role="listitem">
+Dorie, Vincent, Jennifer Hill, Uri Shalit, Marc Scott, and Dan Cervone. 2019. <span>“Automated Versus Do-It-Yourself Methods for Causal Inference: Lessons Learned from a Data Analysis Competition.”</span> <em>Statistical Science</em> 34 (1): 43–68. <a href="https://doi.org/10.1214/18-STS667">https://doi.org/10.1214/18-STS667</a>.
+</div>
+<div id="ref-dorie2022stan" class="csl-entry" role="listitem">
+Dorie, Vincent, George Perrett, Jennifer L. Hill, and Benjamin Goodrich. 2022. <span>“Stan and <span>BART</span> for Causal Inference: Estimating Heterogeneous Treatment Effects Using the Power of <span>S</span>tan and the Flexibility of Machine Learning.”</span> <em>Entropy</em> 24 (12): 1782. <a href="https://doi.org/10.3390/e24121782">https://doi.org/10.3390/e24121782</a>.
+</div>
+<div id="ref-englert2025estimating" class="csl-entry" role="listitem">
+Englert, Jacob R., Stefanie T. Ebelt, and Howard H. Chang. 2025a. <span>“Estimating Heterogeneous Exposure Effects in the Case-Crossover Design Using <span>BART</span>.”</span> <em>Journal of the American Statistical Association</em> 120 (551). <a href="https://doi.org/10.1080/01621459.2025.2460231">https://doi.org/10.1080/01621459.2025.2460231</a>.
+</div>
+<div id="ref-englert2025modeling" class="csl-entry" role="listitem">
+Englert, Jacob R., Stefanie T. Ebelt, and Howard H. Chang. 2025b. <span>“Modeling Joint Health Effects of Environmental Exposure Mixtures with <span>B</span>ayesian Additive Regression Trees.”</span> <em>Statistics in Medicine</em> 44 (20–22): e70250. <a href="https://doi.org/10.1002/sim.70250">https://doi.org/10.1002/sim.70250</a>.
+</div>
+<div id="ref-englert2025spatially" class="csl-entry" role="listitem">
+Englert, Jacob, and Howard Chang. 2025. <em>Spatially Varying Coefficient Models for Estimating Heterogeneous Mixture Effects</em>. arXiv:2502.14651.
+</div>
+<div id="ref-gneiting2014probabilistic" class="csl-entry" role="listitem">
+Gneiting, Tilmann, and Matthias Katzfuss. 2014. <span>“Probabilistic Forecasting.”</span> <em>Annual Review of Statistics and Its Application</em> 1: 125–51. <a href="https://doi.org/10.1146/annurev-statistics-062713-085831">https://doi.org/10.1146/annurev-statistics-062713-085831</a>.
+</div>
+<div id="ref-greifer2026bartisan" class="csl-entry" role="listitem">
+Greifer, Noah. 2026. <em>Bartisan: Generalized <span>B</span>ayesian Additive Regression Trees</em>. <a href="https://ngreifer.github.io/bartisan/">https://ngreifer.github.io/bartisan/</a>.
+</div>
+<div id="ref-hahn2020bayesian" class="csl-entry" role="listitem">
+Hahn, P. Richard, Jared S. Murray, and Carlos M. Carvalho. 2020. <span>“Bayesian Regression Tree Models for Causal Inference: Regularization, Confounding, and Heterogeneous Effects (with Discussion).”</span> <em>Bayesian Analysis</em> 15 (3): 965–1056. <a href="https://doi.org/10.1214/19-BA1195">https://doi.org/10.1214/19-BA1195</a>.
+</div>
+<div id="ref-hastie2009elements" class="csl-entry" role="listitem">
+Hastie, Trevor, Robert Tibshirani, and Jerome Friedman. 2009. <em>The Elements of Statistical Learning: Data Mining, Inference, and Prediction</em>. 2nd ed. Springer.
+</div>
+<div id="ref-hill2011bayesian" class="csl-entry" role="listitem">
+Hill, Jennifer L. 2011. <span>“Bayesian Nonparametric Modeling for Causal Inference.”</span> <em>Journal of Computational and Graphical Statistics</em> 20 (1): 217–40. <a href="https://doi.org/10.1198/jcgs.2010.08162">https://doi.org/10.1198/jcgs.2010.08162</a>.
+</div>
+<div id="ref-hill2020bart" class="csl-entry" role="listitem">
+Hill, Jennifer, Antonio Linero, and Jared Murray. 2020. <span>“Bayesian Additive Regression Trees: A Review and Look Forward.”</span> <em>Annual Review of Statistics and Its Application</em> 7 (1): 251–78. <a href="https://doi.org/10.1146/annurev-statistics-031219-041110">https://doi.org/10.1146/annurev-statistics-031219-041110</a>.
+</div>
+<div id="ref-huber2022inference" class="csl-entry" role="listitem">
+Huber, Florian, and Luca Rossini. 2022. <span>“Inference in <span>B</span>ayesian Additive Vector Autoregressive Tree Models.”</span> <em>The Annals of Applied Statistics</em> 16 (1): 104–23. <a href="https://doi.org/10.1214/21-AOAS1488">https://doi.org/10.1214/21-AOAS1488</a>.
+</div>
+<div id="ref-hyndman2021forecasting" class="csl-entry" role="listitem">
+Hyndman, Rob J., and George Athanasopoulos. 2021. <em>Forecasting: Principles and Practice</em>. 3rd ed. OTexts.
+</div>
+<div id="ref-jiang2025bartsimp" class="csl-entry" role="listitem">
+Jiang, Alex Ziyu, and Jon Wakefield. 2025. <em><span>BARTSIMP</span>: Flexible Spatial Covariate Modeling and Prediction Using <span>B</span>ayesian Additive Regression Trees</em>. arXiv:2309.13270.
+</div>
+<div id="ref-kapelner2015prediction" class="csl-entry" role="listitem">
+Kapelner, Adam, and Justin Bleich. 2015. <span>“Prediction with Missing Data via <span>B</span>ayesian Additive Regression Trees.”</span> <em>Canadian Journal of Statistics</em> 43 (2): 224–39. <a href="https://doi.org/10.1002/cjs.11248">https://doi.org/10.1002/cjs.11248</a>.
+</div>
+<div id="ref-kim2022bayesian" class="csl-entry" role="listitem">
+Kim, Chanmin. 2022. <span>“<span>B</span>ayesian Additive Regression Trees in Spatial Data Analysis with Sparse Observations.”</span> <em>Journal of Statistical Computation and Simulation</em>, ahead of print. <a href="https://doi.org/10.1080/00949655.2022.2102633">https://doi.org/10.1080/00949655.2022.2102633</a>.
+</div>
+<div id="ref-linero2018dart" class="csl-entry" role="listitem">
+Linero, Antonio R. 2018. <span>“Bayesian Regression Trees for High-Dimensional Prediction and Variable Selection.”</span> <em>Journal of the American Statistical Association</em> 113 (522): 626–36. <a href="https://doi.org/10.1080/01621459.2016.1264957">https://doi.org/10.1080/01621459.2016.1264957</a>.
+</div>
+<div id="ref-linero2025generalized" class="csl-entry" role="listitem">
+Linero, Antonio R. 2025. <span>“Generalized <span>B</span>ayesian Additive Regression Trees Models: Beyond Conditional Conjugacy.”</span> <em>Journal of the American Statistical Association</em> 120 (549): 356–69. <a href="https://doi.org/10.1080/01621459.2024.2337156">https://doi.org/10.1080/01621459.2024.2337156</a>.
+</div>
+<div id="ref-linero2018soft" class="csl-entry" role="listitem">
+Linero, Antonio R., and Yun Yang. 2018. <span>“Bayesian Regression Tree Ensembles That Adapt to Smoothness and Sparsity.”</span> <em>Journal of the Royal Statistical Society Series B: Statistical Methodology</em> 80 (5): 1087–110. <a href="https://doi.org/10.1111/rssb.12293">https://doi.org/10.1111/rssb.12293</a>.
+</div>
+<div id="ref-lu2025gaussian" class="csl-entry" role="listitem">
+Lu, Xuetao, and Robert E. McCulloch. 2025. <em><span>G</span>aussian Processes Correlated <span>B</span>ayesian Additive Regression Trees</em>. arXiv:2311.18699.
+</div>
+<div id="ref-maia2024gpbart" class="csl-entry" role="listitem">
+Maia, Mateus, Keefe Murphy, and Andrew C. Parnell. 2024. <span>“<span>GP-BART</span>: A Novel <span>B</span>ayesian Additive Regression Trees Approach Using <span>G</span>aussian Processes.”</span> <em>Computational Statistics &amp; Data Analysis</em> 190: 107858. <a href="https://doi.org/10.1016/j.csda.2023.107858">https://doi.org/10.1016/j.csda.2023.107858</a>.
+</div>
+<div id="ref-mork2026dlmtree" class="csl-entry" role="listitem">
+Mork, Daniel, Seongwon Im, and Ander Wilson. 2026. <em>Dlmtree: <span>B</span>ayesian Treed Distributed Lag Models</em>. <a href="https://CRAN.R-project.org/package=dlmtree">https://CRAN.R-project.org/package=dlmtree</a>.
+</div>
+<div id="ref-mork2024heterogeneous" class="csl-entry" role="listitem">
+Mork, Daniel, Marianthi-Anna Kioumourtzoglou, Marc Weisskopf, Brent A. Coull, and Ander Wilson. 2024. <span>“Heterogeneous Distributed Lag Models to Estimate Personalized Effects of Maternal Exposures to Air Pollution.”</span> <em>Journal of the American Statistical Association</em>, ahead of print. <a href="https://doi.org/10.1080/01621459.2023.2258595">https://doi.org/10.1080/01621459.2023.2258595</a>.
+</div>
+<div id="ref-mork2022treed" class="csl-entry" role="listitem">
+Mork, Daniel, and Ander Wilson. 2022. <span>“Treed Distributed Lag Nonlinear Models.”</span> <em>Biostatistics</em> 23 (3): 754–71. <a href="https://doi.org/10.1093/biostatistics/kxaa051">https://doi.org/10.1093/biostatistics/kxaa051</a>.
+</div>
+<div id="ref-mork2023estimating" class="csl-entry" role="listitem">
+Mork, Daniel, and Ander Wilson. 2023. <span>“Estimating Perinatal Critical Windows of Susceptibility to Environmental Mixtures via Structured <span>B</span>ayesian Regression Tree Pairs.”</span> <em>Biometrics</em> 79 (1): 449–61. <a href="https://doi.org/10.1111/biom.13568">https://doi.org/10.1111/biom.13568</a>.
+</div>
+<div id="ref-muller2007spatially" class="csl-entry" role="listitem">
+Müller, Peter, Ya-Chen Tina Shih, and Song Zhang. 2007. <span>“A Spatially-Adjusted <span>B</span>ayesian Additive Regression Tree Model to Merge Two Datasets.”</span> <em>Bayesian Analysis</em> 2 (3): 611–33. <a href="https://doi.org/10.1214/07-BA224">https://doi.org/10.1214/07-BA224</a>.
+</div>
+<div id="ref-shmueli2010explain" class="csl-entry" role="listitem">
+Shmueli, Galit. 2010. <span>“To Explain or to Predict?”</span> <em>Statistical Science</em> 25 (3): 289–310. <a href="https://doi.org/10.1214/10-STS330">https://doi.org/10.1214/10-STS330</a>.
+</div>
+<div id="ref-starling2020bart" class="csl-entry" role="listitem">
+Starling, Jennifer E., Jared S. Murray, Carlos M. Carvalho, Radek K. Bukowski, and James G. Scott. 2020. <span>“<span>BART</span> with Targeted Smoothing: An Analysis of Patient-Specific Stillbirth Risk.”</span> <em>The Annals of Applied Statistics</em> 14 (1): 28–50. <a href="https://doi.org/10.1214/19-AOAS1268">https://doi.org/10.1214/19-AOAS1268</a>.
+</div>
+<div id="ref-tan2019bayesian" class="csl-entry" role="listitem">
+Tan, Yaoyuan Vincent, and Jason Roy. 2019. <span>“Bayesian Additive Regression Trees and the General <span>BART</span> Model.”</span> <em>Statistics in Medicine</em> 38 (25): 5048–69. <a href="https://doi.org/10.1002/sim.8347">https://doi.org/10.1002/sim.8347</a>.
+</div>
+<div id="ref-tashman2000out" class="csl-entry" role="listitem">
+Tashman, Leonard J. 2000. <span>“Out-of-Sample Tests of Forecasting Accuracy: An Analysis and Review.”</span> <em>International Journal of Forecasting</em> 16 (4): 437–50.
+</div>
+</div></section></div></main> <!-- /main -->
+<script src="assets/course.js"></script>
+<script src="assets/glossary-data.js"></script>
+<script src="assets/glossary-ui.js"></script>
+<script id="quarto-html-after-body" type="application/javascript">
+  window.document.addEventListener("DOMContentLoaded", function (event) {
+    // Ensure there is a toggle, if there isn't float one in the top right
+    if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
+      const a = window.document.createElement('a');
+      a.classList.add('top-right');
+      a.classList.add('quarto-color-scheme-toggle');
+      a.href = "";
+      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const i = window.document.createElement("i");
+      i.classList.add('bi');
+      a.appendChild(i);
+      window.document.body.appendChild(a);
+    }
+    setColorSchemeToggle(hasAlternateSentinel())
+    const icon = "";
+    const anchorJS = new window.AnchorJS();
+    anchorJS.options = {
+      placement: 'right',
+      icon: icon
+    };
+    anchorJS.add('.anchored');
+    const isCodeAnnotation = (el) => {
+      for (const clz of el.classList) {
+        if (clz.startsWith('code-annotation-')) {                     
+          return true;
+        }
+      }
+      return false;
+    }
+    const onCopySuccess = function(e) {
+      // button target
+      const button = e.trigger;
+      // don't keep focus
+      button.blur();
+      // flash "checked"
+      button.classList.add('code-copy-button-checked');
+      var currentTitle = button.getAttribute("title");
+      button.setAttribute("title", "Copied!");
+      let tooltip;
+      if (window.bootstrap) {
+        button.setAttribute("data-bs-toggle", "tooltip");
+        button.setAttribute("data-bs-placement", "left");
+        button.setAttribute("data-bs-title", "Copied!");
+        tooltip = new bootstrap.Tooltip(button, 
+          { trigger: "manual", 
+            customClass: "code-copy-button-tooltip",
+            offset: [0, -8]});
+        tooltip.show();    
+      }
+      setTimeout(function() {
+        if (tooltip) {
+          tooltip.hide();
+          button.removeAttribute("data-bs-title");
+          button.removeAttribute("data-bs-toggle");
+          button.removeAttribute("data-bs-placement");
+        }
+        button.setAttribute("title", currentTitle);
+        button.classList.remove('code-copy-button-checked');
+      }, 1000);
+      // clear code selection
+      e.clearSelection();
+    }
+    const getTextToCopy = function(trigger) {
+      const outerScaffold = trigger.parentElement.cloneNode(true);
+      const codeEl = outerScaffold.querySelector('code');
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+    const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+      text: getTextToCopy
+    });
+    clipboard.on('success', onCopySuccess);
+    if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+      const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+        text: getTextToCopy,
+        container: window.document.getElementById('quarto-embedded-source-code-modal')
+      });
+      clipboardModal.on('success', onCopySuccess);
+    }
+      var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+      var mailtoRegex = new RegExp(/^mailto:/);
+        var filterRegex = new RegExp("https:\/\/danieljeannetot\.github\.io\/stats-epi\/");
+      var isInternal = (href) => {
+          return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+      }
+      // Inspect non-navigation links and adorn them if external
+     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      for (var i=0; i<links.length; i++) {
+        const link = links[i];
+        if (!isInternal(link.href)) {
+          // undo the damage that might have been done by quarto-nav.js in the case of
+          // links that we want to consider external
+          if (link.dataset.originalHref !== undefined) {
+            link.href = link.dataset.originalHref;
+          }
+        }
+      }
+    function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+      const config = {
+        allowHTML: true,
+        maxWidth: 500,
+        delay: 100,
+        arrow: false,
+        appendTo: function(el) {
+            return el.parentElement;
+        },
+        interactive: true,
+        interactiveBorder: 10,
+        theme: 'quarto',
+        placement: 'bottom-start',
+      };
+      if (contentFn) {
+        config.content = contentFn;
+      }
+      if (onTriggerFn) {
+        config.onTrigger = onTriggerFn;
+      }
+      if (onUntriggerFn) {
+        config.onUntrigger = onUntriggerFn;
+      }
+      window.tippy(el, config); 
+    }
+    const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+    for (var i=0; i<noterefs.length; i++) {
+      const ref = noterefs[i];
+      tippyHover(ref, function() {
+        // use id or data attribute instead here
+        let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+        try { href = new URL(href).hash; } catch {}
+        const id = href.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note) {
+          return note.innerHTML;
+        } else {
+          return "";
+        }
+      });
+    }
+    const xrefs = window.document.querySelectorAll('a.quarto-xref');
+    const processXRef = (id, note) => {
+      // Strip column container classes
+      const stripColumnClz = (el) => {
+        el.classList.remove("page-full", "page-columns");
+        if (el.children) {
+          for (const child of el.children) {
+            stripColumnClz(child);
+          }
+        }
+      }
+      stripColumnClz(note)
+      if (id === null || id.startsWith('sec-')) {
+        // Special case sections, only their first couple elements
+        const container = document.createElement("div");
+        if (note.children && note.children.length > 2) {
+          container.appendChild(note.children[0].cloneNode(true));
+          for (let i = 1; i < note.children.length; i++) {
+            const child = note.children[i];
+            if (child.tagName === "P" && child.innerText === "") {
+              continue;
+            } else {
+              container.appendChild(child.cloneNode(true));
+              break;
+            }
+          }
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(container);
+          }
+          return container.innerHTML
+        } else {
+          if (window.Quarto?.typesetMath) {
+            window.Quarto.typesetMath(note);
+          }
+          return note.innerHTML;
+        }
+      } else {
+        // Remove any anchor links if they are present
+        const anchorLink = note.querySelector('a.anchorjs-link');
+        if (anchorLink) {
+          anchorLink.remove();
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        if (note.classList.contains("callout")) {
+          return note.outerHTML;
+        } else {
+          return note.innerHTML;
+        }
+      }
+    }
+    for (var i=0; i<xrefs.length; i++) {
+      const xref = xrefs[i];
+      tippyHover(xref, undefined, function(instance) {
+        instance.disable();
+        let url = xref.getAttribute('href');
+        let hash = undefined; 
+        if (url.startsWith('#')) {
+          hash = url;
+        } else {
+          try { hash = new URL(url).hash; } catch {}
+        }
+        if (hash) {
+          const id = hash.replace(/^#\/?/, "");
+          const note = window.document.getElementById(id);
+          if (note !== null) {
+            try {
+              const html = processXRef(id, note.cloneNode(true));
+              instance.setContent(html);
+            } finally {
+              instance.enable();
+              instance.show();
+            }
+          } else {
+            // See if we can fetch this
+            fetch(url.split('#')[0])
+            .then(res => res.text())
+            .then(html => {
+              const parser = new DOMParser();
+              const htmlDoc = parser.parseFromString(html, "text/html");
+              const note = htmlDoc.getElementById(id);
+              if (note !== null) {
+                const html = processXRef(id, note);
+                instance.setContent(html);
+              } 
+            }).finally(() => {
+              instance.enable();
+              instance.show();
+            });
+          }
+        } else {
+          // See if we can fetch a full url (with no hash to target)
+          // This is a special case and we should probably do some content thinning / targeting
+          fetch(url)
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.querySelector('main.content');
+            if (note !== null) {
+              // This should only happen for chapter cross references
+              // (since there is no id in the URL)
+              // remove the first header
+              if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+                note.children[0].remove();
+              }
+              const html = processXRef(null, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      }, function(instance) {
+      });
+    }
+        let selectedAnnoteEl;
+        const selectorForAnnotation = ( cell, annotation) => {
+          let cellAttr = 'data-code-cell="' + cell + '"';
+          let lineAttr = 'data-code-annotation="' +  annotation + '"';
+          const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+          return selector;
+        }
+        const selectCodeLines = (annoteEl) => {
+          const doc = window.document;
+          const targetCell = annoteEl.getAttribute("data-target-cell");
+          const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+          const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+          const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+          const lineIds = lines.map((line) => {
+            return targetCell + "-" + line;
+          })
+          let top = null;
+          let height = null;
+          let parent = null;
+          if (lineIds.length > 0) {
+              //compute the position of the single el (top and bottom and make a div)
+              const el = window.document.getElementById(lineIds[0]);
+              top = el.offsetTop;
+              height = el.offsetHeight;
+              parent = el.parentElement.parentElement;
+            if (lineIds.length > 1) {
+              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+              height = bottom - top;
+            }
+            if (top !== null && height !== null && parent !== null) {
+              // cook up a div (if necessary) and position it 
+              let div = window.document.getElementById("code-annotation-line-highlight");
+              if (div === null) {
+                div = window.document.createElement("div");
+                div.setAttribute("id", "code-annotation-line-highlight");
+                div.style.position = 'absolute';
+                parent.appendChild(div);
+              }
+              div.style.top = top - 2 + "px";
+              div.style.height = height + 4 + "px";
+              div.style.left = 0;
+              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+              if (gutterDiv === null) {
+                gutterDiv = window.document.createElement("div");
+                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+                gutterDiv.style.position = 'absolute';
+                const codeCell = window.document.getElementById(targetCell);
+                const gutter = codeCell.querySelector('.code-annotation-gutter');
+                gutter.appendChild(gutterDiv);
+              }
+              gutterDiv.style.top = top - 2 + "px";
+              gutterDiv.style.height = height + 4 + "px";
+            }
+            selectedAnnoteEl = annoteEl;
+          }
+        };
+        const unselectCodeLines = () => {
+          const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+          elementsIds.forEach((elId) => {
+            const div = window.document.getElementById(elId);
+            if (div) {
+              div.remove();
+            }
+          });
+          selectedAnnoteEl = undefined;
+        };
+          // Handle positioning of the toggle
+      window.addEventListener(
+        "resize",
+        throttle(() => {
+          elRect = undefined;
+          if (selectedAnnoteEl) {
+            selectCodeLines(selectedAnnoteEl);
+          }
+        }, 10)
+      );
+      function throttle(fn, ms) {
+      let throttle = false;
+      let timer;
+        return (...args) => {
+          if(!throttle) { // first call gets through
+              fn.apply(this, args);
+              throttle = true;
+          } else { // all the others get throttled
+              if(timer) clearTimeout(timer); // cancel #2
+              timer = setTimeout(() => {
+                fn.apply(this, args);
+                timer = throttle = false;
+              }, ms);
+          }
+        };
+      }
+        // Attach click handler to the DT
+        const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+        for (const annoteDlNode of annoteDls) {
+          annoteDlNode.addEventListener('click', (event) => {
+            const clickedEl = event.target;
+            if (clickedEl !== selectedAnnoteEl) {
+              unselectCodeLines();
+              const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+              if (activeEl) {
+                activeEl.classList.remove('code-annotation-active');
+              }
+              selectCodeLines(clickedEl);
+              clickedEl.classList.add('code-annotation-active');
+            } else {
+              // Unselect the line
+              unselectCodeLines();
+              clickedEl.classList.remove('code-annotation-active');
+            }
+          });
+        }
+    const findCites = (el) => {
+      const parentEl = el.parentElement;
+      if (parentEl) {
+        const cites = parentEl.dataset.cites;
+        if (cites) {
+          return {
+            el,
+            cites: cites.split(' ')
+          };
+        } else {
+          return findCites(el.parentElement)
+        }
+      } else {
+        return undefined;
+      }
+    };
+    var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+    for (var i=0; i<bibliorefs.length; i++) {
+      const ref = bibliorefs[i];
+      const citeInfo = findCites(ref);
+      if (citeInfo) {
+        tippyHover(citeInfo.el, function() {
+          var popup = window.document.createElement('div');
+          citeInfo.cites.forEach(function(cite) {
+            var citeDiv = window.document.createElement('div');
+            citeDiv.classList.add('hanging-indent');
+            citeDiv.classList.add('csl-entry');
+            var biblioDiv = window.document.getElementById('ref-' + cite);
+            if (biblioDiv) {
+              citeDiv.innerHTML = biblioDiv.innerHTML;
+            }
+            popup.appendChild(citeDiv);
+          });
+          return popup.innerHTML;
+        });
+      }
+    }
+  });
+  </script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./lesson-25.html" class="pagination-link" aria-label="Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+    <div class="nav-footer-left">
+<p>All data are simulated. Course text CC BY 4.0, code MIT.</p>
+</div>   
+    <div class="nav-footer-center">
+      &nbsp;
+    </div>
+    <div class="nav-footer-right">
+<p>Built with <a href="https://quarto.org">Quarto</a></p>
+</div>
+  </div>
+</footer>
+
+
+
+
+<script src="site_libs/quarto-html/zenscroll-min.js"></script>
+</body></html>

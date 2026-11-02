@@ -139,7 +139,7 @@ function pchisqUpper(x,df){if(x<=0)return 1;const a=df/2,z=x/2;
   return Math.exp(-z+a*Math.log(z)-lgammaFn(a))*h;}
 function pFmt(p){return p<0.001?"<0.001":p<0.01?fmt(p,3):fmt(p,2);}
 
-if(typeof module!=="undefined"){module.exports={genBseed:o=>genB(o),matSolve,matInv,lmFit,glmFit,rcsKnots,rcsRow,pchisqUpper,pnormStd,qnormStd,COURSE_SEED,makeRng,gaussFrom,poisFrom,gammaFrom,DISTRICTS,AGE_GROUPS,agePop,NEIGHBORS,genA,genB,TRUTH_A,TRUTH_B,mean,sd,quantile};}
+if(typeof module!=="undefined"){module.exports={heatLogRR,coldLogRR,genBseed:o=>genB(o),matSolve,matInv,lmFit,glmFit,rcsKnots,rcsRow,pchisqUpper,pnormStd,qnormStd,COURSE_SEED,makeRng,gaussFrom,poisFrom,gammaFrom,DISTRICTS,AGE_GROUPS,agePop,NEIGHBORS,genA,genB,TRUTH_A,TRUTH_B,mean,sd,quantile};}
 
 /* ---------- browser-only: plotting helpers and lesson components ---------- */
 if(typeof document!=="undefined"){
@@ -185,9 +185,9 @@ var COURSE_LESSONS=[[0,"Welcome: the city, the data and how to use the course","
  [7,"Linear regression","II"],[8,"Generalized linear models: logistic and Poisson regression","II"],[9,"Confounding, effect modification and interaction","II"],[10,"Model checking, comparison and selection","II"],[11,"Nonlinear effects: categories, polynomials, splines and GAMs","II"],
  [12,"Causal inference: from association to effect","III"],[13,"Measurement error and misclassification","III"],[14,"Measuring disease burden","III"],
  [15,"Time-series regression for health data","IV"],[16,"Distributed lag and distributed lag non-linear models","IV"],[17,"Spatial data and spatial autocorrelation","IV"],[18,"Clustered data and mixed-effects models","IV"],
- [19,"Bayesian thinking: from Bayes' rule to a model equation","V"],[20,"Priors: choosing, eliciting and checking them","V"],[21,"Computing the posterior: MCMC and its diagnostics","V"],[22,"Bayesian regression and GLMs","V"],[23,"Bayesian hypothesis testing and model comparison","V"],[24,"Bayesian hierarchical models","V"],[25,"Capstone: Bayesian spatio-temporal hierarchical models","V"]];
-var COURSE_PARTS={I:["Foundations: data, probability and inference","--p1"],II:["Frequentist regression","--p2"],III:["Causal inference, measurement and disease burden","--p5"],IV:["Time, space and clustering","--p3"],V:["Bayesian modeling","--p4"]};
-var COURSE_AVAILABLE=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22];
+ [19,"Bayesian thinking: from Bayes' rule to a model equation","V"],[20,"Priors: choosing, eliciting and checking them","V"],[21,"Computing the posterior: MCMC and its diagnostics","V"],[22,"Bayesian regression and GLMs","V"],[23,"Bayesian hypothesis testing and model comparison","V"],[24,"Bayesian hierarchical models","V"],[25,"Capstone: Bayesian spatio-temporal hierarchical models","V"],[26,"Bayesian additive regression trees (BART) and bartisan","VI"]];
+var COURSE_PARTS={I:["Foundations: data, probability and inference","--p1"],II:["Frequentist regression","--p2"],III:["Causal inference, measurement and disease burden","--p5"],IV:["Time, space and clustering","--p3"],V:["Bayesian modeling","--p4"],VI:["Machine learning meets Bayesian inference","--p2"]};
+var COURSE_AVAILABLE=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26];
 var lessonHref=function(n){return "lesson-"+String(n).padStart(2,"0")+".html";};
 var buildHome=function(){const g=document.getElementById("lessonGrid");if(!g)return;const p=getProgress();let html="",done=0;
   Object.keys(COURSE_PARTS).forEach(k=>{const part=COURSE_PARTS[k];html+="<section class='lpart' style='--pc:var("+part[1]+")'><div class='plab'>Part "+k+"</div><h3>"+part[0]+"</h3><div class='lgrid'>";
