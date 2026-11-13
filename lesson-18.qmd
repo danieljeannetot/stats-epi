@@ -65,11 +65,28 @@ $i$ = child, $j$ = school, $m$ = average school size; $\pi^2/3$ is the variance 
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\pi_{ij}$: the risk for child $i$ in school $j$.
+- $u_j$: school $j$'s random effect: its departure from the average log-odds.
+- $\tau^2$: the variance of the school effects.
+- $ICC$: the intraclass correlation: the share of variance between schools, on the latent scale.
+- $\pi^2/3$: the variance of the logistic distribution, used as the within-school variance.
+- $m$: the average school size.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -86,28 +103,11 @@ tau2 / (tau2 + pi^2 / 3)       # ICC
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\pi_{ij}$: the risk for child $i$ in school $j$.
-- $u_j$: school $j$'s random effect: its departure from the average log-odds.
-- $\tau^2$: the variance of the school effects.
-- $ICC$: the intraclass correlation: the share of variance between schools, on the latent scale.
-- $\pi^2/3$: the variance of the logistic distribution, used as the within-school variance.
-- $m$: the average school size.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -116,6 +116,10 @@ tau2 / (tau2 + pi^2 / 3)       # ICC
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L18.0"></div>
+```
 
 ::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): random-intercept logistic model and ICC"}
 
@@ -172,27 +176,11 @@ $\hat\theta_j$: school $j$'s own log-odds, with standard error $s_j$; $\hat\mu$:
 
 ::::
 
-:::: {.b}
-
-::: {.lab}
-
-[B]{.k}Model list and R
-
-:::
-
-```r
-lme4::ranef(fit0)$school    # shrunken u_j
-coef(fit0)$school |>         # alpha + u_j
-  mutate(risk = plogis(`(Intercept)`))
-```
-
-::::
-
 :::: {.d}
 
 ::: {.lab}
 
-[D]{.k}How to read it
+[B]{.k}How to read it
 
 :::
 
@@ -205,7 +193,27 @@ coef(fit0)$school |>         # alpha + u_j
 
 ::::
 
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+lme4::ranef(fit0)$school    # shrunken u_j
+coef(fit0)$school |>         # alpha + u_j
+  mutate(risk = plogis(`(Intercept)`))
+```
+
+::::
+
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L18.1"></div>
+```
 
 ::: {.further}
 
@@ -239,11 +247,30 @@ $$Q = \sum_j \frac{(\hat\beta_j - \hat\beta_{\text{FE}})^2}{s_j^2}, \qquad I^2 =
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\hat\beta_j$: district $j$'s estimated heat effect.
+- $\beta_j$: district $j$'s true effect.
+- $\mu$: the mean of the true effects: the pooled effect.
+- $\tau^2$: the between-district variance of the true effects.
+- $Q$: Cochran's Q: the weighted spread of the estimates around the fixed-effect mean.
+- $\hat\beta_{\text{FE}}$: the fixed-effect (inverse-variance weighted) mean.
+- $I^2$: the share of the spread due to real differences rather than chance.
+- $J$: the number of districts.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -259,30 +286,11 @@ blup(meta)      # shrunken district effects
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\hat\beta_j$: district $j$'s estimated heat effect.
-- $\beta_j$: district $j$'s true effect.
-- $\mu$: the mean of the true effects: the pooled effect.
-- $\tau^2$: the between-district variance of the true effects.
-- $Q$: Cochran's Q: the weighted spread of the estimates around the fixed-effect mean.
-- $\hat\beta_{\text{FE}}$: the fixed-effect (inverse-variance weighted) mean.
-- $I^2$: the share of the spread due to real differences rather than chance.
-- $J$: the number of districts.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -366,11 +374,28 @@ $I$ = information matrix from the ordinary model; $U_c$ = score contribution of 
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\widehat{\mathrm{Var}}_{\text{CR}}(\hat\beta)$: the cluster-robust variance of the estimates.
+- $I^{-1}$: the inverse information matrix from the ordinary model: the "bread".
+- $\sum_{c}$: the sum over clusters (schools or districts): the "meat".
+- $U_c$: cluster $c$'s score: the summed contributions of its members, which may be correlated.
+- $\hat\pi_i$: the fitted risk for child $i$.
+- $x_i$: child $i$'s predictors.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -381,23 +406,6 @@ sqrt(diag(vcov(fit)))                    # naive
 sqrt(diag(sandwich::vcovCL(fit,
           cluster = ~ district)))        # robust
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\widehat{\mathrm{Var}}_{\text{CR}}(\hat\beta)$: the cluster-robust variance of the estimates.
-- $I^{-1}$: the inverse information matrix from the ordinary model: the "bread".
-- $\sum_{c}$: the sum over clusters (schools or districts): the "meat".
-- $U_c$: cluster $c$'s score: the summed contributions of its members, which may be correlated.
-- $\hat\pi_i$: the fitted risk for child $i$.
-- $x_i$: child $i$'s predictors.
 
 ::::
 

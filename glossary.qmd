@@ -10,7 +10,7 @@ This glossary defines the 274 terms used across the course. In every lesson, hov
 
 ## Symbols and notation {#symbols}
 
-Every model is shown three ways side by side: **A, standard notation**, as in papers and textbooks; **B, a model list with R**, one line per assumption, as in software; and **C, epidemiological reporting**, as in a results section.
+Every model is shown in four panels: **A, standard notation**, as in papers and textbooks; **B, how to read it**, explaining each term; **C, a model list with R**, one line per assumption, as in software; and **D, how it's reported**, as in a results section.
 
 | Symbol | Meaning |
 |:--|:--|
@@ -1464,6 +1464,16 @@ Every forecast is a prediction, but not every prediction is a forecast. What def
 :::
 
 [Related: [Data leakage](#g-data-leakage), [Rolling-origin evaluation](#g-rolling-origin), [Prediction interval](#g-prediction-interval), [Cross-validation](#g-cross-validation) · Lessons: [26](lesson-26.qmd)]{.gmeta}
+
+### Four-panel notation {#g-three-way-notation .gloss-entry}
+
+[About the course]{.gcat}
+
+**The course's way of showing every model: standard notation, how to read it, a model list with R, and how it's reported.**
+
+**A, standard notation** is how models appear in papers and textbooks. **B, how to read it** explains each term of the equation: click a term to see what it does in the model. **C, the model list and R** writes one line per assumption, as software does. **D, how it's reported** shows how the result would appear in a results section.
+
+[Related: [Simulated data](#g-simulated-data) · Lessons: [0](lesson-00.qmd)]{.gmeta}
 
 ### Fourier terms {#g-fourier-terms .gloss-entry}
 
@@ -4263,7 +4273,7 @@ simex::simex(fit, SIMEXvariable = "no2_modeled", measurement.error = 5)
 
 This course uses simulated data so that every estimate can be compared with the truth. The simulation includes realistic complications: overdispersion, confounding, measurement error, lags and spatial correlation.
 
-[Related: [Three-way notation](#g-three-way-notation) · Lessons: [0](lesson-00.qmd)]{.gmeta}
+[Related: [Four-panel notation](#g-three-way-notation) · Lessons: [0](lesson-00.qmd)]{.gmeta}
 
 ### Skewness {#g-skewness .gloss-entry}
 
@@ -4508,16 +4518,6 @@ Spelling out eligibility, the exposure strategies compared, the start of follow-
 :::
 
 [Related: [p-value](#g-p-value), [Wald test](#g-wald-test) · Lessons: [6](lesson-06.qmd)]{.gmeta}
-
-### Three-way notation {#g-three-way-notation .gloss-entry}
-
-[About the course]{.gcat}
-
-**The course's way of showing every model: standard notation, a model list with R, and epidemiological reporting, side by side.**
-
-**A, standard notation** is how models appear in papers and textbooks. **B, the model list and R** writes one line per assumption, as software does. **C, epidemiological reporting** shows how the result would appear in a results section.
-
-[Related: [Simulated data](#g-simulated-data) · Lessons: [0](lesson-00.qmd)]{.gmeta}
 
 ### Time-series study {#g-time-series .gloss-entry}
 

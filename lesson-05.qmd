@@ -65,11 +65,27 @@ $$\hat\pi = \frac{d}{n}$$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $L(\pi)$: the likelihood: the probability of the observed data, viewed as a function of the unknown risk $\pi$.
+- $\ell(\pi)$: the log-likelihood: easier to work with; it peaks at the same value.
+- $d$: the number of children with asthma among the $n$ observed.
+- $\hat\pi$: the maximum likelihood estimate: the value of $\pi$ that makes the data most probable, here simply $d/n$.
+- $\text{const}$: terms that don't involve $\pi$; they don't change where the curve peaks.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -82,27 +98,11 @@ optimize(loglik, c(0, 1), maximum = TRUE)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $L(\pi)$: the likelihood: the probability of the observed data, viewed as a function of the unknown risk $\pi$.
-- $\ell(\pi)$: the log-likelihood: easier to work with; it peaks at the same value.
-- $d$: the number of children with asthma among the $n$ observed.
-- $\hat\pi$: the maximum likelihood estimate: the value of $\pi$ that makes the data most probable, here simply $d/n$.
-- $\text{const}$: terms that don't involve $\pi$; they don't change where the curve peaks.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -111,6 +111,10 @@ optimize(loglik, c(0, 1), maximum = TRUE)
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L05.0"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -162,11 +166,26 @@ $$\ell(\lambda) = \sum_{t} \left[ y_t \log\lambda - \lambda \right] + \text{cons
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $y_t$: the count on day $t$.
+- $\lambda$: the unknown daily rate: the expected number of visits per day.
+- $\ell(\lambda)$: the log-likelihood of the rate, summed over the $n$ days.
+- $\hat\lambda$: the maximum likelihood estimate of the rate: the mean daily count.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -180,26 +199,11 @@ glm(y ~ 1, family = poisson) |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $y_t$: the count on day $t$.
-- $\lambda$: the unknown daily rate: the expected number of visits per day.
-- $\ell(\lambda)$: the log-likelihood of the rate, summed over the $n$ days.
-- $\hat\lambda$: the maximum likelihood estimate of the rate: the mean daily count.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -265,11 +269,26 @@ $$\text{Wald: } \hat\pi \pm 1.96\,SE \qquad \text{Likelihood: } \{\pi : \ell(\ha
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $I(\hat\pi)$: the information: the curvature of the log-likelihood at its peak. Sharper peak, more information.
+- $\ell''(\hat\pi)$: the second derivative of the log-likelihood, which measures the curvature.
+- $SE$: the standard error: one over the square root of the information.
+- $1.92$: half of 3.84, the 95% point of a chi-squared distribution with one degree of freedom: values within 1.92 log-likelihood units of the peak form the likelihood interval.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -284,26 +303,11 @@ confint(fit) |> plogis()         # profile likelihood
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $I(\hat\pi)$: the information: the curvature of the log-likelihood at its peak. Sharper peak, more information.
-- $\ell''(\hat\pi)$: the second derivative of the log-likelihood, which measures the curvature.
-- $SE$: the standard error: one over the square root of the information.
-- $1.92$: half of 3.84, the 95% point of a chi-squared distribution with one degree of freedom: values within 1.92 log-likelihood units of the peak form the likelihood interval.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

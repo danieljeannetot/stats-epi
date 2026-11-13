@@ -72,11 +72,28 @@ $z_{0.975} = 1.96$ for a 95% interval. The probability statement is about the pr
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\hat\pi$: the estimated risk in the sample.
+- $z_{1-\alpha/2}$: the normal quantile that sets the confidence level: 1.96 for 95%.
+- $n$: the sample size: the interval narrows with $\sqrt{n}$.
+- $P_\pi$: a probability over repeated samples, computed as if the true risk were $\pi$.
+- $L$: the lower limit of the interval; $U$ is the upper limit. Both vary from sample to sample; $\pi$ doesn't.
+- $1 - \alpha$: the coverage: the share of repeated intervals that capture $\pi$, whatever its value.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -91,28 +108,11 @@ binom.test(sum(smp$asthma), 200)$conf.int
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\hat\pi$: the estimated risk in the sample.
-- $z_{1-\alpha/2}$: the normal quantile that sets the confidence level: 1.96 for 95%.
-- $n$: the sample size: the interval narrows with $\sqrt{n}$.
-- $P_\pi$: a probability over repeated samples, computed as if the true risk were $\pi$.
-- $L$: the lower limit of the interval; $U$ is the upper limit. Both vary from sample to sample; $\pi$ doesn't.
-- $1 - \alpha$: the coverage: the share of repeated intervals that capture $\pi$, whatever its value.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -121,6 +121,10 @@ binom.test(sum(smp$asthma), 200)$conf.int
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L06.0"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -171,28 +175,11 @@ $$z = \frac{\hat\pi_1 - \hat\pi_0}{\sqrt{\bar\pi(1-\bar\pi)\left(\frac{1}{n_1} +
 
 ::::
 
-:::: {.b}
-
-::: {.lab}
-
-[B]{.k}Model list and R
-
-:::
-
-```r
-smp <- cohort |> slice_sample(n = 500) |>
-  mutate(high = no2_modeled >= 30)
-prop.test(table(smp$high, smp$asthma)[, 2:1],
-          correct = FALSE)
-```
-
-::::
-
 :::: {.d}
 
 ::: {.lab}
 
-[D]{.k}How to read it
+[B]{.k}How to read it
 
 :::
 
@@ -205,11 +192,28 @@ prop.test(table(smp$high, smp$asthma)[, 2:1],
 
 ::::
 
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+smp <- cohort |> slice_sample(n = 500) |>
+  mutate(high = no2_modeled >= 30)
+prop.test(table(smp$high, smp$asthma)[, 2:1],
+          correct = FALSE)
+```
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -224,6 +228,10 @@ Report the effect estimate with its confidence interval and the exact p-value, n
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L06.1"></div>
+```
 
 ::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): p-values under the null and under a real effect"}
 
@@ -308,11 +316,26 @@ $$\text{Bonferroni: reject } H_{0j} \text{ if } p_j < \alpha / m$$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $m$: the number of tests.
+- $\alpha$: the significance level of each test, usually 0.05.
+- $1 - (1-\alpha)^m$: the chance of at least one false positive across $m$ independent tests: about 0.64 for 20 tests.
+- $p_j$: the p-value of test $j$; Bonferroni compares it with $\alpha/m$ instead of $\alpha$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -324,26 +347,11 @@ p.adjust(p_values, method = "holm")
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $m$: the number of tests.
-- $\alpha$: the significance level of each test, usually 0.05.
-- $1 - (1-\alpha)^m$: the chance of at least one false positive across $m$ independent tests: about 0.64 for 20 tests.
-- $p_j$: the p-value of test $j$; Bonferroni compares it with $\alpha/m$ instead of $\alpha$.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -352,6 +360,10 @@ p.adjust(p_values, method = "holm")
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L06.2"></div>
+```
 
 ::: {.further}
 

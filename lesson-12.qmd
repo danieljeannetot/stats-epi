@@ -69,11 +69,27 @@ Only $Y_i^{X_i}$, the outcome under the exposure actually received, is ever obse
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $Y_i^{x}$: child $i$'s potential outcome: whether they would have asthma if their exposure were set to $x$.
+- $E[Y^{X}]$: the average outcome if everyone kept their actual exposure.
+- $E[Y^{X-\Delta}]$: the average outcome if everyone's exposure were lowered by $\Delta$ (here 10 µg/m³): a hypothetical intervention.
+- $RR_{\text{causal}}$: the causal risk ratio: average risk under the intervention divided by average risk without it.
+- $RD_{\text{causal}}$: the causal risk difference: cases prevented per child; × 1,000 for cases per 1,000.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -90,27 +106,11 @@ Only $Y_i^{X_i}$, the outcome under the exposure actually received, is ever obse
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $Y_i^{x}$: child $i$'s potential outcome: whether they would have asthma if their exposure were set to $x$.
-- $E[Y^{X}]$: the average outcome if everyone kept their actual exposure.
-- $E[Y^{X-\Delta}]$: the average outcome if everyone's exposure were lowered by $\Delta$ (here 10 µg/m³): a hypothetical intervention.
-- $RR_{\text{causal}}$: the causal risk ratio: average risk under the intervention divided by average risk without it.
-- $RD_{\text{causal}}$: the causal risk difference: cases prevented per child; × 1,000 for cases per 1,000.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -119,6 +119,10 @@ Only $Y_i^{X_i}$, the outcome under the exposure actually received, is ever obse
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L12.0"></div>
+```
 
 ::: {.further}
 
@@ -161,11 +165,27 @@ Evaluated once with each child's own $x_i$, once with $x_i - \Delta$; $Z$ = conf
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\widehat{E}[Y^{x}]$: the estimated average outcome if exposure were set to $x$ for everyone.
+- $\frac{1}{n}\sum_{i=1}^{n}$: average over all children: g-computation predicts each child's risk, then averages.
+- $\widehat{P}$: the predicted risk from the fitted outcome model (here logistic regression).
+- $x_i$: child $i$'s exposure, set to the value of the scenario (actual, or 10 µg/m³ lower).
+- $z_i$: child $i$'s confounders, kept at their observed values.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -181,27 +201,11 @@ c(rr = r0 / r1, rd = r0 - r1)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\widehat{E}[Y^{x}]$: the estimated average outcome if exposure were set to $x$ for everyone.
-- $\frac{1}{n}\sum_{i=1}^{n}$: average over all children: g-computation predicts each child's risk, then averages.
-- $\widehat{P}$: the predicted risk from the fitted outcome model (here logistic regression).
-- $x_i$: child $i$'s exposure, set to the value of the scenario (actual, or 10 µg/m³ lower).
-- $z_i$: child $i$'s confounders, kept at their observed values.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -280,11 +284,27 @@ $$\widehat{E}[Y^{a}] = \frac{\sum_i w_i\, 1\{A_i = a\}\, Y_i}{\sum_i w_i\, 1\{A_
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $e(z)$: the propensity score: the probability of high exposure given the confounders $z$.
+- $A_i$: child $i$'s exposure group: 1 if highly exposed, 0 if not.
+- $w_i$: the inverse probability weight: rarely exposed children with high exposure (and vice versa) count more.
+- $e(z_i)$: child $i$'s own propensity score.
+- $\widehat{E}[Y^{a}]$: the weighted average outcome in group $a$: an estimate of the average outcome if everyone had exposure $a$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -299,27 +319,11 @@ with(d, weighted.mean(asthma[high], w[high]) /
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $e(z)$: the propensity score: the probability of high exposure given the confounders $z$.
-- $A_i$: child $i$'s exposure group: 1 if highly exposed, 0 if not.
-- $w_i$: the inverse probability weight: rarely exposed children with high exposure (and vice versa) count more.
-- $e(z_i)$: child $i$'s own propensity score.
-- $\widehat{E}[Y^{a}]$: the weighted average outcome in group $a$: an estimate of the average outcome if everyone had exposure $a$.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -393,11 +397,26 @@ $RR_{EU}$: confounder–exposure association; $RR_{UD}$: confounder–outcome as
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $E$: the E-value: the minimum strength of association an unmeasured confounder would need, with both exposure and outcome, to explain the RR away.
+- $RR$: the observed risk ratio (inverted if below 1).
+- $RR_{EU}$: the confounder–exposure association (as a risk ratio).
+- $RR_{UD}$: the confounder–outcome association (as a risk ratio).
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -410,26 +429,11 @@ e_value(1.01)   # lower confidence limit
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $E$: the E-value: the minimum strength of association an unmeasured confounder would need, with both exposure and outcome, to explain the RR away.
-- $RR$: the observed risk ratio (inverted if below 1).
-- $RR_{EU}$: the confounder–exposure association (as a risk ratio).
-- $RR_{UD}$: the confounder–outcome association (as a risk ratio).
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -438,6 +442,10 @@ e_value(1.01)   # lower confidence limit
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L12.3"></div>
+```
 
 ::: {.callout-tip icon="false" title="Bayesian preview"}
 

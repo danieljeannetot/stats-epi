@@ -63,11 +63,29 @@ $$\text{constrained: } \beta_\ell = \sum_k \theta_k\, c_k(\ell), \qquad \text{cu
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\beta_\ell$: the effect of heat on day $t-\ell$ on visits on day $t$: the lag-specific effect.
+- $h_{t-\ell}$: the heat exposure $\ell$ days earlier.
+- $h_t$: heat on day $t$: degrees above 20°C (0 below).
+- $L$: the maximum lag, here 21 days.
+- $\theta_k$: the coefficients of the lag basis: a few numbers that define the whole smooth lag curve.
+- $c_k(\ell)$: the lag basis functions: smooth curves over lags.
+- $\text{cumulative}$: the cumulative effect: the sum over all lags.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -79,24 +97,6 @@ cb <- dlnm::crossbasis(pmax(city_daily$temp - 20, 0),
 fit <- glm(visits ~ cb + splines::ns(t, df = 35) + dow,
            family = quasipoisson, data = city_daily)
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\beta_\ell$: the effect of heat on day $t-\ell$ on visits on day $t$: the lag-specific effect.
-- $h_{t-\ell}$: the heat exposure $\ell$ days earlier.
-- $h_t$: heat on day $t$: degrees above 20°C (0 below).
-- $L$: the maximum lag, here 21 days.
-- $\theta_k$: the coefficients of the lag basis: a few numbers that define the whole smooth lag curve.
-- $c_k(\ell)$: the lag basis functions: smooth curves over lags.
-- $\text{cumulative}$: the cumulative effect: the sum over all lags.
 
 ::::
 
@@ -145,11 +145,27 @@ $b_j$: spline basis in temperature; $c_k$: spline basis in lag; the $\eta_{jk}$ 
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\eta_{jk}$: the cross-basis coefficients: together they define the whole exposure–lag–response surface.
+- $w_{t,jk}$: the cross-basis variable: exposure history on day $t$ transformed by basis $j$ and weighted by lag basis $k$.
+- $b_j(T_{t-\ell})$: exposure basis function $j$ applied to the temperature $\ell$ days earlier.
+- $c_k(\ell)$: lag basis function $k$ at lag $\ell$.
+- $L$: the maximum lag.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -163,22 +179,6 @@ fit <- glm(visits ~ cb + splines::ns(t, df = 35) +
              dow, family = quasipoisson,
            data = city_daily)
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\eta_{jk}$: the cross-basis coefficients: together they define the whole exposure–lag–response surface.
-- $w_{t,jk}$: the cross-basis variable: exposure history on day $t$ transformed by basis $j$ and weighted by lag basis $k$.
-- $b_j(T_{t-\ell})$: exposure basis function $j$ applied to the temperature $\ell$ days earlier.
-- $c_k(\ell)$: lag basis function $k$ at lag $\ell$.
-- $L$: the maximum lag.
 
 ::::
 
@@ -221,11 +221,27 @@ $$\mathrm{MMT} = \arg\min_x \log RR_{\text{cum}}(x)$$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\log RR_{\text{cum}}(x)$: the cumulative log relative risk at temperature $x$, summed over lags.
+- $b_j(x)$: exposure basis function $j$ at temperature $x$.
+- $x_{\text{ref}}$: the reference temperature: RRs are relative to it.
+- $\mathrm{MMT}$: the minimum morbidity temperature: where the cumulative curve is lowest.
+- $\arg\min_x$: "the value of $x$ that minimizes".
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -241,27 +257,11 @@ pred2$allRRfit; pred2$allRRlow; pred2$allRRhigh
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\log RR_{\text{cum}}(x)$: the cumulative log relative risk at temperature $x$, summed over lags.
-- $b_j(x)$: exposure basis function $j$ at temperature $x$.
-- $x_{\text{ref}}$: the reference temperature: RRs are relative to it.
-- $\mathrm{MMT}$: the minimum morbidity temperature: where the cumulative curve is lowest.
-- $\arg\min_x$: "the value of $x$ that minimizes".
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -270,6 +270,10 @@ pred2$allRRfit; pred2$allRRlow; pred2$allRRhigh
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L16.2"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -340,11 +344,27 @@ $$AF_{\text{heat}} = \frac{\sum_{t: T_t > \mathrm{MMT}} y_t\, AF_t}{\sum_t y_t}$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $AF_t$: the share of day $t$'s visits attributable to its temperature (relative to the MMT).
+- $y_t$: the visits on day $t$.
+- $AN$: the attributable number: summed over days.
+- $AF_{\text{heat}}$: the heat-attributable fraction: from days above the MMT only. Cold uses days below.
+- $\mathrm{MMT}$: the reference temperature separating heat from cold.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -358,27 +378,11 @@ $$AF_{\text{heat}} = \frac{\sum_{t: T_t > \mathrm{MMT}} y_t\, AF_t}{\sum_t y_t}$
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $AF_t$: the share of day $t$'s visits attributable to its temperature (relative to the MMT).
-- $y_t$: the visits on day $t$.
-- $AN$: the attributable number: summed over days.
-- $AF_{\text{heat}}$: the heat-attributable fraction: from days above the MMT only. Cold uses days below.
-- $\mathrm{MMT}$: the reference temperature separating heat from cold.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -387,6 +391,10 @@ $$AF_{\text{heat}} = \frac{\sum_{t: T_t > \mathrm{MMT}} y_t\, AF_t}{\sum_t y_t}$
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L16.3"></div>
+```
 
 ::: {.callout-tip icon="false" title="Bayesian preview"}
 

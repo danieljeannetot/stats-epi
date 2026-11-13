@@ -13,8 +13,8 @@ project:
 website:
   title: "Statistics for epidemiology"
   description: "An interactive course from probability to Bayesian hierarchical models, for MSc students in epidemiology and public health."
-  # site-url: https://YOUR-USER.github.io/stats-epi-course/
-  # repo-url: https://github.com/YOUR-USER/stats-epi-course
+  site-url: https://danieljeannetot.github.io/stats-epi/
+  repo-url: https://github.com/danieljeannetot/stats-epi
   search: true
   page-navigation: true
   reader-mode: false
@@ -24,6 +24,8 @@ website:
         text: Home
       - href: methods.qmd
         text: Choosing a method
+      - href: playground.qmd
+        text: Model playground
       - href: glossary.qmd
         text: Glossary
       - href: course-plan.html

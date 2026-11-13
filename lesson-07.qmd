@@ -63,11 +63,27 @@ $$(\hat\beta_0, \hat\beta_1) = \arg\min_{\beta_0, \beta_1} \sum_i \big(y_i - \be
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $Y_i$: the outcome for child $i$ (here NO₂ exposure).
+- $\beta_0$: the intercept: the predicted outcome when $x_i = 0$.
+- $\beta_1$: the slope: the change in the mean outcome per unit of $x$.
+- $\varepsilon_i$: the error: how far child $i$ lies from the line; assumed normal with constant variance $\sigma^2$.
+- $\arg\min$: "the values that minimize": least squares picks the line with the smallest sum of squared vertical distances.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -81,27 +97,11 @@ coef(fit)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $Y_i$: the outcome for child $i$ (here NO₂ exposure).
-- $\beta_0$: the intercept: the predicted outcome when $x_i = 0$.
-- $\beta_1$: the slope: the change in the mean outcome per unit of $x$.
-- $\varepsilon_i$: the error: how far child $i$ lies from the line; assumed normal with constant variance $\sigma^2$.
-- $\arg\min$: "the values that minimize": least squares picks the line with the smallest sum of squared vertical distances.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -110,6 +110,10 @@ coef(fit)
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L07.0"></div>
+```
 
 ::: {.further}
 
@@ -154,11 +158,26 @@ $\beta_1$ is the difference in mean NO₂ per unit of green space among children
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $E[Y_i \mid x_i]$: the mean outcome for children with given values of the predictors.
+- $\beta_1$: the green-space coefficient: the difference in mean NO₂ per unit of green space, holding SES and traffic fixed.
+- $\beta_2$: the SES coefficient, adjusted for the other terms.
+- $\mathrm{traffic}_{j[i]}$: the traffic level of district $j[i]$, the district child $i$ lives in.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -171,26 +190,11 @@ broom::tidy(fit, conf.int = TRUE)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $E[Y_i \mid x_i]$: the mean outcome for children with given values of the predictors.
-- $\beta_1$: the green-space coefficient: the difference in mean NO₂ per unit of green space, holding SES and traffic fixed.
-- $\beta_2$: the SES coefficient, adjusted for the other terms.
-- $\mathrm{traffic}_{j[i]}$: the traffic level of district $j[i]$, the district child $i$ lives in.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -199,6 +203,10 @@ broom::tidy(fit, conf.int = TRUE)
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L07.1"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -297,11 +305,26 @@ $$\text{new child: } \hat y_0 \pm t\,\sqrt{\hat\sigma^2 + \widehat{\mathrm{Var}}
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\hat y_0$: the predicted mean at the chosen values of the predictors.
+- $t$: the $t$ quantile for the confidence level: close to 1.96 with large samples.
+- $\widehat{\mathrm{Var}}(\hat y_0)$: the uncertainty of the estimated mean: shrinks as the sample grows.
+- $\hat\sigma^2$: the residual variance: how much individual children vary around the mean. It doesn't shrink with more data, so prediction intervals stay wide.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -313,26 +336,11 @@ predict(fit1, new, interval = "prediction")
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\hat y_0$: the predicted mean at the chosen values of the predictors.
-- $t$: the $t$ quantile for the confidence level: close to 1.96 with large samples.
-- $\widehat{\mathrm{Var}}(\hat y_0)$: the uncertainty of the estimated mean: shrinks as the sample grows.
-- $\hat\sigma^2$: the residual variance: how much individual children vary around the mean. It doesn't shrink with more data, so prediction intervals stay wide.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

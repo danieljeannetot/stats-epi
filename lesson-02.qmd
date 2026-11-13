@@ -69,11 +69,26 @@ $$\text{independent} \iff P(A \cap B) = P(A)\,P(B)$$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $P(A \cup B)$: the probability of A or B (or both); subtracting $P(A \cap B)$ avoids counting the overlap twice.
+- $P(A \cap B)$: the probability of A and B together.
+- $P(A \mid B)$: the conditional probability of A given that B happened: restrict attention to B, then ask how often A occurs.
+- $\iff$: "if and only if": events are independent exactly when the joint probability equals the product.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -90,26 +105,11 @@ cohort |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $P(A \cup B)$: the probability of A or B (or both); subtracting $P(A \cap B)$ avoids counting the overlap twice.
-- $P(A \cap B)$: the probability of A and B together.
-- $P(A \mid B)$: the conditional probability of A given that B happened: restrict attention to B, then ask how often A occurs.
-- $\iff$: "if and only if": events are independent exactly when the joint probability equals the product.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -201,11 +201,26 @@ $p$ = prevalence, $D^+$ = has asthma, $T^+$ = positive test.
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $Se$: sensitivity: the share of children with asthma who test positive.
+- $Sp$: specificity: the share of children without asthma who test negative.
+- $PPV$: positive predictive value: the probability of asthma given a positive test; what a clinician needs.
+- $p$: the prevalence before testing. With low prevalence, most positives can be false, even with a good test.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -220,26 +235,11 @@ cohort |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $Se$: sensitivity: the share of children with asthma who test positive.
-- $Sp$: specificity: the share of children without asthma who test negative.
-- $PPV$: positive predictive value: the probability of asthma given a positive test; what a clinician needs.
-- $p$: the prevalence before testing. With low prevalence, most positives can be false, even with a good test.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -248,6 +248,10 @@ cohort |>
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L02.1"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -309,11 +313,26 @@ $$\text{post-test odds} = \text{pre-test odds} \times LR$$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $LR^+$: the positive likelihood ratio: how much a positive test multiplies the odds of disease.
+- $LR^-$: the negative likelihood ratio: how much a negative test multiplies the odds (it shrinks them).
+- $\text{pre-test odds}$: the odds of disease before the test, from the prevalence: $p/(1-p)$.
+- $\text{post-test odds}$: the odds after the test result: Bayes' theorem in its simplest form.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -326,26 +345,11 @@ p_post    <- post_odds / (1 + post_odds)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $LR^+$: the positive likelihood ratio: how much a positive test multiplies the odds of disease.
-- $LR^-$: the negative likelihood ratio: how much a negative test multiplies the odds (it shrinks them).
-- $\text{pre-test odds}$: the odds of disease before the test, from the prevalence: $p/(1-p)$.
-- $\text{post-test odds}$: the odds after the test result: Bayes' theorem in its simplest form.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -354,6 +358,10 @@ p_post    <- post_odds / (1 + post_odds)
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L02.2"></div>
+```
 
 ::: {.callout-tip icon="false" title="Bayesian preview"}
 

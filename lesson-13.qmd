@@ -71,11 +71,29 @@ $X$ = true exposure, $W$ = measured, $Z$ = covariates; $\lambda$ is the reliabil
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $X$: the true exposure, never observed.
+- $W$: the measured exposure, e.g. modeled NO₂.
+- $U$: the measurement error: independent of $X$ (classical) or of $W$ (Berkson).
+- $\hat\beta_W$: the slope estimated with the measured exposure: shrunk toward zero under classical error.
+- $\lambda$: the reliability ratio: the share of exposure variation that is real. The slope is multiplied by it.
+- $\sigma^2_{X \mid Z}$: the true exposure's variance after accounting for covariates $Z$.
+- $\sigma^2_U$: the error variance: larger error, stronger attenuation.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -90,29 +108,11 @@ glm(asthma ~ I(no2_true / 10) + ses + green,
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $X$: the true exposure, never observed.
-- $W$: the measured exposure, e.g. modeled NO₂.
-- $U$: the measurement error: independent of $X$ (classical) or of $W$ (Berkson).
-- $\hat\beta_W$: the slope estimated with the measured exposure: shrunk toward zero under classical error.
-- $\lambda$: the reliability ratio: the share of exposure variation that is real. The slope is multiplied by it.
-- $\sigma^2_{X \mid Z}$: the true exposure's variance after accounting for covariates $Z$.
-- $\sigma^2_U$: the error variance: larger error, stronger attenuation.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -121,6 +121,10 @@ glm(asthma ~ I(no2_true / 10) + ses + green,
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L13.0"></div>
+```
 
 ::: {.further}
 
@@ -158,11 +162,28 @@ $$\mathrm{logit}\,P(Y = 1) = \beta_0 + \beta\,\widehat{E}[X \mid W, Z] + \gamma^
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $E[X \mid W, Z]$: the calibration model: the expected true exposure given the measured one and covariates, fitted in validation data.
+- $\alpha_1$: the calibration slope: how much true exposure changes per unit of measured exposure (below 1 under classical error).
+- $\widehat{E}[X \mid W, Z]$: each child's predicted true exposure, used in place of $W$ in the outcome model.
+- $\beta_0$: the intercept of the outcome model.
+- $\beta$: the exposure effect, now corrected for attenuation.
+- $\gamma^\top Z$: the covariates, in both models.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -177,28 +198,11 @@ glm(asthma ~ I(no2_cal / 10) + ses + green,
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $E[X \mid W, Z]$: the calibration model: the expected true exposure given the measured one and covariates, fitted in validation data.
-- $\alpha_1$: the calibration slope: how much true exposure changes per unit of measured exposure (below 1 under classical error).
-- $\widehat{E}[X \mid W, Z]$: each child's predicted true exposure, used in place of $W$ in the outcome model.
-- $\beta_0$: the intercept of the outcome model.
-- $\beta$: the exposure effect, now corrected for attenuation.
-- $\gamma^\top Z$: the covariates, in both models.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -291,11 +295,27 @@ $a^*$ = observed positives in a group of size $n$; $\hat a$ = corrected number o
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $a^*$: the number classified as exposed (or as cases) by the imperfect measure.
+- $Se$: sensitivity of the classification: the share of truly positive classified as positive.
+- $Sp$: specificity: the share of truly negative classified as negative.
+- $\hat a$: the corrected count: back-calculated from $a^*$, $Se$ and $Sp$.
+- $n$: the size of the group.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -308,27 +328,11 @@ correct <- function(pos, n, se, sp)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $a^*$: the number classified as exposed (or as cases) by the imperfect measure.
-- $Se$: sensitivity of the classification: the share of truly positive classified as positive.
-- $Sp$: specificity: the share of truly negative classified as negative.
-- $\hat a$: the corrected count: back-calculated from $a^*$, $Se$ and $Sp$.
-- $n$: the size of the group.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -337,6 +341,10 @@ correct <- function(pos, n, se, sp)
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L13.2"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 

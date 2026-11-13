@@ -64,11 +64,26 @@ $$\tilde y^{(s)} \sim \mathrm{Poisson}\big(\tilde\mu^{(s)}(T)\big)$$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $p(\alpha)$: the prior on the intercept.
+- $p(\beta)$: the prior on the heat effect.
+- $\tilde\mu^{(s)}(T)$: the expected visits at temperature $T$ implied by prior draw $s$.
+- $\tilde y^{(s)}$: visits simulated from the prior alone: the prior predictive distribution. Absurd values mean an unreasonable prior.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -82,22 +97,11 @@ brms::brm(..., sample_prior = "only")
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $p(\alpha)$: the prior on the intercept.
-- $p(\beta)$: the prior on the heat effect.
-- $\tilde\mu^{(s)}(T)$: the expected visits at temperature $T$ implied by prior draw $s$.
-- $\tilde y^{(s)}$: visits simulated from the prior alone: the prior predictive distribution. Absurd values mean an unreasonable prior.
-
-::::
-
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L20.0"></div>
+```
 
 ::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): a prior predictive check"}
 
@@ -156,11 +160,27 @@ $L$ and $U$: the lowest and highest plausible effects, read as a 95% prior range
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $m$: the prior mean on the log scale: the midpoint of the plausible range.
+- $s$: the prior SD: chosen so that 95% of the prior lies within the plausible range.
+- $\log(1 + L)$: the lower end of the experts' plausible range ($L$ = −0.02 means −2% per °C), on the log scale.
+- $\log(1 + U)$: the upper end of the plausible range, on the log scale.
+- $1.96$: the normal quantile for 95%.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -173,27 +193,11 @@ prior(normal(m, s), class = b)   # brms
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $m$: the prior mean on the log scale: the midpoint of the plausible range.
-- $s$: the prior SD: chosen so that 95% of the prior lies within the plausible range.
-- $\log(1 + L)$: the lower end of the experts' plausible range ($L$ = −0.02 means −2% per °C), on the log scale.
-- $\log(1 + U)$: the upper end of the plausible range, on the log scale.
-- $1.96$: the normal quantile for 95%.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -202,6 +206,10 @@ prior(normal(m, s), class = b)   # brms
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L20.1"></div>
+```
 
 ::: {.further}
 
@@ -269,11 +277,27 @@ $P = I$ for the independent prior; $P = D^\top D$, with $D$ the first-difference
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\beta_\ell$: the effect at lag $\ell$.
+- $\beta_{\ell-1}$: the effect at the previous lag: a random-walk prior pulls neighboring lags together, making the curve smooth.
+- $\lambda$: the precision of the prior: larger means stronger smoothing (or shrinkage).
+- $P$: the penalty matrix: identity for independent priors, a difference matrix for a random walk.
+- $\ell(\beta)$: the log-likelihood: the posterior is likelihood minus a penalty, which is why a penalty is a prior.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -284,22 +308,6 @@ b[l] ~ normal(b[l - 1], sigma_rw)    # l = 2..L
 mgcv::gam(visits ~ s(lag_matrix, by = temp_matrix,
                      bs = "ps"), ...)
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\beta_\ell$: the effect at lag $\ell$.
-- $\beta_{\ell-1}$: the effect at the previous lag: a random-walk prior pulls neighboring lags together, making the curve smooth.
-- $\lambda$: the precision of the prior: larger means stronger smoothing (or shrinkage).
-- $P$: the penalty matrix: identity for independent priors, a difference matrix for a random walk.
-- $\ell(\beta)$: the log-likelihood: the posterior is likelihood minus a penalty, which is why a penalty is a prior.
 
 ::::
 

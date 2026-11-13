@@ -70,11 +70,27 @@ A Normal(0, 0.5²) prior on the log OR gives 95% prior probability to ORs betwee
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\pi_i$: child $i$'s probability of asthma.
+- $\beta$: the log odds ratio per 10 µg/m³; its prior keeps ORs within about 0.4 to 2.7.
+- $\gamma^\top z_i$: the confounder terms.
+- $\gamma_k$: one confounder's coefficient, with a weakly informative prior.
+- $\alpha$: the intercept: its prior centers the baseline risk near 14% ($\mathrm{logit}(0.14) \approx -1.8$).
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -92,27 +108,11 @@ fit <- brms::brm(
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\pi_i$: child $i$'s probability of asthma.
-- $\beta$: the log odds ratio per 10 µg/m³; its prior keeps ORs within about 0.4 to 2.7.
-- $\gamma^\top z_i$: the confounder terms.
-- $\gamma_k$: one confounder's coefficient, with a weakly informative prior.
-- $\alpha$: the intercept: its prior centers the baseline risk near 14% ($\mathrm{logit}(0.14) \approx -1.8$).
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -121,6 +121,10 @@ fit <- brms::brm(
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L22.0"></div>
+```
 
 ::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): the same posterior by normal approximation, in base R"}
 
@@ -194,11 +198,27 @@ $$\Delta^{(s)} = \frac{1}{n}\sum_i\Big[\pi_i^{(s)}(x_i) - \pi_i^{(s)}(x_i - 10)\
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $P(OR > c \mid y)$: the posterior probability that the odds ratio exceeds $c$.
+- $S$: the number of posterior draws.
+- $e^{10\beta^{(s)}}$: the odds ratio implied by draw $s$.
+- $\Delta^{(s)}$: cases prevented per child in draw $s$: one draw of a derived quantity.
+- $\pi_i^{(s)}(x_i)$: child $i$'s predicted risk under draw $s$ at their actual exposure.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -215,27 +235,11 @@ quantile(cases_prevented, c(.025, .5, .975))
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $P(OR > c \mid y)$: the posterior probability that the odds ratio exceeds $c$.
-- $S$: the number of posterior draws.
-- $e^{10\beta^{(s)}}$: the odds ratio implied by draw $s$.
-- $\Delta^{(s)}$: cases prevented per child in draw $s$: one draw of a derived quantity.
-- $\pi_i^{(s)}(x_i)$: child $i$'s predicted risk under draw $s$ at their actual exposure.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -286,11 +290,26 @@ $T$ = a test statistic, here the variance-to-mean ratio. $p_B$ near 0 or 1 signa
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $y^{\text{rep}(s)}$: a replicated dataset simulated from posterior draw $s$.
+- $\theta^{(s)}$: the parameters in draw $s$.
+- $T(y)$: a test statistic of the observed data, e.g. the share of days with zero visits.
+- $p_B$: the posterior predictive p-value: near 0 or 1 means the model can't reproduce that feature of the data.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -301,21 +320,6 @@ brms::pp_check(fit, type = "stat",
 # switch the likelihood:
 brms::brm(..., family = negbinomial)
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $y^{\text{rep}(s)}$: a replicated dataset simulated from posterior draw $s$.
-- $\theta^{(s)}$: the parameters in draw $s$.
-- $T(y)$: a test statistic of the observed data, e.g. the share of days with zero visits.
-- $p_B$: the posterior predictive p-value: near 0 or 1 means the model can't reproduce that feature of the data.
 
 ::::
 
@@ -350,7 +354,7 @@ A Bayesian result is only interpretable alongside the choices that produced it. 
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

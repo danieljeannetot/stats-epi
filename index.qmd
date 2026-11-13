@@ -39,7 +39,7 @@ A birth cohort of 5,000 children with modeled and personal NO₂ exposure, socio
 
 ## How to use the course
 
-Work through the lessons in order. Each one has interactive demonstrations narrated by a **What's happening** box; models written three ways side by side (standard notation, a model list with R, and epidemiological reporting); optional R code in closed panels; **Bayesian previews** until Part V; and a concept quiz. Underlined terms open the glossary: hover for a short definition, click for the full entry. Mark lessons as complete to track your progress here. Progress is kept in your browser only.
+Work through the lessons in order. Each one has interactive demonstrations narrated by a **What's happening** box; models shown in four panels (standard notation, how to read it, a model list with R, and how it is reported); optional R code in closed panels; **Bayesian previews** until Part V; and a concept quiz. Underlined terms open the glossary: hover for a short definition, click for the full entry. Mark lessons as complete to track your progress here. Progress is kept in your browser only.
 
 ## The lessons
 

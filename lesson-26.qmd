@@ -72,11 +72,25 @@ $T$ = the tree's splitting rules; $M = (\mu_1, \dots, \mu_B)$ = one value per le
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $g(x; T, M)$: one tree's prediction: $T$ is its structure (splits), $M$ its leaf values.
+- $\mu_b$: the value in leaf $b$.
+- $b$: a leaf: a final group of the tree.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -86,20 +100,6 @@ tree <- rpart::rpart(visits ~ temp,
                      control = rpart::rpart.control(
                        maxdepth = 3, cp = 0))
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $g(x; T, M)$: one tree's prediction: $T$ is its structure (splits), $M$ its leaf values.
-- $\mu_b$: the value in leaf $b$.
-- $b$: a leaf: a final group of the tree.
 
 ::::
 
@@ -162,11 +162,26 @@ Each tree is updated in turn against the residual left by the others ("Bayesian 
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $f(x)$: the regression function: the sum of all trees.
+- $g(x; T_j, M_j)$: tree $j$'s contribution.
+- $m$: the number of trees.
+- $\varepsilon_i$: the residual error, with variance $\sigma^2$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -182,26 +197,11 @@ bartisan::partial_dependence(fit, ~ temp) |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $f(x)$: the regression function: the sum of all trees.
-- $g(x; T_j, M_j)$: tree $j$'s contribution.
-- $m$: the number of trees.
-- $\varepsilon_i$: the residual error, with variance $\sigma^2$.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -250,29 +250,11 @@ $$\text{soft rule: } P(\text{go left}) = \psi\!\left(\frac{c - x_j}{\tau}\right)
 
 ::::
 
-:::: {.b}
-
-::: {.lab}
-
-[B]{.k}Model list and R
-
-:::
-
-```r
-bartisan::bartisan_control(
-  num_trees = 50,
-  gamma = 0.95, beta = 2, k = 2,
-  gate = "smoothstep",   # soft rules (default)
-  sparsity = FALSE)      # DART prior off
-```
-
-::::
-
 :::: {.d}
 
 ::: {.lab}
 
-[D]{.k}How to read it
+[B]{.k}How to read it
 
 :::
 
@@ -286,7 +268,29 @@ bartisan::bartisan_control(
 
 ::::
 
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+bartisan::bartisan_control(
+  num_trees = 50,
+  gamma = 0.95, beta = 2, k = 2,
+  gate = "smoothstep",   # soft rules (default)
+  sparsity = FALSE)      # DART prior off
+```
+
+::::
+
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L26.2"></div>
+```
 
 ::: {.callout-tip icon="false" title="Bayesian connection"}
 
@@ -363,11 +367,27 @@ $x$ = NO₂, $z$ = confounders; one value of $\Delta$ per posterior draw $s$.
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\Phi^{-1}$: the probit link.
+- $f(x_i, z_i)$: BART with exposure and confounders together in the trees.
+- $\beta\, x_i$: the exposure's own linear term (semiparametric model).
+- $f(z_i)$: BART for the confounders only.
+- $\Delta^{(s)}$: cases prevented in draw $s$, by g-computation.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -382,27 +402,11 @@ marginaleffects::avg_comparisons(fit,
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\Phi^{-1}$: the probit link.
-- $f(x_i, z_i)$: BART with exposure and confounders together in the trees.
-- $\beta\, x_i$: the exposure's own linear term (semiparametric model).
-- $f(z_i)$: BART for the confounders only.
-- $\Delta^{(s)}$: cases prevented in draw $s$, by g-computation.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -660,11 +664,27 @@ $\mathcal{F}_t$: everything known at origin $t$; $h$: horizon; $\mathcal{T}$: fo
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\hat y_{t+h \mid t}$: the forecast for $h$ days ahead, made at origin $t$.
+- $\mathcal{F}_t$: the information available at the origin: nothing later.
+- $h$: the horizon.
+- $\mathrm{RMSE}_h$: the root mean squared forecast error at horizon $h$.
+- $\mathcal{T}$: the forecast origins in the test period, never used for fitting.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -682,27 +702,11 @@ for (k in seq_along(origins[-1])) {
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\hat y_{t+h \mid t}$: the forecast for $h$ days ahead, made at origin $t$.
-- $\mathcal{F}_t$: the information available at the origin: nothing later.
-- $h$: the horizon.
-- $\mathrm{RMSE}_h$: the root mean squared forecast error at horizon $h$.
-- $\mathcal{T}$: the forecast origins in the test period, never used for fitting.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

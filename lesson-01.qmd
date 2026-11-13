@@ -92,11 +92,27 @@ $Q(p)$ is the value below which a fraction $p$ of the data lies.
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\bar{x}$: the mean: the sum of all values divided by their number $n$.
+- $x_i$: the value for observation $i$, for example one day's visit count.
+- $s$: the standard deviation: the typical distance of a value from the mean; dividing by $n-1$ corrects for having estimated the mean.
+- $Q(0.5)$: the median: half the values lie below it; unlike the mean, it isn't pulled by extreme values.
+- $\text{IQR}$: the interquartile range: the spread of the middle half of the data.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -113,27 +129,11 @@ city_daily |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\bar{x}$: the mean: the sum of all values divided by their number $n$.
-- $x_i$: the value for observation $i$, for example one day's visit count.
-- $s$: the standard deviation: the typical distance of a value from the mean; dividing by $n-1$ corrects for having estimated the mean.
-- $Q(0.5)$: the median: half the values lie below it; unlike the mean, it isn't pulled by extreme values.
-- $\text{IQR}$: the interquartile range: the spread of the middle half of the data.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -200,11 +200,27 @@ $D$ = cases or events, $N$ = people at risk, $PT$ = person-time.
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $R$: the risk: the share of people at risk who become cases over a period.
+- $O$: the odds: cases per non-case. Close to the risk when the outcome is rare.
+- $I$: the incidence rate: cases per unit of person-time, for example per 1,000 person-years.
+- $D$: the number of cases or events.
+- $PT$: person-time: the total time people were followed while at risk.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -225,27 +241,11 @@ visits |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $R$: the risk: the share of people at risk who become cases over a period.
-- $O$: the odds: cases per non-case. Close to the risk when the outcome is rare.
-- $I$: the incidence rate: cases per unit of person-time, for example per 1,000 person-years.
-- $D$: the number of cases or events.
-- $PT$: person-time: the total time people were followed while at risk.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -254,6 +254,10 @@ visits |>
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L01.1"></div>
+```
 
 ```{=html}
 <div class="cw grid2">
@@ -336,11 +340,27 @@ Subscript 1 = exposed (high NO₂), 0 = unexposed; $a, b, c, d$ are the cells of
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $RD$: the risk difference: extra cases per person due to exposure, on the absolute scale.
+- $RR$: the risk ratio: how many times higher the risk is in the exposed.
+- $OR$: the odds ratio: the ratio of odds; close to the RR only when the outcome is rare.
+- $R_1$: the risk in the exposed group (high NO₂); $R_0$ is the risk in the unexposed.
+- $\frac{ad}{bc}$: the OR from a 2×2 table: exposed cases × unexposed non-cases, divided by exposed non-cases × unexposed cases.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -357,27 +377,11 @@ cohort |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $RD$: the risk difference: extra cases per person due to exposure, on the absolute scale.
-- $RR$: the risk ratio: how many times higher the risk is in the exposed.
-- $OR$: the odds ratio: the ratio of odds; close to the RR only when the outcome is rare.
-- $R_1$: the risk in the exposed group (high NO₂); $R_0$ is the risk in the unexposed.
-- $\frac{ad}{bc}$: the OR from a 2×2 table: exposed cases × unexposed non-cases, divided by exposed non-cases × unexposed cases.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -392,6 +396,10 @@ How the 95% confidence interval is calculated is explained in Lesson 6.
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L01.2"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -462,11 +470,26 @@ $j$ = district, $k$ = age group. The crude rate weights each $r_{jk}$ by distric
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $r_{jk}$: the rate in district $j$ and age group $k$.
+- $w_k$: the weight of age group $k$: its share of the standard population, the same for every district.
+- $N_k^{\text{std}}$: the size of age group $k$ in the chosen standard population.
+- $ASR_j$: district $j$'s age-standardized rate: its age-specific rates averaged with standard weights, so districts with different age structures can be compared.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -488,26 +511,11 @@ visits |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $r_{jk}$: the rate in district $j$ and age group $k$.
-- $w_k$: the weight of age group $k$: its share of the standard population, the same for every district.
-- $N_k^{\text{std}}$: the size of age group $k$ in the chosen standard population.
-- $ASR_j$: district $j$'s age-standardized rate: its age-specific rates averaged with standard weights, so districts with different age structures can be compared.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

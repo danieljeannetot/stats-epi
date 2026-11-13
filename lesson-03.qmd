@@ -68,11 +68,25 @@ $Y$ = visits on a day; $P(Y = y)$ is estimated by the share of days with exactly
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $E[Y]$: the expected value: the long-run average of $Y$, each value weighted by its probability.
+- $P(Y = y)$: the probability that $Y$ takes the value $y$.
+- $\mathrm{Var}(Y)$: the variance: the expected squared distance from the mean; its square root is the SD.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -87,25 +101,11 @@ visits |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $E[Y]$: the expected value: the long-run average of $Y$, each value weighted by its probability.
-- $P(Y = y)$: the probability that $Y$ takes the value $y$.
-- $\mathrm{Var}(Y)$: the variance: the expected squared distance from the mean; its square root is the SD.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -160,11 +160,26 @@ Binomial: $E[Y] = n\pi$, $\mathrm{Var}(Y) = n\pi(1-\pi)$. Poisson: $E[Y] = \math
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\binom{n}{k}$: the number of ways to choose which $k$ of the $n$ people are cases.
+- $\pi$: the probability that each person is a case.
+- $\mu$: the Poisson mean: the expected count, for example visits per day. Its variance equals its mean.
+- $k!$: $k$ factorial, $k \times (k-1) \times \dots \times 1$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -180,26 +195,11 @@ dpois(0:20, lambda = 8)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\binom{n}{k}$: the number of ways to choose which $k$ of the $n$ people are cases.
-- $\pi$: the probability that each person is a case.
-- $\mu$: the Poisson mean: the expected count, for example visits per day. Its variance equals its mean.
-- $k!$: $k$ factorial, $k \times (k-1) \times \dots \times 1$.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -208,6 +208,10 @@ dpois(0:20, lambda = 8)
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L03.1"></div>
+```
 
 ::: {.further}
 
@@ -247,11 +251,26 @@ $$P(a \le X \le b) = \int_a^b f(x)\,dx$$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $f(x)$: the density: its height shows where values are concentrated. It is not itself a probability and can exceed 1.
+- $\mu$: the mean, the center of the bell curve.
+- $\sigma$: the standard deviation: about 95% of values lie within $1.96\sigma$ of $\mu$.
+- $\int_a^b f(x)\,dx$: the area under the density between $a$ and $b$: that area is the probability.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -264,26 +283,11 @@ pnorm(1.96) - pnorm(-1.96)    # area: 0.95
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $f(x)$: the density: its height shows where values are concentrated. It is not itself a probability and can exceed 1.
-- $\mu$: the mean, the center of the bell curve.
-- $\sigma$: the standard deviation: about 95% of values lie within $1.96\sigma$ of $\mu$.
-- $\int_a^b f(x)\,dx$: the area under the density between $a$ and $b$: that area is the probability.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -292,6 +296,10 @@ pnorm(1.96) - pnorm(-1.96)    # area: 0.95
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L03.2"></div>
+```
 
 ::: {.further}
 
@@ -337,11 +345,26 @@ As $\phi \to \infty$ the negative binomial becomes Poisson. Method-of-moments es
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\mathrm{NegBin}$: a count distribution like the Poisson, but allowing more variation than the mean.
+- $\mu$: the expected count, as in a Poisson model.
+- $\phi$: the dispersion parameter: smaller $\phi$ means more extra variation; as $\phi \to \infty$ it becomes Poisson.
+- $\frac{\mu^2}{\phi}$: the extra variance beyond the Poisson's, growing with the square of the mean.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -357,26 +380,11 @@ dnbinom(0:60, mu = m, size = phi_hat)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\mathrm{NegBin}$: a count distribution like the Poisson, but allowing more variation than the mean.
-- $\mu$: the expected count, as in a Poisson model.
-- $\phi$: the dispersion parameter: smaller $\phi$ means more extra variation; as $\phi \to \infty$ it becomes Poisson.
-- $\frac{\mu^2}{\phi}$: the extra variance beyond the Poisson's, growing with the square of the mean.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -385,6 +393,10 @@ dnbinom(0:60, mu = m, size = phi_hat)
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L03.3"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 

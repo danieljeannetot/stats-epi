@@ -89,11 +89,27 @@ The backdoor criterion: $Z$ blocks every backdoor path from $X$ to $Y$, and cont
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\rightarrow$: an arrow: a direct causal effect.
+- $Z$: the adjustment set: the variables to adjust for.
+- $Y^{x}$: the potential outcome: the outcome that would occur if exposure were set to $x$.
+- $\perp\!\!\!\perp$: "is independent of": within levels of $Z$, exposure is unrelated to the potential outcomes, so there is no confounding.
+- $X$: the exposure.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -109,27 +125,11 @@ dagitty::adjustmentSets(dag, "NO2", "Asthma")
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\rightarrow$: an arrow: a direct causal effect.
-- $Z$: the adjustment set: the variables to adjust for.
-- $Y^{x}$: the potential outcome: the outcome that would occur if exposure were set to $x$.
-- $\perp\!\!\!\perp$: "is independent of": within levels of $Z$, exposure is unrelated to the potential outcomes, so there is no confounding.
-- $X$: the exposure.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -197,11 +197,26 @@ $$z = \frac{\hat\beta_{65+} - \hat\beta_{0\text{–}14}}{\sqrt{SE_{65+}^2 + SE_{
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\alpha_k$: the baseline log-rate in age group $k$.
+- $\beta_k$: the heat effect in age group $k$: allowing it to differ by group is what effect modification means.
+- $\hat\beta_{65+}$: the estimated effect for the oldest group, compared with the youngest group's effect.
+- $z$: the test of the difference between two effects: compare the effects directly, not their p-values.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -215,26 +230,11 @@ glm(visits ~ age_group * I(temp - 22) + dow,
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\alpha_k$: the baseline log-rate in age group $k$.
-- $\beta_k$: the heat effect in age group $k$: allowing it to differ by group is what effect modification means.
-- $\hat\beta_{65+}$: the estimated effect for the oldest group, compared with the youngest group's effect.
-- $z$: the test of the difference between two effects: compare the effects directly, not their p-values.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -243,6 +243,10 @@ glm(visits ~ age_group * I(temp - 22) + dow,
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L09.1"></div>
+```
 
 ::: {.further}
 
@@ -285,11 +289,25 @@ $RR_{ab}$: risk with NO₂ level $a$ and factor level $b$, relative to neither.
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $RERI$: the relative excess risk due to interaction: the joint effect beyond the sum of the separate effects. Above 0 means more than additive.
+- $RR_{11}$: the risk ratio when both NO₂ and the other factor are present, relative to neither.
+- $RR_{10}$: the risk ratio with NO₂ alone; $RR_{01}$ with the other factor alone.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -302,25 +320,11 @@ cohort |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $RERI$: the relative excess risk due to interaction: the joint effect beyond the sum of the separate effects. Above 0 means more than additive.
-- $RR_{11}$: the risk ratio when both NO₂ and the other factor are present, relative to neither.
-- $RR_{10}$: the risk ratio with NO₂ alone; $RR_{01}$ with the other factor alone.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -329,6 +333,10 @@ cohort |>
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L09.2"></div>
+```
 
 ::: {.callout-tip icon="false" title="Bayesian preview"}
 

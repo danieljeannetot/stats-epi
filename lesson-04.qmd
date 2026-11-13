@@ -86,11 +86,26 @@ $\sigma$ = population SD, $s$ = sample SD, $n$ = sample size.
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $SE(\bar{X})$: the standard error of the mean: how much the sample mean would vary between repeated samples.
+- $\sigma$: the SD of the population: the spread of individual values.
+- $\sqrt{n}$: the square root of the sample size: four times more data halves the standard error.
+- $\widehat{SE}$: the estimated standard error, using the sample SD $s$ in place of the unknown $\sigma$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -104,26 +119,11 @@ smp |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $SE(\bar{X})$: the standard error of the mean: how much the sample mean would vary between repeated samples.
-- $\sigma$: the SD of the population: the spread of individual values.
-- $\sqrt{n}$: the square root of the sample size: four times more data halves the standard error.
-- $\widehat{SE}$: the estimated standard error, using the sample SD $s$ in place of the unknown $\sigma$.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -138,6 +138,10 @@ Report the SD to describe the data and the SE (or better, a confidence interval)
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L04.0"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -222,11 +226,26 @@ $$\widehat{SE}_{\text{boot}} = \mathrm{SD}\big(\hat\theta^{*(1)}, \dots, \hat\th
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $y^{*(b)}$: bootstrap sample $b$: $n$ values drawn with replacement from the data.
+- $B$: the number of bootstrap samples, typically 1,000 or more.
+- $\hat\theta^{*(1)}$: the estimate computed in a bootstrap sample (here the first).
+- $\widehat{SE}_{\text{boot}}$: the bootstrap standard error: the SD of the estimates across bootstrap samples.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -240,26 +259,11 @@ quantile(boot, c(0.025, 0.975))  # percentile CI
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $y^{*(b)}$: bootstrap sample $b$: $n$ values drawn with replacement from the data.
-- $B$: the number of bootstrap samples, typically 1,000 or more.
-- $\hat\theta^{*(1)}$: the estimate computed in a bootstrap sample (here the first).
-- $\widehat{SE}_{\text{boot}}$: the bootstrap standard error: the SD of the estimates across bootstrap samples.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

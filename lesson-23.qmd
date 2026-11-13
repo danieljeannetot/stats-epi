@@ -68,11 +68,25 @@ Decision rule: equivalent if the 95% credible interval lies inside $[-r, r]$; me
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\text{ROPE}$: the region of practical equivalence: effects too small to matter.
+- $r$: the ROPE's half-width, fixed before seeing the data.
+- $\beta$: the effect.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -85,25 +99,11 @@ quantile(b, c(.025, .975))    # compare with ROPE
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\text{ROPE}$: the region of practical equivalence: effects too small to matter.
-- $r$: the ROPE's half-width, fixed before seeing the data.
-- $\beta$: the effect.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -112,6 +112,10 @@ quantile(b, c(.025, .975))    # compare with ROPE
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L23.0"></div>
+```
 
 ::: {.further}
 
@@ -156,27 +160,11 @@ $\hat\beta$, $s$: estimate and standard error; $\tau$: prior SD under H₁. Post
 
 ::::
 
-:::: {.b}
-
-::: {.lab}
-
-[B]{.k}Model list and R
-
-:::
-
-```r
-brms::hypothesis(fit, "heat = 0")   # Savage–Dickey
-# or marginal likelihoods for any two models:
-brms::bayes_factor(fit1, fit0)      # bridge sampling
-```
-
-::::
-
 :::: {.d}
 
 ::: {.lab}
 
-[D]{.k}How to read it
+[B]{.k}How to read it
 
 :::
 
@@ -188,11 +176,27 @@ brms::bayes_factor(fit1, fit0)      # bridge sampling
 
 ::::
 
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+brms::hypothesis(fit, "heat = 0")   # Savage–Dickey
+# or marginal likelihoods for any two models:
+brms::bayes_factor(fit1, fit0)      # bridge sampling
+```
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -201,6 +205,10 @@ brms::bayes_factor(fit1, fit0)      # bridge sampling
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L23.1"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -275,11 +283,25 @@ With exchangeable priors, the denominator is 1/6: each of the six orderings is e
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $BF_{\text{order}, u}$: the Bayes factor for the ordered hypothesis against the unconstrained model.
+- $\beta_{65+}$: the heat effect in the oldest group.
+- $H_u$: the unconstrained hypothesis.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -293,25 +315,11 @@ bain::bain(est, "old > adult > child",
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $BF_{\text{order}, u}$: the Bayes factor for the ordered hypothesis against the unconstrained model.
-- $\beta_{65+}$: the heat effect in the oldest group.
-- $H_u$: the unconstrained hypothesis.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -363,11 +371,26 @@ $w_i^{(s)} \propto 1/p(y_i \mid \theta^{(s)})$, Pareto-smoothed. Values of $\hat
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\mathrm{elpd}_{\text{loo}}$: the expected log predictive density: how well the model predicts each observation when it is left out.
+- $p(y_i \mid y_{-i})$: the predictive density for observation $i$ from a model fitted without it.
+- $w_i^{(s)}$: importance weights that approximate leaving observation $i$ out, Pareto-smoothed in PSIS.
+- $p(y_i \mid \theta^{(s)})$: the likelihood of observation $i$ under draw $s$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -380,26 +403,11 @@ plot(loo2)                  # Pareto k diagnostics
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\mathrm{elpd}_{\text{loo}}$: the expected log predictive density: how well the model predicts each observation when it is left out.
-- $p(y_i \mid y_{-i})$: the predictive density for observation $i$ from a model fitted without it.
-- $w_i^{(s)}$: importance weights that approximate leaving observation $i$ out, Pareto-smoothed in PSIS.
-- $p(y_i \mid \theta^{(s)})$: the likelihood of observation $i$ under draw $s$.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

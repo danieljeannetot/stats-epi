@@ -73,11 +73,26 @@ $a + b$ is the prior's strength in "equivalent children"; $a/(a+b)$ its mean.
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\mathrm{Beta}(a, b)$: the prior for the risk: like having seen $a$ cases and $b$ non-cases before the study.
+- $\pi$: the unknown risk of asthma.
+- $d$: the number of cases observed among $n$ children.
+- $\mathrm{Beta}(a + d,\ b + n - d)$: the posterior: prior counts plus observed counts. This simple updating is what makes the beta prior conjugate.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -91,26 +106,11 @@ qbeta(c(0.025, 0.5, 0.975), a_post, b_post)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\mathrm{Beta}(a, b)$: the prior for the risk: like having seen $a$ cases and $b$ non-cases before the study.
-- $\pi$: the unknown risk of asthma.
-- $d$: the number of cases observed among $n$ children.
-- $\mathrm{Beta}(a + d,\ b + n - d)$: the posterior: prior counts plus observed counts. This simple updating is what makes the beta prior conjugate.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -119,6 +119,10 @@ qbeta(c(0.025, 0.5, 0.975), a_post, b_post)
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L19.0"></div>
+```
 
 ::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): conjugate updating and a grid posterior"}
 
@@ -178,11 +182,27 @@ $$L(\alpha, \beta) = \prod_t \frac{\mu_t^{y_t} e^{-\mu_t}}{y_t!}$$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $y_t$: the visits on day $t$.
+- $\mu_t$: the expected visits on day $t$.
+- $\alpha$: the log expected visits at 20°C.
+- $\beta$: the heat effect: the change in log visits per °C.
+- $L(\alpha, \beta)$: the likelihood: the probability of all the observed counts, as a function of $\alpha$ and $\beta$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -194,22 +214,6 @@ loglik <- function(a, b)
   sum(dpois(d$visits,
             exp(a + b * (d$temp - 20)), log = TRUE))
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $y_t$: the visits on day $t$.
-- $\mu_t$: the expected visits on day $t$.
-- $\alpha$: the log expected visits at 20°C.
-- $\beta$: the heat effect: the change in log visits per °C.
-- $L(\alpha, \beta)$: the likelihood: the probability of all the observed counts, as a function of $\alpha$ and $\beta$.
 
 ::::
 
@@ -258,11 +262,27 @@ $$\beta \sim \mathrm{Normal}(m, s^2), \qquad \alpha \sim \mathrm{Normal}(\log 8,
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $p(\alpha, \beta \mid y)$: the posterior: what is known about the parameters after seeing the data.
+- $\propto$: "proportional to": the normalizing constant is left out.
+- $p(y \mid \alpha, \beta)$: the likelihood, as in 19.2.
+- $p(\beta)$: the prior on the heat effect.
+- $m$: the prior mean of $\beta$; $s$ is its prior SD.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -280,23 +300,11 @@ brms::brm(visits ~ I(temp - 20), family = poisson,
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $p(\alpha, \beta \mid y)$: the posterior: what is known about the parameters after seeing the data.
-- $\propto$: "proportional to": the normalizing constant is left out.
-- $p(y \mid \alpha, \beta)$: the likelihood, as in 19.2.
-- $p(\beta)$: the prior on the heat effect.
-- $m$: the prior mean of $\beta$; $s$ is its prior SD.
-
-::::
-
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L19.2"></div>
+```
 
 ::: {.further}
 
@@ -330,11 +338,25 @@ $$\text{95\% credible interval for } \beta: \ \big[\beta_{(0.025)},\ \beta_{(0.9
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $(\alpha^{(s)}, \beta^{(s)})$: draw $s$ from the posterior: one plausible pair of parameter values.
+- $S$: the number of posterior draws.
+- $\beta_{(0.025)}$: the 2.5th percentile of the draws of $\beta$: the lower limit of the 95% credible interval.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -348,25 +370,11 @@ mean(exp(draws$b_Intercept +
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $(\alpha^{(s)}, \beta^{(s)})$: draw $s$ from the posterior: one plausible pair of parameter values.
-- $S$: the number of posterior draws.
-- $\beta_{(0.025)}$: the 2.5th percentile of the draws of $\beta$: the lower limit of the 95% credible interval.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

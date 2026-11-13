@@ -65,11 +65,27 @@ $$\theta^{(s+1)} = \begin{cases} \theta^* & \text{with probability } \min\!\left
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\theta^{(s)}$: the current value of the chain.
+- $\theta^*$: the proposal: a random step from the current value.
+- $\sigma^2_{\text{step}}$: the step size: too small explores slowly, too large rejects most proposals.
+- $\theta^{(s+1)}$: the next value: the proposal if accepted, otherwise the current value again.
+- $p(\theta^* \mid y)$: the posterior density at the proposal: uphill moves are always accepted, downhill ones sometimes.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -83,22 +99,6 @@ for (s in 2:5000) {
   theta[s] <- if (accept) prop else theta[s - 1]
 }
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\theta^{(s)}$: the current value of the chain.
-- $\theta^*$: the proposal: a random step from the current value.
-- $\sigma^2_{\text{step}}$: the step size: too small explores slowly, too large rejects most proposals.
-- $\theta^{(s+1)}$: the next value: the proposal if accepted, otherwise the current value again.
-- $p(\theta^* \mid y)$: the posterior density at the proposal: uphill moves are always accepted, downhill ones sometimes.
 
 ::::
 
@@ -166,11 +166,27 @@ The last line is one leapfrog step, repeated L times per iteration; $r$ is a ran
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $H(\theta, r)$: the Hamiltonian: "potential energy" (minus log posterior) plus "kinetic energy" of the momentum.
+- $r$: the momentum: a random push given to the parameters at each iteration.
+- $\tfrac12 r^\top r$: the kinetic energy.
+- $\epsilon$: the leapfrog step size.
+- $\nabla_\theta \log p(\theta \mid y)$: the gradient of the log posterior: which way is uphill. It steers HMC's trajectories.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -181,22 +197,6 @@ fit <- brms::brm(visits ~ I(temp - 20),
                  chains = 4, iter = 2000,
                  warmup = 1000)
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $H(\theta, r)$: the Hamiltonian: "potential energy" (minus log posterior) plus "kinetic energy" of the momentum.
-- $r$: the momentum: a random push given to the parameters at each iteration.
-- $\tfrac12 r^\top r$: the kinetic energy.
-- $\epsilon$: the leapfrog step size.
-- $\nabla_\theta \log p(\theta \mid y)$: the gradient of the log posterior: which way is uphill. It steers HMC's trajectories.
 
 ::::
 
@@ -243,27 +243,11 @@ $W$: average within-chain variance; $B$: between-chain variance (× $N$); $M$ ch
 
 ::::
 
-:::: {.b}
-
-::: {.lab}
-
-[B]{.k}Model list and R
-
-:::
-
-```r
-summary(fit)            # Rhat, Bulk_ESS, Tail_ESS
-bayesplot::mcmc_trace(fit)
-posterior::summarise_draws(fit)
-```
-
-::::
-
 :::: {.d}
 
 ::: {.lab}
 
-[D]{.k}How to read it
+[B]{.k}How to read it
 
 :::
 
@@ -273,6 +257,22 @@ posterior::summarise_draws(fit)
 - $N$: the number of draws per chain; $M$ is the number of chains.
 - $\text{ESS}$: the effective sample size: draws discounted for autocorrelation.
 - $\rho_k$: the autocorrelation of the chain at lag $k$.
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+summary(fit)            # Rhat, Bulk_ESS, Tail_ESS
+bayesplot::mcmc_trace(fit)
+posterior::summarise_draws(fit)
+```
 
 ::::
 

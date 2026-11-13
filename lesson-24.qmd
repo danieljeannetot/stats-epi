@@ -69,11 +69,28 @@ $\hat\theta_j$: school $j$'s log-odds of asthma, with variance $v_j$; $\hat\mu_\
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\hat\theta_j$: group $j$'s own estimate, with sampling variance $v_j$.
+- $\theta_j$: group $j$'s true value.
+- $\mu$: the mean of the true values.
+- $\tau$: the between-group SD, with its own (hyper)prior.
+- $V_\mu$: the variance of the estimated mean given $\tau$.
+- $\hat\mu_\tau$: the precision-weighted mean of the estimates, given $\tau$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -90,28 +107,11 @@ brms::brm(asthma ~ 1 + (1 | school),
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\hat\theta_j$: group $j$'s own estimate, with sampling variance $v_j$.
-- $\theta_j$: group $j$'s true value.
-- $\mu$: the mean of the true values.
-- $\tau$: the between-group SD, with its own (hyper)prior.
-- $V_\mu$: the variance of the estimated mean given $\tau$.
-- $\hat\mu_\tau$: the precision-weighted mean of the estimates, given $\tau$.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -214,11 +214,26 @@ The same model, written two ways. In the non-centered form, the sampler's coordi
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\theta_j$: group $j$'s effect.
+- $\mu$: the mean effect.
+- $\tau$: the between-group SD.
+- $z_j$: the standardized group effect: what the sampler moves in the non-centered form.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -230,21 +245,6 @@ brms::brm(..., control = list(adapt_delta = 0.99))
 # vector[J] z;  theta = mu + tau * z;
 # z ~ std_normal();
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\theta_j$: group $j$'s effect.
-- $\mu$: the mean effect.
-- $\tau$: the between-group SD.
-- $z_j$: the standardized group effect: what the sampler moves in the non-centered form.
 
 ::::
 
@@ -294,11 +294,29 @@ $X$: true NO₂ (a parameter for every child); $W$: modeled NO₂; $P$: personal
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $X_i$: child $i$'s true NO₂: an unknown parameter.
+- $\alpha^\top z_i$: the exposure model: true NO₂ predicted from traffic, green space and SES.
+- $\sigma_X^2$: the variation of true exposure around the exposure model.
+- $W_i$: the modeled NO₂, with error variance $\sigma_U^2$.
+- $P_i$: the personal-monitor reading, available for validation children only.
+- $\beta_X$: the effect of true NO₂ (per 10 µg/m³) on the probit scale.
+- $\Phi^{-1}$: the probit link: the inverse of the standard normal distribution function.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -316,29 +334,11 @@ model {
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $X_i$: child $i$'s true NO₂: an unknown parameter.
-- $\alpha^\top z_i$: the exposure model: true NO₂ predicted from traffic, green space and SES.
-- $\sigma_X^2$: the variation of true exposure around the exposure model.
-- $W_i$: the modeled NO₂, with error variance $\sigma_U^2$.
-- $P_i$: the personal-monitor reading, available for validation children only.
-- $\beta_X$: the effect of true NO₂ (per 10 µg/m³) on the probit scale.
-- $\Phi^{-1}$: the probit link: the inverse of the standard normal distribution function.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

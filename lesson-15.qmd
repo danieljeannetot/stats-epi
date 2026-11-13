@@ -88,29 +88,11 @@ $s(t; \text{df})$ = natural spline of time; $f$ = spline of temperature.
 
 ::::
 
-:::: {.b}
-
-::: {.lab}
-
-[B]{.k}Model list and R
-
-:::
-
-```r
-fit <- glm(visits ~ pm01 +
-             splines::ns(t, df = 7 * 5) +
-             splines::ns(temp, df = 3) + dow,
-           family = quasipoisson,
-           data = city_daily)
-```
-
-::::
-
 :::: {.d}
 
 ::: {.lab}
 
-[D]{.k}How to read it
+[B]{.k}How to read it
 
 :::
 
@@ -124,7 +106,29 @@ fit <- glm(visits ~ pm01 +
 
 ::::
 
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+fit <- glm(visits ~ pm01 +
+             splines::ns(t, df = 7 * 5) +
+             splines::ns(temp, df = 3) + dow,
+           family = quasipoisson,
+           data = city_daily)
+```
+
+::::
+
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L15.0"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -209,11 +213,28 @@ $s(t)$ = stratum (year × month × weekday). Conditioning on each stratum's tota
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\alpha_{s(t)}$: a separate intercept for each stratum (year × month × weekday): controls time by design.
+- $\overline{PM}_{t,t-1}$: the exposure, as in the time-series model.
+- $L_c(\beta)$: the conditional likelihood: compares days within each stratum only, so the $\alpha_s$ drop out.
+- $\prod_s$: the product over strata.
+- $y_t$: the count on day $t$.
+- $\beta$: the exposure effect, the same quantity as in the time-series model.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -229,28 +250,11 @@ glm(visits ~ pm01 + splines::ns(temp, df = 3) +
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\alpha_{s(t)}$: a separate intercept for each stratum (year × month × weekday): controls time by design.
-- $\overline{PM}_{t,t-1}$: the exposure, as in the time-series model.
-- $L_c(\beta)$: the conditional likelihood: compares days within each stratum only, so the $\alpha_s$ drop out.
-- $\prod_s$: the product over strata.
-- $y_t$: the count on day $t$.
-- $\beta$: the exposure effect, the same quantity as in the time-series model.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

@@ -70,11 +70,28 @@ $p_e$ = proportion of the population exposed; $p_c$ = proportion of cases expose
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $PAF_{\text{Levin}}$: Levin's PAF, from the share of the population exposed and the RR. Biased if the RR is confounded.
+- $p_e$: the proportion of the population exposed.
+- $PAF_{\text{Miettinen}}$: Miettinen's PAF, from the share of cases exposed and an adjusted RR. Valid under confounding.
+- $p_c$: the proportion of cases that were exposed.
+- $RR_{\text{adj}}$: the confounder-adjusted risk ratio.
+- $RR$: the risk ratio for exposure.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -88,28 +105,11 @@ paf_miet  <- pc * (rr_adj - 1) / rr_adj
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $PAF_{\text{Levin}}$: Levin's PAF, from the share of the population exposed and the RR. Biased if the RR is confounded.
-- $p_e$: the proportion of the population exposed.
-- $PAF_{\text{Miettinen}}$: Miettinen's PAF, from the share of cases exposed and an adjusted RR. Valid under confounding.
-- $p_c$: the proportion of cases that were exposed.
-- $RR_{\text{adj}}$: the confounder-adjusted risk ratio.
-- $RR$: the risk ratio for exposure.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -118,6 +118,10 @@ paf_miet  <- pc * (rr_adj - 1) / rr_adj
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L14.0"></div>
+```
 
 ::: {.further}
 
@@ -161,11 +165,27 @@ $x^*$ = counterfactual exposure; $D$ = total cases. This is g-computation (Lesso
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $PAF$: the population attributable fraction: the share of cases that the intervention would prevent.
+- $x^*$: the counterfactual exposure: NO₂ above $x^*$ is capped at $x^*$; lower values are left alone.
+- $x_i$: child $i$'s actual exposure.
+- $AN$: the attributable number: cases prevented.
+- $D$: the total number of cases.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -181,27 +201,11 @@ paf <- 1 - r_cf / r_obs
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $PAF$: the population attributable fraction: the share of cases that the intervention would prevent.
-- $x^*$: the counterfactual exposure: NO₂ above $x^*$ is capped at $x^*$; lower values are left alone.
-- $x_i$: child $i$'s actual exposure.
-- $AN$: the attributable number: cases prevented.
-- $D$: the total number of cases.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -210,6 +214,10 @@ paf <- 1 - r_cf / r_obs
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L14.1"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -279,27 +287,11 @@ Incidence-based YLD: new cases $I$, disability weight $DW$, average duration $L_
 
 ::::
 
-:::: {.b}
-
-::: {.lab}
-
-[B]{.k}Model list and R
-
-:::
-
-```r
-yld  <- cases * dw * duration
-yll  <- deaths * life_expectancy
-daly <- yll + yld
-```
-
-::::
-
 :::: {.d}
 
 ::: {.lab}
 
-[D]{.k}How to read it
+[B]{.k}How to read it
 
 :::
 
@@ -313,11 +305,27 @@ daly <- yll + yld
 
 ::::
 
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+yld  <- cases * dw * duration
+yll  <- deaths * life_expectancy
+daly <- yll + yld
+```
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -326,6 +334,10 @@ daly <- yll + yld
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L14.2"></div>
+```
 
 ::: {.further}
 

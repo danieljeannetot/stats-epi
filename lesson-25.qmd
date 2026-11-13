@@ -94,11 +94,29 @@ $\hat\theta_j$: district $j$'s three cumulative coefficients, with covariance $S
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\eta_{jkq}$: district $j$'s cross-basis coefficients.
+- $w_{jt,kq}$: district $j$'s cross-basis variables on day $t$.
+- $s_j(t)$: the district's spline of time.
+- $\hat\theta_{jk}$: the reduced coefficients: the cumulative curve's coefficients for district $j$.
+- $c_q(\ell)$: the lag basis, summed over lags to reduce the surface to a curve.
+- $\log RR_j(x)$: district $j$'s cumulative log RR at temperature $x$.
+- $x_{\text{ref}}$: the reference temperature.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -112,24 +130,6 @@ fit <- glm(visits ~ cb + splines::ns(t, 35) + dow,
 red <- dlnm::crossreduce(cb, fit)   # overall
 coef(red); vcov(red)
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\eta_{jkq}$: district $j$'s cross-basis coefficients.
-- $w_{jt,kq}$: district $j$'s cross-basis variables on day $t$.
-- $s_j(t)$: the district's spline of time.
-- $\hat\theta_{jk}$: the reduced coefficients: the cumulative curve's coefficients for district $j$.
-- $c_q(\ell)$: the lag basis, summed over lags to reduce the surface to a curve.
-- $\log RR_j(x)$: district $j$'s cumulative log RR at temperature $x$.
-- $x_{\text{ref}}$: the reference temperature.
 
 ::::
 
@@ -206,11 +206,29 @@ ICAR: each district's $u$ is centered on the average of its neighbors'. Scaling 
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\hat\theta_j$: district $j$'s stage-1 coefficients, with covariance $S_j$.
+- $\mu_k$: the citywide mean of coefficient $k$.
+- $\sigma_k$: the between-district SD of coefficient $k$.
+- $\phi$: the spatial share: 0 means exchangeable pooling, 1 purely spatial.
+- $v_{jk}$: the unstructured part: district-specific noise.
+- $u_{jk}$: the spatially structured part: similar for neighbors.
+- $u_{\cdot k}$: all districts' structured effects, with a scaled ICAR prior.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -225,29 +243,11 @@ INLA::inla(f, data = s1k, family = "gaussian",
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\hat\theta_j$: district $j$'s stage-1 coefficients, with covariance $S_j$.
-- $\mu_k$: the citywide mean of coefficient $k$.
-- $\sigma_k$: the between-district SD of coefficient $k$.
-- $\phi$: the spatial share: 0 means exchangeable pooling, 1 purely spatial.
-- $v_{jk}$: the unstructured part: district-specific noise.
-- $u_{jk}$: the spatially structured part: similar for neighbors.
-- $u_{\cdot k}$: all districts' structured effects, with a scaled ICAR prior.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -293,11 +293,28 @@ $$P\big(\mathrm{AN}_j / \mathrm{pop}_j > c \mid y\big) \approx \frac{1}{S}\sum_s
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\mathrm{AN}_j^{(s)}$: heat-attributable visits in district $j$, computed from draw $s$.
+- $\mathrm{MMT}_j^{(s)}$: the district's MMT in that draw.
+- $y_{jt}$: the district's visits on day $t$.
+- $f_j^{(s)}$: the district's cumulative curve in draw $s$.
+- $\mathrm{pop}_j$: the district's population, to express the burden per person.
+- $c$: the policy threshold for the exceedance probability.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -313,28 +330,11 @@ mean(an / pop_j * 1e5 / years > 60)
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\mathrm{AN}_j^{(s)}$: heat-attributable visits in district $j$, computed from draw $s$.
-- $\mathrm{MMT}_j^{(s)}$: the district's MMT in that draw.
-- $y_{jt}$: the district's visits on day $t$.
-- $f_j^{(s)}$: the district's cumulative curve in draw $s$.
-- $\mathrm{pop}_j$: the district's population, to express the burden per person.
-- $c$: the policy threshold for the exceedance probability.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -373,7 +373,7 @@ Before reporting, three checks. **Sensitivity to the prior:** with only 12 distr
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 

@@ -875,15 +875,16 @@
   lessons: [0]
 
 - id: three-way-notation
-  term: Three-way notation
+  term: Four-panel notation
   category: About the course
-  aliases: [three-way notation]
+  aliases: [four-panel notation, three-way notation]
   short: >-
-    The course's way of showing every model: standard notation, a model list with R, and
-    epidemiological reporting, side by side.
+    The course's way of showing every model: standard notation, how to read it, a model list with R,
+    and how it's reported.
   full: >-
-    **A, standard notation** is how models appear in papers and textbooks. **B, the model list and
-    R** writes one line per assumption, as software does. **C, epidemiological reporting** shows
-    how the result would appear in a results section.
+    **A, standard notation** is how models appear in papers and textbooks. **B, how to read it**
+    explains each term of the equation: click a term to see what it does in the model. **C, the model
+    list and R** writes one line per assumption, as software does. **D, how it's reported** shows how
+    the result would appear in a results section.
   related: [simulated-data]
   lessons: [0]

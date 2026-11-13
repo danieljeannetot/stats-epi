@@ -69,11 +69,29 @@ $r_k$ = city-wide rate in age group $k$; $\theta_j$ = the district's true relati
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $E_j$: the expected count in district $j$ if it had the city-wide age-specific rates.
+- $r_k$: the city-wide rate in age group $k$.
+- $PT_{jk}$: person-time in district $j$, age group $k$.
+- $SMR_j$: the standardized morbidity ratio: observed over expected.
+- $O_j$: the observed count.
+- $\theta_j$: the district's true relative risk.
+- $\mathrm{SE}(SMR_j)$: its standard error: large when the expected count is small.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -89,29 +107,11 @@ visits |> left_join(rates, by = "age_group") |>
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $E_j$: the expected count in district $j$ if it had the city-wide age-specific rates.
-- $r_k$: the city-wide rate in age group $k$.
-- $PT_{jk}$: person-time in district $j$, age group $k$.
-- $SMR_j$: the standardized morbidity ratio: observed over expected.
-- $O_j$: the observed count.
-- $\theta_j$: the district's true relative risk.
-- $\mathrm{SE}(SMR_j)$: its standard error: large when the expected count is small.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -120,6 +120,10 @@ visits |> left_join(rates, by = "age_group") |>
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L17.0"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -167,11 +171,27 @@ $w_{ij} = 1$ if districts $i$ and $j$ are neighbors (here: share a border or a c
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $I$: Moran's I: positive when neighbors are alike, negative when they differ.
+- $w_{ij}$: the neighbor weight between districts $i$ and $j$.
+- $x_i$: the value in district $i$.
+- $\bar x$: the citywide mean.
+- $n$: the number of districts.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -183,22 +203,6 @@ lw <- spdep::nb2listw(nb, style = "W")
 spdep::moran.mc(districts$deprivation, lw,
                 nsim = 999)
 ```
-
-::::
-
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $I$: Moran's I: positive when neighbors are alike, negative when they differ.
-- $w_{ij}$: the neighbor weight between districts $i$ and $j$.
-- $x_i$: the value in district $i$.
-- $\bar x$: the citywide mean.
-- $n$: the number of districts.
 
 ::::
 
@@ -285,11 +289,28 @@ $\hat\mu$ and $\hat\sigma^2_\theta$: mean and between-district variance of the t
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\hat\theta_j^{\text{EB}}$: the empirical Bayes estimate: a weighted average of the district's SMR and the citywide mean.
+- $w_j$: the weight on the district's own SMR: small for districts with few expected cases.
+- $SMR_j$: the district's own, noisy estimate.
+- $\hat\mu$: the estimated mean of the true relative risks.
+- $\hat\sigma^2_\theta$: the estimated variance of the true relative risks between districts.
+- $E_j$: the expected count, which sets how noisy the SMR is.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -304,28 +325,11 @@ smr_eb <- w * smr + (1 - w) * mu
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\hat\theta_j^{\text{EB}}$: the empirical Bayes estimate: a weighted average of the district's SMR and the citywide mean.
-- $w_j$: the weight on the district's own SMR: small for districts with few expected cases.
-- $SMR_j$: the district's own, noisy estimate.
-- $\hat\mu$: the estimated mean of the true relative risks.
-- $\hat\sigma^2_\theta$: the estimated variance of the true relative risks between districts.
-- $E_j$: the expected count, which sets how noisy the SMR is.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -334,6 +338,10 @@ smr_eb <- w * smr + (1 - w) * mu
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L17.2"></div>
+```
 
 ::: {.callout-tip icon="false" title="Bayesian preview"}
 

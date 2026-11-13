@@ -112,11 +112,28 @@ $B_k$ are the spline basis functions; $z_t$ the season and day-of-week terms; $T
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $f(T_t)$: the smooth effect of temperature on day $t$, estimated from the data rather than assumed linear.
+- $\gamma^\top z_t$: the other terms: season and day of week.
+- $\beta_k$: the weight of basis function $k$.
+- $B_k(T)$: the spline basis functions: simple curves that, weighted and added, form $f$.
+- $K$: the number of knots, which sets how flexible $f$ can be.
+- $RR(T)$: the relative risk at temperature $T$ compared with the reference $T_{\text{ref}}$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -132,28 +149,11 @@ fit <- glm(visits ~ splines::ns(temp03, df = 3) +
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $f(T_t)$: the smooth effect of temperature on day $t$, estimated from the data rather than assumed linear.
-- $\gamma^\top z_t$: the other terms: season and day of week.
-- $\beta_k$: the weight of basis function $k$.
-- $B_k(T)$: the spline basis functions: simple curves that, weighted and added, form $f$.
-- $K$: the number of knots, which sets how flexible $f$ can be.
-- $RR(T)$: the relative risk at temperature $T$ compared with the reference $T_{\text{ref}}$.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -162,6 +162,10 @@ fit <- glm(visits ~ splines::ns(temp03, df = 3) +
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L11.0"></div>
+```
 
 ::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): a spline exposure–response curve relative to its minimum"}
 

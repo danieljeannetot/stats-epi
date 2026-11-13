@@ -69,27 +69,11 @@ Linear regression: normal, $g(\mu) = \mu$. Logistic: Bernoulli, $g(\pi) = \log\f
 
 ::::
 
-:::: {.b}
-
-::: {.lab}
-
-[B]{.k}Model list and R
-
-:::
-
-```r
-glm(y ~ x, family = gaussian)              # identity
-glm(y ~ x, family = binomial(link = "logit"))
-glm(y ~ x, family = poisson(link = "log"))
-```
-
-::::
-
 :::: {.d}
 
 ::: {.lab}
 
-[D]{.k}How to read it
+[B]{.k}How to read it
 
 :::
 
@@ -101,11 +85,27 @@ glm(y ~ x, family = poisson(link = "log"))
 
 ::::
 
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+glm(y ~ x, family = gaussian)              # identity
+glm(y ~ x, family = binomial(link = "logit"))
+glm(y ~ x, family = poisson(link = "log"))
+```
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -153,11 +153,28 @@ $$\mathrm{logit}(\pi_i) = \alpha + \beta\,\frac{\mathrm{NO}_{2,i}}{10} + \gamma^
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\mathrm{Bernoulli}$: the distribution of a yes/no outcome.
+- $\pi_i$: child $i$'s probability of asthma.
+- $\mathrm{logit}$: the log-odds link.
+- $\beta$: the change in log-odds per 10 µg/m³ of NO₂.
+- $\gamma^\top z_i$: the adjustment terms: the confounders $z_i$ (SES, green space, …) times their coefficients.
+- $OR_{10}$: the odds ratio per 10 µg/m³: $e^{\beta}$.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -174,28 +191,11 @@ broom::tidy(fit, exponentiate = TRUE,
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\mathrm{Bernoulli}$: the distribution of a yes/no outcome.
-- $\pi_i$: child $i$'s probability of asthma.
-- $\mathrm{logit}$: the log-odds link.
-- $\beta$: the change in log-odds per 10 µg/m³ of NO₂.
-- $\gamma^\top z_i$: the adjustment terms: the confounders $z_i$ (SES, green space, …) times their coefficients.
-- $OR_{10}$: the odds ratio per 10 µg/m³: $e^{\beta}$.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -204,6 +204,10 @@ broom::tidy(fit, exponentiate = TRUE,
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L08.1"></div>
+```
 
 ::: {.callout-warning title="Common pitfall"}
 
@@ -278,11 +282,27 @@ $j$ = district, $k$ = age group. $e^{\gamma_k}$ and $e^{\beta}$ are rate ratios.
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $D_{jk}$: the number of cases in district $j$ and age group $k$.
+- $\mu_{jk}$: the expected number of cases.
+- $\log PT_{jk}$: the offset: log person-time, entered with coefficient fixed at 1, so the model describes rates rather than counts.
+- $\gamma_k$: the age-group effects; $e^{\gamma_k}$ is the rate ratio relative to the reference age group.
+- $\mathrm{dep}_j$: district $j$'s deprivation score; $e^{\beta}$ is the rate ratio per unit.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -301,27 +321,11 @@ glm(D ~ age_group + deprivation + offset(log(PT)),
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $D_{jk}$: the number of cases in district $j$ and age group $k$.
-- $\mu_{jk}$: the expected number of cases.
-- $\log PT_{jk}$: the offset: log person-time, entered with coefficient fixed at 1, so the model describes rates rather than counts.
-- $\gamma_k$: the age-group effects; $e^{\gamma_k}$ is the rate ratio relative to the reference age group.
-- $\mathrm{dep}_j$: district $j$'s deprivation score; $e^{\beta}$ is the rate ratio per unit.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -330,6 +334,10 @@ glm(D ~ age_group + deprivation + offset(log(PT)),
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L08.2"></div>
+```
 
 ::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): rate ratios from a Poisson model with an offset"}
 
@@ -382,11 +390,26 @@ $$\hat\phi = \frac{1}{n-p}\sum_t \frac{(y_t - \hat\mu_t)^2}{\hat\mu_t}, \qquad S
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\mu_t$: the expected count on day $t$.
+- $\phi$: the dispersion: the variance is $\phi$ times the mean. Poisson assumes $\phi = 1$.
+- $\hat\phi$: its estimate: the average squared Pearson residual, corrected for the number of parameters $p$.
+- $SE_{\text{quasi}}$: quasi-Poisson standard errors: Poisson ones inflated by $\sqrt{\hat\phi}$; the estimates are unchanged.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -398,26 +421,11 @@ glm(visits ~ I(pm25 / 10) + sin(2*pi*doy/365.25) +
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $\mu_t$: the expected count on day $t$.
-- $\phi$: the dispersion: the variance is $\phi$ times the mean. Poisson assumes $\phi = 1$.
-- $\hat\phi$: its estimate: the average squared Pearson residual, corrected for the number of parameters $p$.
-- $SE_{\text{quasi}}$: quasi-Poisson standard errors: Poisson ones inflated by $\sqrt{\hat\phi}$; the estimates are unchanged.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
@@ -426,6 +434,10 @@ glm(visits ~ I(pm25 / 10) + sin(2*pi*doy/365.25) +
 ::::
 
 :::::
+
+```{=html}
+<div class="pg-mount" data-pg="L08.3"></div>
+```
 
 ::: {.callout-tip icon="false" title="Bayesian preview"}
 

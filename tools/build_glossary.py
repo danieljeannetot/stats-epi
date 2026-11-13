@@ -154,9 +154,9 @@ def build(terms):
         "",
         "## Symbols and notation {#symbols}",
         "",
-        "Every model is shown three ways side by side: **A, standard notation**, as in papers and textbooks; "
-        "**B, a model list with R**, one line per assumption, as in software; and **C, epidemiological "
-        "reporting**, as in a results section.",
+        "Every model is shown in four panels: **A, standard notation**, as in papers and textbooks; "
+        "**B, how to read it**, explaining each term; **C, a model list with R**, one line per assumption, "
+        "as in software; and **D, how it's reported**, as in a results section.",
         "",
         "| Symbol | Meaning |",
         "|:--|:--|",

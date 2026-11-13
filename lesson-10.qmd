@@ -74,11 +74,28 @@ $k$ = parameters added; $p$ = parameters in the model. For quasi-Poisson models,
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $LR$: the likelihood ratio statistic: twice the gain in log-likelihood from adding terms.
+- $\ell_1$: the log-likelihood of the bigger model; $\ell_0$ of the smaller.
+- $\chi^2_{k}$: the chi-squared distribution with $k$ degrees of freedom: the reference distribution when the added terms do nothing.
+- $QAIC$: AIC for quasi-likelihood models, with the log-likelihood divided by $\hat\phi$.
+- $AIC$: Akaike's information criterion: fit ($-2\ell$) plus a penalty of 2 per parameter. Lower is better.
+- $p$: the number of parameters in the model.
+
+::::
+
 :::: {.b}
 
 ::: {.lab}
 
-[B]{.k}Model list and R
+[C]{.k}Model list and R
 
 :::
 
@@ -93,28 +110,11 @@ acf(residuals(m1, type = "pearson"))
 
 ::::
 
-:::: {.d}
-
-::: {.lab}
-
-[D]{.k}How to read it
-
-:::
-
-- $LR$: the likelihood ratio statistic: twice the gain in log-likelihood from adding terms.
-- $\ell_1$: the log-likelihood of the bigger model; $\ell_0$ of the smaller.
-- $\chi^2_{k}$: the chi-squared distribution with $k$ degrees of freedom: the reference distribution when the added terms do nothing.
-- $QAIC$: AIC for quasi-likelihood models, with the log-likelihood divided by $\hat\phi$.
-- $AIC$: Akaike's information criterion: fit ($-2\ell$) plus a penalty of 2 per parameter. Lower is better.
-- $p$: the number of parameters in the model.
-
-::::
-
 :::: {.c}
 
 ::: {.lab}
 
-[C]{.k}How it's reported
+[D]{.k}How it's reported
 
 :::
 
