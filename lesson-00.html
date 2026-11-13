@@ -85,9 +85,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -343,6 +343,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -622,7 +626,7 @@ window.Quarto = {
   <li><a href="#exB" id="toc-exB" class="nav-link" data-scroll-target="#exB">Example B · Traffic-related air pollution and childhood asthma</a></li>
   <li><a href="#purposes" id="toc-purposes" class="nav-link" data-scroll-target="#purposes">Start with the question</a></li>
   <li><a href="#how" id="toc-how" class="nav-link" data-scroll-target="#how">How each lesson works</a></li>
-  <li><a href="#notation" id="toc-notation" class="nav-link" data-scroll-target="#notation">Three ways of writing the same thing</a></li>
+  <li><a href="#notation" id="toc-notation" class="nav-link" data-scroll-target="#notation">Four panels for every model</a></li>
   <li><a href="#setup" id="toc-setup" class="nav-link" data-scroll-target="#setup">Setting up R (optional)</a></li>
   <li><a href="#quiz" id="toc-quiz" class="nav-link" data-scroll-target="#quiz">Check your understanding</a></li>
   <li><a href="#concepts" id="toc-concepts" class="nav-link" data-scroll-target="#concepts">Concepts at a glance</a></li>
@@ -714,8 +718,8 @@ window.Quarto = {
 </ul>
 </section>
 <section id="notation" class="level2">
-<h2 class="anchored" data-anchor-id="notation">Three ways of writing the same thing</h2>
-<p>Statistical models appear in three forms, and you’ll need all three. Papers and textbooks use <strong>standard notation</strong>. Software uses a <strong>model list</strong>, one line per assumption, written in R. And results are communicated in <strong>epidemiological reporting</strong> style. Throughout the course, the three appear side by side so you can translate between them. Here is the model that actually generated the asthma data in Example B. Don’t worry about understanding it yet; by Lesson 18 you will.</p>
+<h2 class="anchored" data-anchor-id="notation">Four panels for every model</h2>
+<p>Statistical models appear in several forms, and you’ll need them all. Throughout the course, every model is shown in four panels: <strong>A, standard notation</strong>, as in papers and textbooks; <strong>B, how to read it</strong>: click any term to see what it does in the model; <strong>C, a model list with R</strong>, one line per assumption, as in software; and <strong>D, how it’s reported</strong>, as in a results section. Here is the model that actually generated the asthma data in Example B. Don’t worry about understanding it yet; by Lesson 18 you will.</p>
 <div class="triad">
 <div class="a">
 <div class="lab">
@@ -726,24 +730,9 @@ window.Quarto = {
 <p><span class="math inline">\(Y_i\)</span> = asthma by age 8 for child <span class="math inline">\(i\)</span>, <span class="math inline">\(\pi_i\)</span> its probability, <span class="math inline">\(s[i]\)</span> the child’s school.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>asthma    <span class="sc">~</span> <span class="fu">bernoulli</span>(p)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logit</span>(p)  <span class="ot">=</span> alpha <span class="sc">+</span> beta <span class="sc">*</span> (no2 <span class="sc">-</span> <span class="dv">25</span>) <span class="sc">/</span> <span class="dv">10</span> <span class="sc">+</span></span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>            g1 <span class="sc">*</span> ses <span class="sc">+</span> g2 <span class="sc">*</span> smoke <span class="sc">+</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>            g3 <span class="sc">*</span> green <span class="sc">+</span> g4 <span class="sc">*</span> boy <span class="sc">+</span> u[school]</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>u[school] <span class="sc">~</span> <span class="fu">normal</span>(<span class="dv">0</span>, sigma_u)</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># in R (Lesson 18):</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">glmer</span>(asthma <span class="sc">~</span> <span class="fu">I</span>((no2 <span class="sc">-</span> <span class="dv">25</span>) <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">+</span> ses <span class="sc">+</span></span>
-<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        parent_smoke <span class="sc">+</span> green <span class="sc">+</span> sex <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> school),</span>
-<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(Y_i\)</span>: the outcome for child <span class="math inline">\(i\)</span>: 1 if they have asthma by age 8, 0 if not.</li>
@@ -757,9 +746,24 @@ window.Quarto = {
 <li><span class="math inline">\(\sigma_u^2\)</span>: how much schools differ: the variance of the school effects.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>asthma    <span class="sc">~</span> <span class="fu">bernoulli</span>(p)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logit</span>(p)  <span class="ot">=</span> alpha <span class="sc">+</span> beta <span class="sc">*</span> (no2 <span class="sc">-</span> <span class="dv">25</span>) <span class="sc">/</span> <span class="dv">10</span> <span class="sc">+</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>            g1 <span class="sc">*</span> ses <span class="sc">+</span> g2 <span class="sc">*</span> smoke <span class="sc">+</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>            g3 <span class="sc">*</span> green <span class="sc">+</span> g4 <span class="sc">*</span> boy <span class="sc">+</span> u[school]</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>u[school] <span class="sc">~</span> <span class="fu">normal</span>(<span class="dv">0</span>, sigma_u)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># in R (Lesson 18):</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">glmer</span>(asthma <span class="sc">~</span> <span class="fu">I</span>((no2 <span class="sc">-</span> <span class="dv">25</span>) <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">+</span> ses <span class="sc">+</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        parent_smoke <span class="sc">+</span> green <span class="sc">+</span> sex <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> school),</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>      <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p>Each 10 µg/m³ increase in residential NO₂ was associated with 15% higher odds of asthma by age 8 (<strong>OR 1.15 per 10 µg/m³</strong>), adjusted for socio-economic position, parental smoking, green space and sex, and accounting for clustering within schools.</p>
 <div class="note">
@@ -767,6 +771,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
+<div class="pg-mount" data-pg="L00.0"></div>
 <p>The symbols are used consistently in every lesson: <span class="math inline">\(\alpha\)</span> for intercepts and baselines, <span class="math inline">\(\beta\)</span> for exposure effects, <span class="math inline">\(\gamma\)</span> for adjustment terms, <span class="math inline">\(u\)</span> for group effects, <span class="math inline">\(\sigma\)</span> and <span class="math inline">\(\tau\)</span> for standard deviations, and the indices <span class="math inline">\(i\)</span> (child), <span class="math inline">\(t\)</span> (day), <span class="math inline">\(j\)</span> (district or school) and <span class="math inline">\(\ell\)</span> (lag). The <a href="./glossary.html#symbols">glossary</a> keeps the full list.</p>
 </section>
 <section id="setup" class="level2">
@@ -1027,7 +1032,7 @@ window.Quarto = {
 <tr class="odd">
 <td><strong>Standard notation (A)</strong></td>
 <td>The model in mathematical form.</td>
-<td>The model list and R code (B) say the same thing to software; the report (C) to readers; D explains each term.</td>
+<td>B explains each term; the model list and R code (C) say the same thing to software; the report (D) to readers.</td>
 </tr>
 <tr class="even">
 <td><strong>Example A vs Example B</strong></td>
@@ -1047,6 +1052,9 @@ window.Quarto = {
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -719,20 +723,9 @@ window.Quarto = {
 <p><span class="math inline">\(k\)</span> = parameters added; <span class="math inline">\(p\)</span> = parameters in the model. For quasi-Poisson models, the LR statistic is divided by <span class="math inline">\(\hat\phi\)</span>.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>m0 <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> dow, <span class="at">family =</span> quasipoisson,</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> city_daily)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">update</span>(m0, . <span class="sc">~</span> . <span class="sc">+</span> <span class="fu">sin</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>doy<span class="sc">/</span><span class="fl">365.25</span>) <span class="sc">+</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>               <span class="fu">cos</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>doy<span class="sc">/</span><span class="fl">365.25</span>))</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(m0, m1, <span class="at">test =</span> <span class="st">"F"</span>)   <span class="co"># quasi-Poisson</span></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(<span class="fu">residuals</span>(m1, <span class="at">type =</span> <span class="st">"pearson"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(LR\)</span>: the likelihood ratio statistic: twice the gain in log-likelihood from adding terms.</li>
@@ -743,9 +736,20 @@ window.Quarto = {
 <li><span class="math inline">\(p\)</span>: the number of parameters in the model.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>m0 <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> dow, <span class="at">family =</span> quasipoisson,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> city_daily)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>m1 <span class="ot">&lt;-</span> <span class="fu">update</span>(m0, . <span class="sc">~</span> . <span class="sc">+</span> <span class="fu">sin</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>doy<span class="sc">/</span><span class="fl">365.25</span>) <span class="sc">+</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>               <span class="fu">cos</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>doy<span class="sc">/</span><span class="fl">365.25</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">anova</span>(m0, m1, <span class="at">test =</span> <span class="st">"F"</span>)   <span class="co"># quasi-Poisson</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">acf</span>(<span class="fu">residuals</span>(m1, <span class="at">type =</span> <span class="st">"pearson"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="tReport"></span></p>
 </div>
@@ -987,6 +991,9 @@ McCullagh, Peter, and John A. Nelder. 1989. <em>Generalized Linear Models</em>. 
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

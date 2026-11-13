@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -715,9 +719,21 @@ window.Quarto = {
 <p>Only <span class="math inline">\(Y_i^{X_i}\)</span>, the outcome under the exposure actually received, is ever observed (consistency).</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(Y_i^{x}\)</span>: child <span class="math inline">\(i\)</span>’s potential outcome: whether they would have asthma if their exposure were set to <span class="math inline">\(x\)</span>.</li>
+<li><span class="math inline">\(E[Y^{X}]\)</span>: the average outcome if everyone kept their actual exposure.</li>
+<li><span class="math inline">\(E[Y^{X-\Delta}]\)</span>: the average outcome if everyone’s exposure were lowered by <span class="math inline">\(\Delta\)</span> (here 10 µg/m³): a hypothetical intervention.</li>
+<li><span class="math inline">\(RR_{\text{causal}}\)</span>: the causal risk ratio: average risk under the intervention divided by average risk without it.</li>
+<li><span class="math inline">\(RD_{\text{causal}}\)</span>: the causal risk difference: cases prevented per child; × 1,000 for cases per 1,000.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co"># the causal question, written as a contrast:</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># E[asthma | everyone's NO2 lowered by 10]</span></span>
@@ -728,25 +744,14 @@ window.Quarto = {
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co">#     NO2 10 µg/m3 lower</span></span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="co">#   consistency: "lowering NO2" is well defined</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(Y_i^{x}\)</span>: child <span class="math inline">\(i\)</span>’s potential outcome: whether they would have asthma if their exposure were set to <span class="math inline">\(x\)</span>.</li>
-<li><span class="math inline">\(E[Y^{X}]\)</span>: the average outcome if everyone kept their actual exposure.</li>
-<li><span class="math inline">\(E[Y^{X-\Delta}]\)</span>: the average outcome if everyone’s exposure were lowered by <span class="math inline">\(\Delta\)</span> (here 10 µg/m³): a hypothetical intervention.</li>
-<li><span class="math inline">\(RR_{\text{causal}}\)</span>: the causal risk ratio: average risk under the intervention divided by average risk without it.</li>
-<li><span class="math inline">\(RD_{\text{causal}}\)</span>: the causal risk difference: cases prevented per child; × 1,000 for cases per 1,000.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="poReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L12.0"></div>
 <div class="further">
 <p><strong>Further reading:</strong> <span class="citation" data-cites="hernan2020causal">Hernán and Robins (<a href="#ref-hernan2020causal" role="doc-biblioref">2020</a>)</span> develop causal inference from potential outcomes; <span class="citation" data-cites="hernan2016using">Hernán and Robins (<a href="#ref-hernan2016using" role="doc-biblioref">2016</a>)</span> on framing observational analyses as emulations of a target trial; <span class="citation" data-cites="greenland1999confounding">Greenland et al. (<a href="#ref-greenland1999confounding" role="doc-biblioref">1999</a>)</span> on the formal definition of confounding.</p>
 </div>
@@ -772,21 +777,9 @@ window.Quarto = {
 <p>Evaluated once with each child’s own <span class="math inline">\(x_i\)</span>, once with <span class="math inline">\(x_i - \Delta\)</span>; <span class="math inline">\(Z\)</span> = confounders.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(asthma <span class="sc">~</span> no2_true <span class="sc">+</span> ses <span class="sc">+</span> green,</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>r1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit, cohort, <span class="at">type =</span> <span class="st">"response"</span>))</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>r0 <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(cohort, <span class="at">no2_true =</span> no2_true <span class="sc">-</span> <span class="dv">10</span>),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">type =</span> <span class="st">"response"</span>))</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">rr =</span> r0 <span class="sc">/</span> r1, <span class="at">rd =</span> r0 <span class="sc">-</span> r1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\widehat{E}[Y^{x}]\)</span>: the estimated average outcome if exposure were set to <span class="math inline">\(x\)</span> for everyone.</li>
@@ -796,9 +789,21 @@ window.Quarto = {
 <li><span class="math inline">\(z_i\)</span>: child <span class="math inline">\(i\)</span>’s confounders, kept at their observed values.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(asthma <span class="sc">~</span> no2_true <span class="sc">+</span> ses <span class="sc">+</span> green,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>r1 <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit, cohort, <span class="at">type =</span> <span class="st">"response"</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>r0 <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(cohort, <span class="at">no2_true =</span> no2_true <span class="sc">-</span> <span class="dv">10</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>        <span class="at">type =</span> <span class="st">"response"</span>))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">rr =</span> r0 <span class="sc">/</span> r1, <span class="at">rd =</span> r0 <span class="sc">-</span> r1)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="gcReport"></span></p>
 </div>
@@ -879,20 +884,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[e(z) = P(A = 1 \mid Z = z), \qquad w_i = \frac{A_i}{e(z_i)} + \frac{1 - A_i}{1 - e(z_i)}\]</span> <span class="math display">\[\widehat{E}[Y^{a}] = \frac{\sum_i w_i\, 1\{A_i = a\}\, Y_i}{\sum_i w_i\, 1\{A_i = a\}}\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">high =</span> no2_true <span class="sc">&gt;=</span> <span class="dv">30</span>)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ps <span class="ot">&lt;-</span> <span class="fu">glm</span>(high <span class="sc">~</span> ses <span class="sc">+</span> green, <span class="at">family =</span> binomial,</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> d) <span class="sc">|&gt;</span> <span class="fu">fitted</span>()</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>w <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(d<span class="sc">$</span>high, <span class="dv">1</span> <span class="sc">/</span> ps, <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> ps))</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(d, <span class="fu">weighted.mean</span>(asthma[high], w[high]) <span class="sc">/</span></span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">weighted.mean</span>(asthma[<span class="sc">!</span>high], w[<span class="sc">!</span>high]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(e(z)\)</span>: the propensity score: the probability of high exposure given the confounders <span class="math inline">\(z\)</span>.</li>
@@ -902,9 +896,20 @@ window.Quarto = {
 <li><span class="math inline">\(\widehat{E}[Y^{a}]\)</span>: the weighted average outcome in group <span class="math inline">\(a\)</span>: an estimate of the average outcome if everyone had exposure <span class="math inline">\(a\)</span>.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>d <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">high =</span> no2_true <span class="sc">&gt;=</span> <span class="dv">30</span>)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>ps <span class="ot">&lt;-</span> <span class="fu">glm</span>(high <span class="sc">~</span> ses <span class="sc">+</span> green, <span class="at">family =</span> binomial,</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>          <span class="at">data =</span> d) <span class="sc">|&gt;</span> <span class="fu">fitted</span>()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>d<span class="sc">$</span>w <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(d<span class="sc">$</span>high, <span class="dv">1</span> <span class="sc">/</span> ps, <span class="dv">1</span> <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> ps))</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(d, <span class="fu">weighted.mean</span>(asthma[high], w[high]) <span class="sc">/</span></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>        <span class="fu">weighted.mean</span>(asthma[<span class="sc">!</span>high], w[<span class="sc">!</span>high]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="psReport"></span></p>
 </div>
@@ -979,18 +984,9 @@ window.Quarto = {
 <p><span class="math inline">\(RR_{EU}\)</span>: confounder–exposure association; <span class="math inline">\(RR_{UD}\)</span>: confounder–outcome association.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>e_value <span class="ot">&lt;-</span> <span class="cf">function</span>(rr) rr <span class="sc">+</span> <span class="fu">sqrt</span>(rr <span class="sc">*</span> (rr <span class="sc">-</span> <span class="dv">1</span>))</span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">e_value</span>(<span class="fl">1.12</span>)   <span class="co"># point estimate</span></span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">e_value</span>(<span class="fl">1.01</span>)   <span class="co"># lower confidence limit</span></span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># or: EValue::evalues.RR(1.12, lo = 1.01)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(E\)</span>: the E-value: the minimum strength of association an unmeasured confounder would need, with both exposure and outcome, to explain the RR away.</li>
@@ -999,13 +995,23 @@ window.Quarto = {
 <li><span class="math inline">\(RR_{UD}\)</span>: the confounder–outcome association (as a risk ratio).</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>e_value <span class="ot">&lt;-</span> <span class="cf">function</span>(rr) rr <span class="sc">+</span> <span class="fu">sqrt</span>(rr <span class="sc">*</span> (rr <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="fu">e_value</span>(<span class="fl">1.12</span>)   <span class="co"># point estimate</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="fu">e_value</span>(<span class="fl">1.01</span>)   <span class="co"># lower confidence limit</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="co"># or: EValue::evalues.RR(1.12, lo = 1.01)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="evReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L12.3"></div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1204,6 +1210,9 @@ Westreich, Daniel, and Stephen R. Cole. 2010. <span>“Invited Commentary: Posit
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

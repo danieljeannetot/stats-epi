@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -718,20 +722,9 @@ window.Quarto = {
 <p><span class="math inline">\(z_{0.975} = 1.96\)</span> for a 95% interval. The probability statement is about the procedure, over repeated samples.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>smp <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">200</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>p  <span class="ot">&lt;-</span> <span class="fu">mean</span>(smp<span class="sc">$</span>asthma)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p) <span class="sc">/</span> <span class="dv">200</span>)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>p <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.96</span>, <span class="fl">1.96</span>) <span class="sc">*</span> se</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">binom.test</span>(<span class="fu">sum</span>(smp<span class="sc">$</span>asthma), <span class="dv">200</span>)<span class="sc">$</span>conf.int</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\hat\pi\)</span>: the estimated risk in the sample.</li>
@@ -742,13 +735,25 @@ window.Quarto = {
 <li><span class="math inline">\(1 - \alpha\)</span>: the coverage: the share of repeated intervals that capture <span class="math inline">\(\pi\)</span>, whatever its value.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>smp <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">200</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>p  <span class="ot">&lt;-</span> <span class="fu">mean</span>(smp<span class="sc">$</span>asthma)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>se <span class="ot">&lt;-</span> <span class="fu">sqrt</span>(p <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">-</span> p) <span class="sc">/</span> <span class="dv">200</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>p <span class="sc">+</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">1.96</span>, <span class="fl">1.96</span>) <span class="sc">*</span> se</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">binom.test</span>(<span class="fu">sum</span>(smp<span class="sc">$</span>asthma), <span class="dv">200</span>)<span class="sc">$</span>conf.int</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="ciReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L06.0"></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -787,18 +792,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[H_0: \pi_1 = \pi_0 \quad\text{vs}\quad H_1: \pi_1 \ne \pi_0\]</span> <span class="math display">\[z = \frac{\hat\pi_1 - \hat\pi_0}{\sqrt{\bar\pi(1-\bar\pi)\left(\frac{1}{n_1} + \frac{1}{n_0}\right)}}, \qquad p = 2\,P(Z \ge |z|)\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>smp <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">500</span>) <span class="sc">|&gt;</span></span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">high =</span> no2_modeled <span class="sc">&gt;=</span> <span class="dv">30</span>)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="fu">table</span>(smp<span class="sc">$</span>high, smp<span class="sc">$</span>asthma)[, <span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>],</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(H_0\)</span>: the null hypothesis: equal risks in the two groups.</li>
@@ -809,9 +805,18 @@ window.Quarto = {
 <li><span class="math inline">\(p\)</span>: the p-value: the probability, if <span class="math inline">\(H_0\)</span> were true, of a difference at least as large as observed.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>smp <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">slice_sample</span>(<span class="at">n =</span> <span class="dv">500</span>) <span class="sc">|&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">high =</span> no2_modeled <span class="sc">&gt;=</span> <span class="dv">30</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">prop.test</span>(<span class="fu">table</span>(smp<span class="sc">$</span>high, smp<span class="sc">$</span>asthma)[, <span class="dv">2</span><span class="sc">:</span><span class="dv">1</span>],</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>          <span class="at">correct =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="pvReport"></span></p>
 <div class="note">
@@ -819,6 +824,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
+<div class="pg-mount" data-pg="L06.1"></div>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -903,17 +909,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[P(\text{at least one false positive}) = 1 - (1-\alpha)^m\]</span> <span class="math display">\[\text{Bonferroni: reject } H_{0j} \text{ if } p_j &lt; \alpha / m\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.003</span>, <span class="fl">0.02</span>, <span class="fl">0.04</span>, <span class="fl">0.30</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_values, <span class="at">method =</span> <span class="st">"bonferroni"</span>)</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_values, <span class="at">method =</span> <span class="st">"holm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(m\)</span>: the number of tests.</li>
@@ -922,13 +920,22 @@ window.Quarto = {
 <li><span class="math inline">\(p_j\)</span>: the p-value of test <span class="math inline">\(j\)</span>; Bonferroni compares it with <span class="math inline">\(\alpha/m\)</span> instead of <span class="math inline">\(\alpha\)</span>.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>p_values <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.003</span>, <span class="fl">0.02</span>, <span class="fl">0.04</span>, <span class="fl">0.30</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_values, <span class="at">method =</span> <span class="st">"bonferroni"</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="fu">p.adjust</span>(p_values, <span class="at">method =</span> <span class="st">"holm"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="mtReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L06.2"></div>
 <div class="further">
 <p><strong>Further reading:</strong> <span class="citation" data-cites="bender2001adjusting">Bender and Lange (<a href="#ref-bender2001adjusting" role="doc-biblioref">2001</a>)</span> explain when and how to adjust for multiple testing; <span class="citation" data-cites="rothman1990no">Rothman (<a href="#ref-rothman1990no" role="doc-biblioref">1990</a>)</span> argues that adjustment is often unnecessary when results are interpreted with care; <span class="citation" data-cites="greenland2016statistical">Greenland et al. (<a href="#ref-greenland2016statistical" role="doc-biblioref">2016</a>)</span> place both views in context.</p>
 </div>
@@ -1080,6 +1087,9 @@ Wasserstein, Ronald L., and Nicole A. Lazar. 2016. <span>“The <span>ASA</span>
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -715,19 +719,9 @@ window.Quarto = {
 <p><span class="math inline">\(p_e\)</span> = proportion of the population exposed; <span class="math inline">\(p_c\)</span> = proportion of cases exposed.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>d  <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">high =</span> no2_true <span class="sc">&gt;=</span> <span class="dv">30</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pe <span class="ot">&lt;-</span> <span class="fu">mean</span>(d<span class="sc">$</span>high)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>pc <span class="ot">&lt;-</span> <span class="fu">mean</span>(d<span class="sc">$</span>high[d<span class="sc">$</span>asthma <span class="sc">==</span> <span class="dv">1</span>])</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>paf_levin <span class="ot">&lt;-</span> pe <span class="sc">*</span> (rr <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> pe <span class="sc">*</span> (rr <span class="sc">-</span> <span class="dv">1</span>))</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>paf_miet  <span class="ot">&lt;-</span> pc <span class="sc">*</span> (rr_adj <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> rr_adj</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(PAF_{\text{Levin}}\)</span>: Levin’s PAF, from the share of the population exposed and the RR. Biased if the RR is confounded.</li>
@@ -738,13 +732,24 @@ window.Quarto = {
 <li><span class="math inline">\(RR\)</span>: the risk ratio for exposure.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>d  <span class="ot">&lt;-</span> cohort <span class="sc">|&gt;</span> <span class="fu">mutate</span>(<span class="at">high =</span> no2_true <span class="sc">&gt;=</span> <span class="dv">30</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>pe <span class="ot">&lt;-</span> <span class="fu">mean</span>(d<span class="sc">$</span>high)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>pc <span class="ot">&lt;-</span> <span class="fu">mean</span>(d<span class="sc">$</span>high[d<span class="sc">$</span>asthma <span class="sc">==</span> <span class="dv">1</span>])</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>paf_levin <span class="ot">&lt;-</span> pe <span class="sc">*</span> (rr <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> pe <span class="sc">*</span> (rr <span class="sc">-</span> <span class="dv">1</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>paf_miet  <span class="ot">&lt;-</span> pc <span class="sc">*</span> (rr_adj <span class="sc">-</span> <span class="dv">1</span>) <span class="sc">/</span> rr_adj</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="lvReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L14.0"></div>
 <div class="further">
 <p><strong>Further reading:</strong> <span class="citation" data-cites="levin1953occurrence">Levin (<a href="#ref-levin1953occurrence" role="doc-biblioref">1953</a>)</span> proposed the attributable fraction; <span class="citation" data-cites="miettinen1974proportion">Miettinen (<a href="#ref-miettinen1974proportion" role="doc-biblioref">1974</a>)</span> gave the formula valid under confounding; <span class="citation" data-cites="rockhill1998use">Rockhill et al. (<a href="#ref-rockhill1998use" role="doc-biblioref">1998</a>)</span> review the use and misuse of PAFs; <span class="citation" data-cites="greenland1988conceptual">Greenland and Robins (<a href="#ref-greenland1988conceptual" role="doc-biblioref">1988</a>)</span> on what attributable fractions do and don’t measure.</p>
 </div>
@@ -770,21 +775,9 @@ window.Quarto = {
 <p><span class="math inline">\(x^*\)</span> = counterfactual exposure; <span class="math inline">\(D\)</span> = total cases. This is g-computation (Lesson 12) with the intervention “cap NO₂ at <span class="math inline">\(x^*\)</span>”.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(asthma <span class="sc">~</span> no2_true <span class="sc">+</span> ses <span class="sc">+</span> green,</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>r_obs <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit, <span class="at">type =</span> <span class="st">"response"</span>))</span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>r_cf  <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit,</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(cohort, <span class="at">no2_true =</span> <span class="fu">pmin</span>(no2_true, <span class="dv">10</span>)),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span>))</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>paf <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> r_cf <span class="sc">/</span> r_obs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(PAF\)</span>: the population attributable fraction: the share of cases that the intervention would prevent.</li>
@@ -794,13 +787,26 @@ window.Quarto = {
 <li><span class="math inline">\(D\)</span>: the total number of cases.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(asthma <span class="sc">~</span> no2_true <span class="sc">+</span> ses <span class="sc">+</span> green,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>r_obs <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit, <span class="at">type =</span> <span class="st">"response"</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>r_cf  <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">predict</span>(fit,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(cohort, <span class="at">no2_true =</span> <span class="fu">pmin</span>(no2_true, <span class="dv">10</span>)),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">type =</span> <span class="st">"response"</span>))</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>paf <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">-</span> r_cf <span class="sc">/</span> r_obs</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="cfReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L14.1"></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -878,17 +884,9 @@ window.Quarto = {
 <p>Incidence-based YLD: new cases <span class="math inline">\(I\)</span>, disability weight <span class="math inline">\(DW\)</span>, average duration <span class="math inline">\(L_{\text{dur}}\)</span>.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>yld  <span class="ot">&lt;-</span> cases <span class="sc">*</span> dw <span class="sc">*</span> duration</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>yll  <span class="ot">&lt;-</span> deaths <span class="sc">*</span> life_expectancy</span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>daly <span class="ot">&lt;-</span> yll <span class="sc">+</span> yld</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(DALY\)</span>: disability-adjusted life years: healthy years lost.</li>
@@ -900,13 +898,22 @@ window.Quarto = {
 <li><span class="math inline">\(L_{\text{dur}}\)</span>: the average duration of the condition.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>yld  <span class="ot">&lt;-</span> cases <span class="sc">*</span> dw <span class="sc">*</span> duration</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>yll  <span class="ot">&lt;-</span> deaths <span class="sc">*</span> life_expectancy</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>daly <span class="ot">&lt;-</span> yll <span class="sc">+</span> yld</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="dyReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L14.2"></div>
 <div class="further">
 <p><strong>Further reading:</strong> <span class="citation" data-cites="murray1994quantifying">Murray (<a href="#ref-murray1994quantifying" role="doc-biblioref">1994</a>)</span> set out the technical basis of DALYs; <span class="citation" data-cites="gbd2020risk">GBD 2019 Risk Factors Collaborators (<a href="#ref-gbd2020risk" role="doc-biblioref">2020</a>)</span> report risk-factor burdens with current methods; <span class="citation" data-cites="ezzati2002selected">Ezzati et al. (<a href="#ref-ezzati2002selected" role="doc-biblioref">2002</a>)</span> on combining burden across risk factors.</p>
 </div>
@@ -1047,6 +1054,9 @@ World Health Organization. 2021. <em><span>WHO</span> Global Air Quality Guideli
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

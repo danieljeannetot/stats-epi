@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -717,19 +721,9 @@ window.Quarto = {
 <p><span class="math inline">\(a + b\)</span> is the prior’s strength in “equivalent children”; <span class="math inline">\(a/(a+b)\)</span> its mean.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">~</span> <span class="fu">binomial</span>(n, p)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>p <span class="sc">~</span> <span class="fu">beta</span>(a, b)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>a_post <span class="ot">&lt;-</span> a <span class="sc">+</span> d; b_post <span class="ot">&lt;-</span> b <span class="sc">+</span> n <span class="sc">-</span> d</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">qbeta</span>(<span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>), a_post, b_post)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\mathrm{Beta}(a, b)\)</span>: the prior for the risk: like having seen <span class="math inline">\(a\)</span> cases and <span class="math inline">\(b\)</span> non-cases before the study.</li>
@@ -738,13 +732,24 @@ window.Quarto = {
 <li><span class="math inline">\(\mathrm{Beta}(a + d,\ b + n - d)\)</span>: the posterior: prior counts plus observed counts. This simple updating is what makes the beta prior conjugate.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>d <span class="sc">~</span> <span class="fu">binomial</span>(n, p)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>p <span class="sc">~</span> <span class="fu">beta</span>(a, b)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>a_post <span class="ot">&lt;-</span> a <span class="sc">+</span> d; b_post <span class="ot">&lt;-</span> b <span class="sc">+</span> n <span class="sc">-</span> d</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">qbeta</span>(<span class="fu">c</span>(<span class="fl">0.025</span>, <span class="fl">0.5</span>, <span class="fl">0.975</span>), a_post, b_post)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="bReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L19.0"></div>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -807,20 +812,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[y_t \sim \mathrm{Poisson}(\mu_t), \qquad \log\mu_t = \alpha + \beta\,(T_t - 20)\]</span> <span class="math display">\[L(\alpha, \beta) = \prod_t \frac{\mu_t^{y_t} e^{-\mu_t}}{y_t!}\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>visits[t] <span class="sc">~</span> <span class="fu">poisson</span>(mu[t])</span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(mu[t]) <span class="ot">=</span> a <span class="sc">+</span> b <span class="sc">*</span> (temp[t] <span class="sc">-</span> <span class="dv">20</span>)</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>loglik <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b)</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="fu">dpois</span>(d<span class="sc">$</span>visits,</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">exp</span>(a <span class="sc">+</span> b <span class="sc">*</span> (d<span class="sc">$</span>temp <span class="sc">-</span> <span class="dv">20</span>)), <span class="at">log =</span> <span class="cn">TRUE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(y_t\)</span>: the visits on day <span class="math inline">\(t\)</span>.</li>
@@ -829,6 +823,17 @@ window.Quarto = {
 <li><span class="math inline">\(\beta\)</span>: the heat effect: the change in log visits per °C.</li>
 <li><span class="math inline">\(L(\alpha, \beta)\)</span>: the likelihood: the probability of all the observed counts, as a function of <span class="math inline">\(\alpha\)</span> and <span class="math inline">\(\beta\)</span>.</li>
 </ul>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>visits[t] <span class="sc">~</span> <span class="fu">poisson</span>(mu[t])</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(mu[t]) <span class="ot">=</span> a <span class="sc">+</span> b <span class="sc">*</span> (temp[t] <span class="sc">-</span> <span class="dv">20</span>)</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>loglik <span class="ot">&lt;-</span> <span class="cf">function</span>(a, b)</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sum</span>(<span class="fu">dpois</span>(d<span class="sc">$</span>visits,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>            <span class="fu">exp</span>(a <span class="sc">+</span> b <span class="sc">*</span> (d<span class="sc">$</span>temp <span class="sc">-</span> <span class="dv">20</span>)), <span class="at">log =</span> <span class="cn">TRUE</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="further">
@@ -860,9 +865,21 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[p(\alpha, \beta \mid y) \propto p(y \mid \alpha, \beta)\; p(\alpha)\, p(\beta)\]</span> <span class="math display">\[\beta \sim \mathrm{Normal}(m, s^2), \qquad \alpha \sim \mathrm{Normal}(\log 8, 1)\]</span></p>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(p(\alpha, \beta \mid y)\)</span>: the posterior: what is known about the parameters after seeing the data.</li>
+<li><span class="math inline">\(\propto\)</span>: “proportional to”: the normalizing constant is left out.</li>
+<li><span class="math inline">\(p(y \mid \alpha, \beta)\)</span>: the likelihood, as in 19.2.</li>
+<li><span class="math inline">\(p(\beta)\)</span>: the prior on the heat effect.</li>
+<li><span class="math inline">\(m\)</span>: the prior mean of <span class="math inline">\(\beta\)</span>; <span class="math inline">\(s\)</span> is its prior SD.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>visits[t] <span class="sc">~</span> <span class="fu">poisson</span>(mu[t])</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(mu[t]) <span class="ot">=</span> a <span class="sc">+</span> b <span class="sc">*</span> (temp[t] <span class="sc">-</span> <span class="dv">20</span>)</span>
@@ -874,19 +891,8 @@ window.Quarto = {
 <span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>            <span class="fu">prior</span>(<span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">0.03</span>), <span class="at">class =</span> b)),</span>
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>  <span class="at">data =</span> d)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
 </div>
-<ul>
-<li><span class="math inline">\(p(\alpha, \beta \mid y)\)</span>: the posterior: what is known about the parameters after seeing the data.</li>
-<li><span class="math inline">\(\propto\)</span>: “proportional to”: the normalizing constant is left out.</li>
-<li><span class="math inline">\(p(y \mid \alpha, \beta)\)</span>: the likelihood, as in 19.2.</li>
-<li><span class="math inline">\(p(\beta)\)</span>: the prior on the heat effect.</li>
-<li><span class="math inline">\(m\)</span>: the prior mean of <span class="math inline">\(\beta\)</span>; <span class="math inline">\(s\)</span> is its prior SD.</li>
-</ul>
-</div>
-</div>
+<div class="pg-mount" data-pg="L19.2"></div>
 <div class="further">
 <p><strong>Further reading:</strong> <span class="citation" data-cites="gelman2013bayesian">Gelman et al. (<a href="#ref-gelman2013bayesian" role="doc-biblioref">2013</a>)</span> on posterior computation by grid and simulation; <span class="citation" data-cites="mcelreath2020statistical">McElreath (<a href="#ref-mcelreath2020statistical" role="doc-biblioref">2020</a>)</span> on grid approximation as a teaching device; <span class="citation" data-cites="greenland2006bayesian">Greenland (<a href="#ref-greenland2006bayesian" role="doc-biblioref">2006</a>)</span> on priors in epidemiological analysis.</p>
 </div>
@@ -905,19 +911,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[(\alpha^{(s)}, \beta^{(s)}) \sim p(\alpha, \beta \mid y), \quad s = 1, \dots, S\]</span> <span class="math display">\[\text{95\% credible interval for } \beta: \ \big[\beta_{(0.025)},\ \beta_{(0.975)}\big]\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>draws <span class="ot">&lt;-</span> posterior<span class="sc">::</span><span class="fu">as_draws_df</span>(fit)</span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(draws<span class="sc">$</span>b_ItempM20, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">5</span>, .<span class="dv">975</span>))</span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>b_ItempM20 <span class="sc">&gt;</span> <span class="dv">0</span>)         <span class="co"># P(heat harmful)</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">exp</span>(draws<span class="sc">$</span>b_Intercept <span class="sc">+</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>         <span class="dv">10</span> <span class="sc">*</span> draws<span class="sc">$</span>b_ItempM20))    <span class="co"># visits at 30°C</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\((\alpha^{(s)}, \beta^{(s)})\)</span>: draw <span class="math inline">\(s\)</span> from the posterior: one plausible pair of parameter values.</li>
@@ -925,9 +921,19 @@ window.Quarto = {
 <li><span class="math inline">\(\beta_{(0.025)}\)</span>: the 2.5th percentile of the draws of <span class="math inline">\(\beta\)</span>: the lower limit of the 95% credible interval.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>draws <span class="ot">&lt;-</span> posterior<span class="sc">::</span><span class="fu">as_draws_df</span>(fit)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="fu">quantile</span>(draws<span class="sc">$</span>b_ItempM20, <span class="fu">c</span>(.<span class="dv">025</span>, .<span class="dv">5</span>, .<span class="dv">975</span>))</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(draws<span class="sc">$</span>b_ItempM20 <span class="sc">&gt;</span> <span class="dv">0</span>)         <span class="co"># P(heat harmful)</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(<span class="fu">exp</span>(draws<span class="sc">$</span>b_Intercept <span class="sc">+</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>         <span class="dv">10</span> <span class="sc">*</span> draws<span class="sc">$</span>b_ItempM20))    <span class="co"># visits at 30°C</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="dReport"></span></p>
 </div>
@@ -1049,6 +1055,9 @@ Spiegelhalter, David J., Keith R. Abrams, and Jonathan P. Myles. 2004. <em><span
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -732,22 +736,9 @@ window.Quarto = {
 <p><span class="math inline">\(\hat\theta_j\)</span>: district <span class="math inline">\(j\)</span>’s three cumulative coefficients, with covariance <span class="math inline">\(S_j\)</span>.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cb <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossbasis</span>(d<span class="sc">$</span>temp, <span class="at">lag =</span> <span class="dv">21</span>,</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">argvar =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>, <span class="at">knots =</span> kn),</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">arglag =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>,</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">knots =</span> dlnm<span class="sc">::</span><span class="fu">logknots</span>(<span class="dv">21</span>, <span class="dv">3</span>)))</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> cb <span class="sc">+</span> splines<span class="sc">::</span><span class="fu">ns</span>(t, <span class="dv">35</span>) <span class="sc">+</span> dow,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> quasipoisson, <span class="at">data =</span> d)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>red <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossreduce</span>(cb, fit)   <span class="co"># overall</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(red); <span class="fu">vcov</span>(red)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\eta_{jkq}\)</span>: district <span class="math inline">\(j\)</span>’s cross-basis coefficients.</li>
@@ -758,6 +749,19 @@ window.Quarto = {
 <li><span class="math inline">\(\log RR_j(x)\)</span>: district <span class="math inline">\(j\)</span>’s cumulative log RR at temperature <span class="math inline">\(x\)</span>.</li>
 <li><span class="math inline">\(x_{\text{ref}}\)</span>: the reference temperature.</li>
 </ul>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cb <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossbasis</span>(d<span class="sc">$</span>temp, <span class="at">lag =</span> <span class="dv">21</span>,</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">argvar =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>, <span class="at">knots =</span> kn),</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">arglag =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>                <span class="at">knots =</span> dlnm<span class="sc">::</span><span class="fu">logknots</span>(<span class="dv">21</span>, <span class="dv">3</span>)))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> cb <span class="sc">+</span> splines<span class="sc">::</span><span class="fu">ns</span>(t, <span class="dv">35</span>) <span class="sc">+</span> dow,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> quasipoisson, <span class="at">data =</span> d)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>red <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossreduce</span>(cb, fit)   <span class="co"># overall</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(red); <span class="fu">vcov</span>(red)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
@@ -828,20 +832,9 @@ window.Quarto = {
 <p>ICAR: each district’s <span class="math inline">\(u\)</span> is centered on the average of its neighbors’. Scaling makes <span class="math inline">\(\sigma_k\)</span> comparable whatever the map.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># INLA, one coefficient at a time (sketch)</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> theta_hat <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">f</span>(district, <span class="at">model =</span> <span class="st">"bym2"</span>,</span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">graph =</span> g, <span class="at">scale.model =</span> <span class="cn">TRUE</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>INLA<span class="sc">::</span><span class="fu">inla</span>(f, <span class="at">data =</span> s1k, <span class="at">family =</span> <span class="st">"gaussian"</span>,</span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control.family =</span> <span class="fu">list</span>(<span class="at">hyper =</span> <span class="fu">list</span>(<span class="at">prec =</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">initial =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">/</span> se2), <span class="at">fixed =</span> <span class="cn">TRUE</span>))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\hat\theta_j\)</span>: district <span class="math inline">\(j\)</span>’s stage-1 coefficients, with covariance <span class="math inline">\(S_j\)</span>.</li>
@@ -853,9 +846,20 @@ window.Quarto = {
 <li><span class="math inline">\(u_{\cdot k}\)</span>: all districts’ structured effects, with a scaled ICAR prior.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># INLA, one coefficient at a time (sketch)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>f <span class="ot">&lt;-</span> theta_hat <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> <span class="fu">f</span>(district, <span class="at">model =</span> <span class="st">"bym2"</span>,</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>                       <span class="at">graph =</span> g, <span class="at">scale.model =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>INLA<span class="sc">::</span><span class="fu">inla</span>(f, <span class="at">data =</span> s1k, <span class="at">family =</span> <span class="st">"gaussian"</span>,</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">control.family =</span> <span class="fu">list</span>(<span class="at">hyper =</span> <span class="fu">list</span>(<span class="at">prec =</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">list</span>(<span class="at">initial =</span> <span class="fu">log</span>(<span class="dv">1</span> <span class="sc">/</span> se2), <span class="at">fixed =</span> <span class="cn">TRUE</span>))))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="s2Report"></span></p>
 </div>
@@ -882,21 +886,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[\mathrm{AN}_j^{(s)} = \sum_{t:\, T_{jt} &gt; \mathrm{MMT}_j^{(s)}} y_{jt}\Big(1 - e^{-\{f_j^{(s)}(T_{jt}) - f_j^{(s)}(\mathrm{MMT}_j^{(s)})\}}\Big)\]</span> <span class="math display">\[P\big(\mathrm{AN}_j / \mathrm{pop}_j &gt; c \mid y\big) \approx \frac{1}{S}\sum_s 1\{\mathrm{AN}_j^{(s)} / \mathrm{pop}_j &gt; c\}\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for each draw s and district j:</span></span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f   <span class="ot">&lt;-</span> B <span class="sc">%*%</span> theta[s, j, ]           <span class="co"># curve</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>mmt <span class="ot">&lt;-</span> grid[<span class="fu">which.min</span>(f)]</span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>an  <span class="ot">&lt;-</span> <span class="fu">sum</span>(y_j[temp_j <span class="sc">&gt;</span> mmt] <span class="sc">*</span></span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>           (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>(f_t <span class="sc">-</span> f_mmt))))</span>
-<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># then summarise over draws:</span></span>
-<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(an <span class="sc">/</span> pop_j <span class="sc">*</span> <span class="fl">1e5</span> <span class="sc">/</span> years <span class="sc">&gt;</span> <span class="dv">60</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\mathrm{AN}_j^{(s)}\)</span>: heat-attributable visits in district <span class="math inline">\(j\)</span>, computed from draw <span class="math inline">\(s\)</span>.</li>
@@ -907,9 +899,21 @@ window.Quarto = {
 <li><span class="math inline">\(c\)</span>: the policy threshold for the exceedance probability.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co"># for each draw s and district j:</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>f   <span class="ot">&lt;-</span> B <span class="sc">%*%</span> theta[s, j, ]           <span class="co"># curve</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>mmt <span class="ot">&lt;-</span> grid[<span class="fu">which.min</span>(f)]</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>an  <span class="ot">&lt;-</span> <span class="fu">sum</span>(y_j[temp_j <span class="sc">&gt;</span> mmt] <span class="sc">*</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>           (<span class="dv">1</span> <span class="sc">-</span> <span class="fu">exp</span>(<span class="sc">-</span>(f_t <span class="sc">-</span> f_mmt))))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co"># then summarise over draws:</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="fu">mean</span>(an <span class="sc">/</span> pop_j <span class="sc">*</span> <span class="fl">1e5</span> <span class="sc">/</span> years <span class="sc">&gt;</span> <span class="dv">60</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="bReport"></span></p>
 </div>
@@ -933,7 +937,7 @@ window.Quarto = {
 <div class="triad">
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="sReport"></span></p>
 </div>
@@ -1109,6 +1113,9 @@ Simpson, Daniel, Håvard Rue, Andrea Riebler, Thiago G. Martins, and Sigrunn H. 
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

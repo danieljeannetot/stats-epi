@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -710,22 +714,9 @@ window.Quarto = {
 <p><span class="math inline">\(i\)</span> = child, <span class="math inline">\(j\)</span> = school, <span class="math inline">\(m\)</span> = average school size; <span class="math inline">\(\pi^2/3\)</span> is the variance of the logistic distribution.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>asthma[i] <span class="sc">~</span> <span class="fu">bernoulli</span>(p[i])</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logit</span>(p[i]) <span class="ot">=</span> a <span class="sc">+</span> u[school[i]]</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>u[j] <span class="sc">~</span> <span class="fu">normal</span>(<span class="dv">0</span>, tau)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(asthma <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> school),</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                   <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>tau2 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(lme4<span class="sc">::</span><span class="fu">VarCorr</span>(fit)<span class="sc">$</span>school)</span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>tau2 <span class="sc">/</span> (tau2 <span class="sc">+</span> pi<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">3</span>)       <span class="co"># ICC</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\pi_{ij}\)</span>: the risk for child <span class="math inline">\(i\)</span> in school <span class="math inline">\(j\)</span>.</li>
@@ -736,13 +727,27 @@ window.Quarto = {
 <li><span class="math inline">\(m\)</span>: the average school size.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>asthma[i] <span class="sc">~</span> <span class="fu">bernoulli</span>(p[i])</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logit</span>(p[i]) <span class="ot">=</span> a <span class="sc">+</span> u[school[i]]</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>u[j] <span class="sc">~</span> <span class="fu">normal</span>(<span class="dv">0</span>, tau)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(asthma <span class="sc">~</span> <span class="dv">1</span> <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> school),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>                   <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>tau2 <span class="ot">&lt;-</span> <span class="fu">as.numeric</span>(lme4<span class="sc">::</span><span class="fu">VarCorr</span>(fit)<span class="sc">$</span>school)</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>tau2 <span class="sc">/</span> (tau2 <span class="sc">+</span> pi<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">3</span>)       <span class="co"># ICC</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="cReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L18.0"></div>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -761,7 +766,7 @@ window.Quarto = {
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">c</span>(<span class="at">tau =</span> <span class="fu">sqrt</span>(tau2), <span class="at">icc =</span> tau2 <span class="sc">/</span> (tau2 <span class="sc">+</span> pi<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> <span class="dv">3</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>#&gt;        tau        icc 
-#&gt; 0.32760872 0.03159296</code></pre>
+#&gt; 0.32760873 0.03159296</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit1 <span class="ot">&lt;-</span> lme4<span class="sc">::</span><span class="fu">glmer</span>(asthma <span class="sc">~</span> <span class="fu">I</span>(no2_modeled <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">+</span> ses <span class="sc">+</span> green <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">|</span> school),</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>                    <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span>
@@ -799,17 +804,9 @@ window.Quarto = {
 <p><span class="math inline">\(\hat\theta_j\)</span>: school <span class="math inline">\(j\)</span>’s own log-odds, with standard error <span class="math inline">\(s_j\)</span>; <span class="math inline">\(\hat\mu\)</span>: overall log-odds.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lme4<span class="sc">::</span><span class="fu">ranef</span>(fit0)<span class="sc">$</span>school    <span class="co"># shrunken u_j</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit0)<span class="sc">$</span>school <span class="sc">|&gt;</span>         <span class="co"># alpha + u_j</span></span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">risk =</span> <span class="fu">plogis</span>(<span class="st">`</span><span class="at">(Intercept)</span><span class="st">`</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\hat\theta_j^{\text{pp}}\)</span>: the partially pooled estimate for school <span class="math inline">\(j\)</span>.</li>
@@ -820,7 +817,16 @@ window.Quarto = {
 <li><span class="math inline">\(s_j^2\)</span>: the school’s own sampling variance.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>lme4<span class="sc">::</span><span class="fu">ranef</span>(fit0)<span class="sc">$</span>school    <span class="co"># shrunken u_j</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="fu">coef</span>(fit0)<span class="sc">$</span>school <span class="sc">|&gt;</span>         <span class="co"># alpha + u_j</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">risk =</span> <span class="fu">plogis</span>(<span class="st">`</span><span class="at">(Intercept)</span><span class="st">`</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="pg-mount" data-pg="L18.1"></div>
 <div class="further">
 <p><strong>Further reading:</strong> <span class="citation" data-cites="efron1977stein">Efron and Morris (<a href="#ref-efron1977stein" role="doc-biblioref">1977</a>)</span> explain why shrinkage improves many estimates at once; <span class="citation" data-cites="gelman2007data">Gelman and Hill (<a href="#ref-gelman2007data" role="doc-biblioref">2007</a>)</span> on no, complete and partial pooling; <span class="citation" data-cites="snijders2012multilevel">Snijders and Bosker (<a href="#ref-snijders2012multilevel" role="doc-biblioref">2012</a>)</span> on empirical Bayes estimates of random effects.</p>
 </div>
@@ -839,21 +845,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[\hat\beta_j \sim \mathrm{Normal}(\beta_j, s_j^2), \qquad \beta_j \sim \mathrm{Normal}(\mu, \tau^2)\]</span> <span class="math display">\[Q = \sum_j \frac{(\hat\beta_j - \hat\beta_{\text{FE}})^2}{s_j^2}, \qquad I^2 = \max\!\left(0, \frac{Q - (J-1)}{Q}\right)\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># stage 1: one model per district (see 18.3 code)</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># stage 2: random-effects meta-analysis</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> mixmeta<span class="sc">::</span><span class="fu">mixmeta</span>(b <span class="sc">~</span> <span class="dv">1</span>, <span class="at">S =</span> se<span class="sc">^</span><span class="dv">2</span>,</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                         <span class="at">data =</span> stage1,</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                         <span class="at">method =</span> <span class="st">"reml"</span>)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(meta)   <span class="co"># pooled effect, tau, I2</span></span>
-<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">blup</span>(meta)      <span class="co"># shrunken district effects</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\hat\beta_j\)</span>: district <span class="math inline">\(j\)</span>’s estimated heat effect.</li>
@@ -866,9 +860,21 @@ window.Quarto = {
 <li><span class="math inline">\(J\)</span>: the number of districts.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># stage 1: one model per district (see 18.3 code)</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># stage 2: random-effects meta-analysis</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>meta <span class="ot">&lt;-</span> mixmeta<span class="sc">::</span><span class="fu">mixmeta</span>(b <span class="sc">~</span> <span class="dv">1</span>, <span class="at">S =</span> se<span class="sc">^</span><span class="dv">2</span>,</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>                         <span class="at">data =</span> stage1,</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>                         <span class="at">method =</span> <span class="st">"reml"</span>)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(meta)   <span class="co"># pooled effect, tau, I2</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a><span class="fu">blup</span>(meta)      <span class="co"># shrunken district effects</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="mReport"></span></p>
 </div>
@@ -941,19 +947,9 @@ window.Quarto = {
 <p><span class="math inline">\(I\)</span> = information matrix from the ordinary model; <span class="math inline">\(U_c\)</span> = score contribution of cluster <span class="math inline">\(c\)</span>.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(asthma <span class="sc">~</span> traffic, <span class="at">family =</span> binomial,</span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">data =</span> cohort_d)</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(fit)))                    <span class="co"># naive</span></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">diag</span>(sandwich<span class="sc">::</span><span class="fu">vcovCL</span>(fit,</span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">cluster =</span> <span class="sc">~</span> district)))        <span class="co"># robust</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\widehat{\mathrm{Var}}_{\text{CR}}(\hat\beta)\)</span>: the cluster-robust variance of the estimates.</li>
@@ -963,6 +959,16 @@ window.Quarto = {
 <li><span class="math inline">\(\hat\pi_i\)</span>: the fitted risk for child <span class="math inline">\(i\)</span>.</li>
 <li><span class="math inline">\(x_i\)</span>: child <span class="math inline">\(i\)</span>’s predictors.</li>
 </ul>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(asthma <span class="sc">~</span> traffic, <span class="at">family =</span> binomial,</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>           <span class="at">data =</span> cohort_d)</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">diag</span>(<span class="fu">vcov</span>(fit)))                    <span class="co"># naive</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sqrt</span>(<span class="fu">diag</span>(sandwich<span class="sc">::</span><span class="fu">vcovCL</span>(fit,</span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>          <span class="at">cluster =</span> <span class="sc">~</span> district)))        <span class="co"># robust</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
@@ -1088,6 +1094,9 @@ Snijders, Tom A. B., and Roel J. Bosker. 2012. <em>Multilevel Analysis: An Intro
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

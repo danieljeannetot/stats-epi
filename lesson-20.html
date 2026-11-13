@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -712,19 +716,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[\alpha^{(s)} \sim p(\alpha), \quad \beta^{(s)} \sim p(\beta), \quad \tilde\mu^{(s)}(T) = e^{\alpha^{(s)} + \beta^{(s)}(T - 20)}\]</span> <span class="math display">\[\tilde y^{(s)} \sim \mathrm{Poisson}\big(\tilde\mu^{(s)}(T)\big)\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="fu">log</span>(<span class="dv">8</span>), <span class="fl">0.5</span>)</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="dv">0</span>, <span class="fl">0.05</span>)</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(a <span class="sc">+</span> b <span class="sc">*</span> (<span class="dv">35</span> <span class="sc">-</span> <span class="dv">20</span>))     <span class="co"># visits at 35°C</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>brms<span class="sc">::</span><span class="fu">brm</span>(..., <span class="at">sample_prior =</span> <span class="st">"only"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(p(\alpha)\)</span>: the prior on the intercept.</li>
@@ -733,7 +727,18 @@ window.Quarto = {
 <li><span class="math inline">\(\tilde y^{(s)}\)</span>: visits simulated from the prior alone: the prior predictive distribution. Absurd values mean an unreasonable prior.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
 </div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>a <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="fu">log</span>(<span class="dv">8</span>), <span class="fl">0.5</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(<span class="dv">100</span>, <span class="dv">0</span>, <span class="fl">0.05</span>)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(a <span class="sc">+</span> b <span class="sc">*</span> (<span class="dv">35</span> <span class="sc">-</span> <span class="dv">20</span>))     <span class="co"># visits at 35°C</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>brms<span class="sc">::</span><span class="fu">brm</span>(..., <span class="at">sample_prior =</span> <span class="st">"only"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
+</div>
+<div class="pg-mount" data-pg="L20.0"></div>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -792,18 +797,9 @@ window.Quarto = {
 <p><span class="math inline">\(L\)</span> and <span class="math inline">\(U\)</span>: the lowest and highest plausible effects, read as a 95% prior range.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fl">0.00</span>; U <span class="ot">&lt;-</span> <span class="fl">0.04</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> (<span class="fu">log1p</span>(L) <span class="sc">+</span> <span class="fu">log1p</span>(U)) <span class="sc">/</span> <span class="dv">2</span></span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> (<span class="fu">log1p</span>(U) <span class="sc">-</span> <span class="fu">log1p</span>(L)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fl">1.96</span>)</span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">prior</span>(<span class="fu">normal</span>(m, s), <span class="at">class =</span> b)   <span class="co"># brms</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(m\)</span>: the prior mean on the log scale: the midpoint of the plausible range.</li>
@@ -813,13 +809,23 @@ window.Quarto = {
 <li><span class="math inline">\(1.96\)</span>: the normal quantile for 95%.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>L <span class="ot">&lt;-</span> <span class="fl">0.00</span>; U <span class="ot">&lt;-</span> <span class="fl">0.04</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>m <span class="ot">&lt;-</span> (<span class="fu">log1p</span>(L) <span class="sc">+</span> <span class="fu">log1p</span>(U)) <span class="sc">/</span> <span class="dv">2</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> (<span class="fu">log1p</span>(U) <span class="sc">-</span> <span class="fu">log1p</span>(L)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fl">1.96</span>)</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">prior</span>(<span class="fu">normal</span>(m, s), <span class="at">class =</span> b)   <span class="co"># brms</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="elReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L20.1"></div>
 <div class="further">
 <p><strong>Further reading:</strong> <span class="citation" data-cites="spiegelhalter2004bayesian">Spiegelhalter et al. (<a href="#ref-spiegelhalter2004bayesian" role="doc-biblioref">2004</a>)</span> on eliciting priors from clinical and epidemiological experts; <span class="citation" data-cites="greenland2006bayesian">Greenland (<a href="#ref-greenland2006bayesian" role="doc-biblioref">2006</a>)</span> on priors expressed as plausible ranges of relative risks; <span class="citation" data-cites="greenland2007bayesian">Greenland (<a href="#ref-greenland2007bayesian" role="doc-biblioref">2007</a>)</span> on informative priors in regression.</p>
 </div>
@@ -869,19 +875,9 @@ window.Quarto = {
 <p><span class="math inline">\(P = I\)</span> for the independent prior; <span class="math inline">\(P = D^\top D\)</span>, with <span class="math inline">\(D\)</span> the first-difference matrix, for the random walk.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>b[<span class="dv">1</span>] <span class="sc">~</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">0.1</span>)</span>
-<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>b[l] <span class="sc">~</span> <span class="fu">normal</span>(b[l <span class="sc">-</span> <span class="dv">1</span>], sigma_rw)    <span class="co"># l = 2..L</span></span>
-<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># mgcv: the same penalty, chosen by REML</span></span>
-<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>mgcv<span class="sc">::</span><span class="fu">gam</span>(visits <span class="sc">~</span> <span class="fu">s</span>(lag_matrix, <span class="at">by =</span> temp_matrix,</span>
-<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">bs =</span> <span class="st">"ps"</span>), ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\beta_\ell\)</span>: the effect at lag <span class="math inline">\(\ell\)</span>.</li>
@@ -890,6 +886,16 @@ window.Quarto = {
 <li><span class="math inline">\(P\)</span>: the penalty matrix: identity for independent priors, a difference matrix for a random walk.</li>
 <li><span class="math inline">\(\ell(\beta)\)</span>: the log-likelihood: the posterior is likelihood minus a penalty, which is why a penalty is a prior.</li>
 </ul>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>b[<span class="dv">1</span>] <span class="sc">~</span> <span class="fu">normal</span>(<span class="dv">0</span>, <span class="fl">0.1</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>b[l] <span class="sc">~</span> <span class="fu">normal</span>(b[l <span class="sc">-</span> <span class="dv">1</span>], sigma_rw)    <span class="co"># l = 2..L</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co"># mgcv: the same penalty, chosen by REML</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>mgcv<span class="sc">::</span><span class="fu">gam</span>(visits <span class="sc">~</span> <span class="fu">s</span>(lag_matrix, <span class="at">by =</span> temp_matrix,</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">bs =</span> <span class="st">"ps"</span>), ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
@@ -1015,6 +1021,9 @@ Wood, Simon N. 2017. <em>Generalized Additive Models: An Introduction with <span
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

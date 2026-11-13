@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -716,9 +720,20 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[P(A \cup B) = P(A) + P(B) - P(A \cap B)\]</span> <span class="math display">\[P(A \mid B) = \frac{P(A \cap B)}{P(B)}\]</span> <span class="math display">\[\text{independent} \iff P(A \cap B) = P(A)\,P(B)\]</span></p>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(P(A \cup B)\)</span>: the probability of A or B (or both); subtracting <span class="math inline">\(P(A \cap B)\)</span> avoids counting the overlap twice.</li>
+<li><span class="math inline">\(P(A \cap B)\)</span>: the probability of A and B together.</li>
+<li><span class="math inline">\(P(A \mid B)\)</span>: the conditional probability of A given that B happened: restrict attention to B, then ask how often A occurs.</li>
+<li><span class="math inline">\(\iff\)</span>: “if and only if”: events are independent exactly when the joint probability equals the product.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
@@ -729,20 +744,9 @@ window.Quarto = {
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_A_givB  =</span> <span class="fu">mean</span>(asthma[parent_smoke]),</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">p_A_givnB =</span> <span class="fu">mean</span>(asthma[<span class="sc">!</span>parent_smoke]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(P(A \cup B)\)</span>: the probability of A or B (or both); subtracting <span class="math inline">\(P(A \cap B)\)</span> avoids counting the overlap twice.</li>
-<li><span class="math inline">\(P(A \cap B)\)</span>: the probability of A and B together.</li>
-<li><span class="math inline">\(P(A \mid B)\)</span>: the conditional probability of A given that B happened: restrict attention to B, then ask how often A occurs.</li>
-<li><span class="math inline">\(\iff\)</span>: “if and only if”: events are independent exactly when the joint probability equals the product.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="pReport"></span></p>
 </div>
@@ -827,20 +831,9 @@ window.Quarto = {
 <p><span class="math inline">\(p\)</span> = prevalence, <span class="math inline">\(D^+\)</span> = has asthma, <span class="math inline">\(T^+\)</span> = positive test.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">sens =</span> <span class="fu">mean</span>(wheeze_q[asthma <span class="sc">==</span> <span class="dv">1</span>]),</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">spec =</span> <span class="fu">mean</span>(<span class="sc">!</span>wheeze_q[asthma <span class="sc">==</span> <span class="dv">0</span>]),</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ppv  =</span> <span class="fu">mean</span>(asthma[wheeze_q]),</span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">npv  =</span> <span class="fu">mean</span>(<span class="dv">1</span> <span class="sc">-</span> asthma[<span class="sc">!</span>wheeze_q]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(Se\)</span>: sensitivity: the share of children with asthma who test positive.</li>
@@ -849,13 +842,25 @@ window.Quarto = {
 <li><span class="math inline">\(p\)</span>: the prevalence before testing. With low prevalence, most positives can be false, even with a good test.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">sens =</span> <span class="fu">mean</span>(wheeze_q[asthma <span class="sc">==</span> <span class="dv">1</span>]),</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">spec =</span> <span class="fu">mean</span>(<span class="sc">!</span>wheeze_q[asthma <span class="sc">==</span> <span class="dv">0</span>]),</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ppv  =</span> <span class="fu">mean</span>(asthma[wheeze_q]),</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">npv  =</span> <span class="fu">mean</span>(<span class="dv">1</span> <span class="sc">-</span> asthma[<span class="sc">!</span>wheeze_q]))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="dReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L02.1"></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -931,18 +936,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[LR^+ = \frac{Se}{1 - Sp} \qquad LR^- = \frac{1 - Se}{Sp}\]</span> <span class="math display">\[\text{post-test odds} = \text{pre-test odds} \times LR\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>lr_pos    <span class="ot">&lt;-</span> sens <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> spec)</span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>pre_odds  <span class="ot">&lt;-</span> p_pre <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> p_pre)</span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>post_odds <span class="ot">&lt;-</span> pre_odds <span class="sc">*</span> lr_pos</span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>p_post    <span class="ot">&lt;-</span> post_odds <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> post_odds)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(LR^+\)</span>: the positive likelihood ratio: how much a positive test multiplies the odds of disease.</li>
@@ -951,13 +947,23 @@ window.Quarto = {
 <li><span class="math inline">\(\text{post-test odds}\)</span>: the odds after the test result: Bayes’ theorem in its simplest form.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>lr_pos    <span class="ot">&lt;-</span> sens <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> spec)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>pre_odds  <span class="ot">&lt;-</span> p_pre <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> p_pre)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>post_odds <span class="ot">&lt;-</span> pre_odds <span class="sc">*</span> lr_pos</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>p_post    <span class="ot">&lt;-</span> post_odds <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">+</span> post_odds)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="lReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L02.2"></div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1089,6 +1095,9 @@ Lash, Timothy L., Tyler J. VanderWeele, Sebastien Haneuse, and Kenneth J. Rothma
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

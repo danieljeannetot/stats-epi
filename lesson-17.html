@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -714,21 +718,9 @@ window.Quarto = {
 <p><span class="math inline">\(r_k\)</span> = city-wide rate in age group <span class="math inline">\(k\)</span>; <span class="math inline">\(\theta_j\)</span> = the district’s true relative risk.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>rates <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span> <span class="fu">group_by</span>(age_group) <span class="sc">|&gt;</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">r =</span> <span class="fu">sum</span>(visits) <span class="sc">/</span> <span class="fu">sum</span>(population))</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>visits <span class="sc">|&gt;</span> <span class="fu">left_join</span>(rates, <span class="at">by =</span> <span class="st">"age_group"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(district) <span class="sc">|&gt;</span></span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">O =</span> <span class="fu">sum</span>(visits),</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">E =</span> <span class="fu">sum</span>(r <span class="sc">*</span> population),</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">smr =</span> O <span class="sc">/</span> E)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(E_j\)</span>: the expected count in district <span class="math inline">\(j\)</span> if it had the city-wide age-specific rates.</li>
@@ -740,13 +732,26 @@ window.Quarto = {
 <li><span class="math inline">\(\mathrm{SE}(SMR_j)\)</span>: its standard error: large when the expected count is small.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>rates <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span> <span class="fu">group_by</span>(age_group) <span class="sc">|&gt;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">r =</span> <span class="fu">sum</span>(visits) <span class="sc">/</span> <span class="fu">sum</span>(population))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>visits <span class="sc">|&gt;</span> <span class="fu">left_join</span>(rates, <span class="at">by =</span> <span class="st">"age_group"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(district) <span class="sc">|&gt;</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">O =</span> <span class="fu">sum</span>(visits),</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">E =</span> <span class="fu">sum</span>(r <span class="sc">*</span> population),</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>            <span class="at">smr =</span> O <span class="sc">/</span> E)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="mReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L17.0"></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -784,20 +789,9 @@ window.Quarto = {
 <p><span class="math inline">\(w_{ij} = 1\)</span> if districts <span class="math inline">\(i\)</span> and <span class="math inline">\(j\)</span> are neighbors (here: share a border or a corner), row-standardized. Under no autocorrelation, <span class="math inline">\(E[I] = -1/(n-1)\)</span>.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nb <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">strsplit</span>(districts<span class="sc">$</span>neighbors, <span class="st">" "</span>),</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>             as.integer)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(nb) <span class="ot">&lt;-</span> <span class="st">"nb"</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>lw <span class="ot">&lt;-</span> spdep<span class="sc">::</span><span class="fu">nb2listw</span>(nb, <span class="at">style =</span> <span class="st">"W"</span>)</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spdep<span class="sc">::</span><span class="fu">moran.mc</span>(districts<span class="sc">$</span>deprivation, lw,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(I\)</span>: Moran’s I: positive when neighbors are alike, negative when they differ.</li>
@@ -806,6 +800,17 @@ window.Quarto = {
 <li><span class="math inline">\(\bar x\)</span>: the citywide mean.</li>
 <li><span class="math inline">\(n\)</span>: the number of districts.</li>
 </ul>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>nb <span class="ot">&lt;-</span> <span class="fu">lapply</span>(<span class="fu">strsplit</span>(districts<span class="sc">$</span>neighbors, <span class="st">" "</span>),</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>             as.integer)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">class</span>(nb) <span class="ot">&lt;-</span> <span class="st">"nb"</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>lw <span class="ot">&lt;-</span> spdep<span class="sc">::</span><span class="fu">nb2listw</span>(nb, <span class="at">style =</span> <span class="st">"W"</span>)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>spdep<span class="sc">::</span><span class="fu">moran.mc</span>(districts<span class="sc">$</span>deprivation, lw,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
@@ -841,7 +846,7 @@ window.Quarto = {
 #&gt; weights: lw  
 #&gt; number of simulations + 1: 1000 
 #&gt; 
-#&gt; statistic = 0.095085, observed rank = 901, p-value = 0.099
+#&gt; statistic = 0.095085, observed rank = 892, p-value = 0.108
 #&gt; alternative hypothesis: greater</code></pre>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>spdep<span class="sc">::</span><span class="fu">moran.mc</span>(districts<span class="sc">$</span>deprivation, lw, <span class="at">nsim =</span> <span class="dv">999</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
@@ -853,7 +858,7 @@ window.Quarto = {
 #&gt; weights: lw  
 #&gt; number of simulations + 1: 1000 
 #&gt; 
-#&gt; statistic = -0.01325, observed rank = 747, p-value = 0.253
+#&gt; statistic = -0.01325, observed rank = 741, p-value = 0.259
 #&gt; alternative hypothesis: greater</code></pre>
 </div>
 </div>
@@ -899,20 +904,9 @@ window.Quarto = {
 <p><span class="math inline">\(\hat\mu\)</span> and <span class="math inline">\(\hat\sigma^2_\theta\)</span>: mean and between-district variance of the true relative risks, estimated by the method of moments (Marshall, 1991).</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mu   <span class="ot">&lt;-</span> <span class="fu">sum</span>(O) <span class="sc">/</span> <span class="fu">sum</span>(E)</span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>s2   <span class="ot">&lt;-</span> <span class="fu">sum</span>(E <span class="sc">*</span> (smr <span class="sc">-</span> mu)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> <span class="fu">sum</span>(E) <span class="sc">-</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        mu <span class="sc">/</span> <span class="fu">mean</span>(E)</span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>s2   <span class="ot">&lt;-</span> <span class="fu">max</span>(s2, <span class="dv">0</span>)</span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>w    <span class="ot">&lt;-</span> s2 <span class="sc">/</span> (s2 <span class="sc">+</span> mu <span class="sc">/</span> E)</span>
-<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>smr_eb <span class="ot">&lt;-</span> w <span class="sc">*</span> smr <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> w) <span class="sc">*</span> mu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\hat\theta_j^{\text{EB}}\)</span>: the empirical Bayes estimate: a weighted average of the district’s SMR and the citywide mean.</li>
@@ -923,13 +917,25 @@ window.Quarto = {
 <li><span class="math inline">\(E_j\)</span>: the expected count, which sets how noisy the SMR is.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>mu   <span class="ot">&lt;-</span> <span class="fu">sum</span>(O) <span class="sc">/</span> <span class="fu">sum</span>(E)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>s2   <span class="ot">&lt;-</span> <span class="fu">sum</span>(E <span class="sc">*</span> (smr <span class="sc">-</span> mu)<span class="sc">^</span><span class="dv">2</span>) <span class="sc">/</span> <span class="fu">sum</span>(E) <span class="sc">-</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>        mu <span class="sc">/</span> <span class="fu">mean</span>(E)</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>s2   <span class="ot">&lt;-</span> <span class="fu">max</span>(s2, <span class="dv">0</span>)</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>w    <span class="ot">&lt;-</span> s2 <span class="sc">/</span> (s2 <span class="sc">+</span> mu <span class="sc">/</span> E)</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>smr_eb <span class="ot">&lt;-</span> w <span class="sc">*</span> smr <span class="sc">+</span> (<span class="dv">1</span> <span class="sc">-</span> w) <span class="sc">*</span> mu</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="sReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L17.2"></div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1058,6 +1064,9 @@ Waller, Lance A., and Carol A. Gotway. 2004. <em>Applied Spatial Statistics for 
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -711,20 +715,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[\log\mu_t = \alpha + \sum_{\ell=0}^{L}\beta_\ell\, h_{t-\ell} + s(t) + \gamma^\top \mathrm{dow}_t, \qquad h_t = \max(0, T_t - 20)\]</span> <span class="math display">\[\text{constrained: } \beta_\ell = \sum_k \theta_k\, c_k(\ell), \qquad \text{cumulative} = \sum_\ell \beta_\ell\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cb <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossbasis</span>(<span class="fu">pmax</span>(city_daily<span class="sc">$</span>temp <span class="sc">-</span> <span class="dv">20</span>, <span class="dv">0</span>),</span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">lag =</span> <span class="dv">10</span>,</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">argvar =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"lin"</span>),</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">arglag =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>, <span class="at">df =</span> <span class="dv">4</span>))</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> cb <span class="sc">+</span> splines<span class="sc">::</span><span class="fu">ns</span>(t, <span class="at">df =</span> <span class="dv">35</span>) <span class="sc">+</span> dow,</span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> quasipoisson, <span class="at">data =</span> city_daily)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\beta_\ell\)</span>: the effect of heat on day <span class="math inline">\(t-\ell\)</span> on visits on day <span class="math inline">\(t\)</span>: the lag-specific effect.</li>
@@ -735,6 +728,17 @@ window.Quarto = {
 <li><span class="math inline">\(c_k(\ell)\)</span>: the lag basis functions: smooth curves over lags.</li>
 <li><span class="math inline">\(\text{cumulative}\)</span>: the cumulative effect: the sum over all lags.</li>
 </ul>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>cb <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossbasis</span>(<span class="fu">pmax</span>(city_daily<span class="sc">$</span>temp <span class="sc">-</span> <span class="dv">20</span>, <span class="dv">0</span>),</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>        <span class="at">lag =</span> <span class="dv">10</span>,</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="at">argvar =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"lin"</span>),</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>        <span class="at">arglag =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>, <span class="at">df =</span> <span class="dv">4</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> cb <span class="sc">+</span> splines<span class="sc">::</span><span class="fu">ns</span>(t, <span class="at">df =</span> <span class="dv">35</span>) <span class="sc">+</span> dow,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> quasipoisson, <span class="at">data =</span> city_daily)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="further">
@@ -763,9 +767,21 @@ window.Quarto = {
 <p><span class="math inline">\(b_j\)</span>: spline basis in temperature; <span class="math inline">\(c_k\)</span>: spline basis in lag; the <span class="math inline">\(\eta_{jk}\)</span> define the whole surface.</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(\eta_{jk}\)</span>: the cross-basis coefficients: together they define the whole exposure–lag–response surface.</li>
+<li><span class="math inline">\(w_{t,jk}\)</span>: the cross-basis variable: exposure history on day <span class="math inline">\(t\)</span> transformed by basis <span class="math inline">\(j\)</span> and weighted by lag basis <span class="math inline">\(k\)</span>.</li>
+<li><span class="math inline">\(b_j(T_{t-\ell})\)</span>: exposure basis function <span class="math inline">\(j\)</span> applied to the temperature <span class="math inline">\(\ell\)</span> days earlier.</li>
+<li><span class="math inline">\(c_k(\ell)\)</span>: lag basis function <span class="math inline">\(k\)</span> at lag <span class="math inline">\(\ell\)</span>.</li>
+<li><span class="math inline">\(L\)</span>: the maximum lag.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cb <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crossbasis</span>(city_daily<span class="sc">$</span>temp, <span class="at">lag =</span> <span class="dv">21</span>,</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">argvar =</span> <span class="fu">list</span>(<span class="at">fun =</span> <span class="st">"ns"</span>, <span class="at">knots =</span> <span class="fu">quantile</span>(</span>
@@ -775,18 +791,6 @@ window.Quarto = {
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> cb <span class="sc">+</span> splines<span class="sc">::</span><span class="fu">ns</span>(t, <span class="at">df =</span> <span class="dv">35</span>) <span class="sc">+</span></span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>             dow, <span class="at">family =</span> quasipoisson,</span>
 <span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>           <span class="at">data =</span> city_daily)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(\eta_{jk}\)</span>: the cross-basis coefficients: together they define the whole exposure–lag–response surface.</li>
-<li><span class="math inline">\(w_{t,jk}\)</span>: the cross-basis variable: exposure history on day <span class="math inline">\(t\)</span> transformed by basis <span class="math inline">\(j\)</span> and weighted by lag basis <span class="math inline">\(k\)</span>.</li>
-<li><span class="math inline">\(b_j(T_{t-\ell})\)</span>: exposure basis function <span class="math inline">\(j\)</span> applied to the temperature <span class="math inline">\(\ell\)</span> days earlier.</li>
-<li><span class="math inline">\(c_k(\ell)\)</span>: lag basis function <span class="math inline">\(k\)</span> at lag <span class="math inline">\(\ell\)</span>.</li>
-<li><span class="math inline">\(L\)</span>: the maximum lag.</li>
-</ul>
 </div>
 </div>
 <div class="further">
@@ -812,21 +816,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[\log RR_{\text{cum}}(x) = \sum_{\ell=0}^{L}\sum_{j,k}\eta_{jk}\,\big[b_j(x) - b_j(x_{\text{ref}})\big]\, c_k(\ell)\]</span> <span class="math display">\[\mathrm{MMT} = \arg\min_x \log RR_{\text{cum}}(x)\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crosspred</span>(cb, fit, <span class="at">cen =</span> <span class="dv">20</span>,</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">by =</span> <span class="fl">0.1</span>)</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>mmt <span class="ot">&lt;-</span> pred<span class="sc">$</span>predvar[<span class="fu">which.min</span>(pred<span class="sc">$</span>allRRfit)]</span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>pred2 <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crosspred</span>(cb, fit, <span class="at">cen =</span> mmt,</span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                         <span class="at">at =</span> <span class="fu">quantile</span>(city_daily<span class="sc">$</span>temp,</span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">c</span>(.<span class="dv">01</span>, .<span class="dv">99</span>)))</span>
-<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>pred2<span class="sc">$</span>allRRfit; pred2<span class="sc">$</span>allRRlow; pred2<span class="sc">$</span>allRRhigh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\log RR_{\text{cum}}(x)\)</span>: the cumulative log relative risk at temperature <span class="math inline">\(x\)</span>, summed over lags.</li>
@@ -836,13 +828,26 @@ window.Quarto = {
 <li><span class="math inline">\(\arg\min_x\)</span>: “the value of <span class="math inline">\(x\)</span> that minimizes”.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>pred <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crosspred</span>(cb, fit, <span class="at">cen =</span> <span class="dv">20</span>,</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>                        <span class="at">by =</span> <span class="fl">0.1</span>)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>mmt <span class="ot">&lt;-</span> pred<span class="sc">$</span>predvar[<span class="fu">which.min</span>(pred<span class="sc">$</span>allRRfit)]</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>pred2 <span class="ot">&lt;-</span> dlnm<span class="sc">::</span><span class="fu">crosspred</span>(cb, fit, <span class="at">cen =</span> mmt,</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>                         <span class="at">at =</span> <span class="fu">quantile</span>(city_daily<span class="sc">$</span>temp,</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>                                       <span class="fu">c</span>(.<span class="dv">01</span>, .<span class="dv">99</span>)))</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>pred2<span class="sc">$</span>allRRfit; pred2<span class="sc">$</span>allRRlow; pred2<span class="sc">$</span>allRRhigh</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="cReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L16.2"></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -921,19 +926,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[AF_t = 1 - \exp\{-\log RR_{\text{cum}}(T_t)\}, \qquad AN = \sum_t y_t\, AF_t\]</span> <span class="math display">\[AF_{\text{heat}} = \frac{\sum_{t: T_t &gt; \mathrm{MMT}} y_t\, AF_t}{\sum_t y_t}\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># attrdl() from the dlnm tutorial code</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># (Gasparrini &amp; Leone 2014):</span></span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># attrdl(city_daily$temp, cb, city_daily$visits,</span></span>
-<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#        fit, type = "af", cen = mmt,</span></span>
-<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#        range = c(mmt, 100), sim = TRUE)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(AF_t\)</span>: the share of day <span class="math inline">\(t\)</span>’s visits attributable to its temperature (relative to the MMT).</li>
@@ -943,13 +938,24 @@ window.Quarto = {
 <li><span class="math inline">\(\mathrm{MMT}\)</span>: the reference temperature separating heat from cold.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># attrdl() from the dlnm tutorial code</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="co"># (Gasparrini &amp; Leone 2014):</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a><span class="co"># attrdl(city_daily$temp, cb, city_daily$visits,</span></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">#        fit, type = "af", cen = mmt,</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="co">#        range = c(mmt, 100), sim = TRUE)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="aReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L16.3"></div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1105,6 +1111,9 @@ Tobías, Aurelio, Ben Armstrong, and Antonio Gasparrini. 2017. <span>“Investig
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

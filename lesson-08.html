@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -715,17 +719,9 @@ window.Quarto = {
 <p>Linear regression: normal, <span class="math inline">\(g(\mu) = \mu\)</span>. Logistic: Bernoulli, <span class="math inline">\(g(\pi) = \log\frac{\pi}{1-\pi}\)</span>. Poisson: <span class="math inline">\(g(\mu) = \log\mu\)</span>.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family =</span> gaussian)              <span class="co"># identity</span></span>
-<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>))</span>
-<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family =</span> <span class="fu">poisson</span>(<span class="at">link =</span> <span class="st">"log"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(Y_i\)</span>: the outcome for observation <span class="math inline">\(i\)</span>.</li>
@@ -735,9 +731,17 @@ window.Quarto = {
 <li><span class="math inline">\(\beta\)</span>: the effect of <span class="math inline">\(x\)</span> on the link scale.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family =</span> gaussian)              <span class="co"># identity</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family =</span> <span class="fu">binomial</span>(<span class="at">link =</span> <span class="st">"logit"</span>))</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(y <span class="sc">~</span> x, <span class="at">family =</span> <span class="fu">poisson</span>(<span class="at">link =</span> <span class="st">"log"</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p>Coefficients are reported on the scale that makes sense for the link: as differences for the identity link, <strong>odds ratios</strong> <span class="math inline">\(e^{\beta}\)</span> for the logit link, and <strong>rate ratios</strong> <span class="math inline">\(e^{\beta}\)</span> for the log link.</p>
 </div>
@@ -766,22 +770,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[Y_i \sim \mathrm{Bernoulli}(\pi_i)\]</span> <span class="math display">\[\mathrm{logit}(\pi_i) = \alpha + \beta\,\frac{\mathrm{NO}_{2,i}}{10} + \gamma^\top z_i, \qquad OR_{10} = e^{\beta}\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>asthma[i] <span class="sc">~</span> <span class="fu">bernoulli</span>(p[i])</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logit</span>(p[i]) <span class="ot">=</span> a <span class="sc">+</span> b <span class="sc">*</span> no2[i] <span class="sc">/</span> <span class="dv">10</span> <span class="sc">+</span> g <span class="sc">*</span> z[i]</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(asthma <span class="sc">~</span> <span class="fu">I</span>(no2_modeled <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">+</span> ses <span class="sc">+</span></span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>             parent_smoke <span class="sc">+</span> green <span class="sc">+</span> sex,</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(fit, <span class="at">exponentiate =</span> <span class="cn">TRUE</span>,</span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\mathrm{Bernoulli}\)</span>: the distribution of a yes/no outcome.</li>
@@ -792,13 +783,27 @@ window.Quarto = {
 <li><span class="math inline">\(OR_{10}\)</span>: the odds ratio per 10 µg/m³: <span class="math inline">\(e^{\beta}\)</span>.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>asthma[i] <span class="sc">~</span> <span class="fu">bernoulli</span>(p[i])</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">logit</span>(p[i]) <span class="ot">=</span> a <span class="sc">+</span> b <span class="sc">*</span> no2[i] <span class="sc">/</span> <span class="dv">10</span> <span class="sc">+</span> g <span class="sc">*</span> z[i]</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">glm</span>(asthma <span class="sc">~</span> <span class="fu">I</span>(no2_modeled <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">+</span> ses <span class="sc">+</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>             parent_smoke <span class="sc">+</span> green <span class="sc">+</span> sex,</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> binomial, <span class="at">data =</span> cohort)</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>broom<span class="sc">::</span><span class="fu">tidy</span>(fit, <span class="at">exponentiate =</span> <span class="cn">TRUE</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>            <span class="at">conf.int =</span> <span class="cn">TRUE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="gReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L08.1"></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -878,9 +883,21 @@ window.Quarto = {
 <p><span class="math inline">\(j\)</span> = district, <span class="math inline">\(k\)</span> = age group. <span class="math inline">\(e^{\gamma_k}\)</span> and <span class="math inline">\(e^{\beta}\)</span> are rate ratios.</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(D_{jk}\)</span>: the number of cases in district <span class="math inline">\(j\)</span> and age group <span class="math inline">\(k\)</span>.</li>
+<li><span class="math inline">\(\mu_{jk}\)</span>: the expected number of cases.</li>
+<li><span class="math inline">\(\log PT_{jk}\)</span>: the offset: log person-time, entered with coefficient fixed at 1, so the model describes rates rather than counts.</li>
+<li><span class="math inline">\(\gamma_k\)</span>: the age-group effects; <span class="math inline">\(e^{\gamma_k}\)</span> is the rate ratio relative to the reference age group.</li>
+<li><span class="math inline">\(\mathrm{dep}_j\)</span>: district <span class="math inline">\(j\)</span>’s deprivation score; <span class="math inline">\(e^{\beta}\)</span> is the rate ratio per unit.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>D[j,k] <span class="sc">~</span> <span class="fu">poisson</span>(mu[j,k])</span>
 <span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">log</span>(mu[j,k]) <span class="ot">=</span> <span class="fu">log</span>(PT[j,k]) <span class="sc">+</span> a <span class="sc">+</span> g[k] <span class="sc">+</span> b <span class="sc">*</span> dep[j]</span>
@@ -893,25 +910,14 @@ window.Quarto = {
 <span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(D <span class="sc">~</span> age_group <span class="sc">+</span> deprivation <span class="sc">+</span> <span class="fu">offset</span>(<span class="fu">log</span>(PT)),</span>
 <span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> poisson, <span class="at">data =</span> agg)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(D_{jk}\)</span>: the number of cases in district <span class="math inline">\(j\)</span> and age group <span class="math inline">\(k\)</span>.</li>
-<li><span class="math inline">\(\mu_{jk}\)</span>: the expected number of cases.</li>
-<li><span class="math inline">\(\log PT_{jk}\)</span>: the offset: log person-time, entered with coefficient fixed at 1, so the model describes rates rather than counts.</li>
-<li><span class="math inline">\(\gamma_k\)</span>: the age-group effects; <span class="math inline">\(e^{\gamma_k}\)</span> is the rate ratio relative to the reference age group.</li>
-<li><span class="math inline">\(\mathrm{dep}_j\)</span>: district <span class="math inline">\(j\)</span>’s deprivation score; <span class="math inline">\(e^{\beta}\)</span> is the rate ratio per unit.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="oReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L08.2"></div>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-3-contents" aria-controls="callout-3" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
@@ -968,17 +974,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[E[Y_t] = \mu_t, \qquad \mathrm{Var}(Y_t) = \phi\,\mu_t\]</span> <span class="math display">\[\hat\phi = \frac{1}{n-p}\sum_t \frac{(y_t - \hat\mu_t)^2}{\hat\mu_t}, \qquad SE_{\text{quasi}} = \sqrt{\hat\phi}\,SE_{\text{Poisson}}\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(visits <span class="sc">~</span> <span class="fu">I</span>(pm25 <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">+</span> <span class="fu">sin</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>doy<span class="sc">/</span><span class="fl">365.25</span>) <span class="sc">+</span></span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cos</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>doy<span class="sc">/</span><span class="fl">365.25</span>) <span class="sc">+</span> dow,</span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> quasipoisson, <span class="at">data =</span> city_daily)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\mu_t\)</span>: the expected count on day <span class="math inline">\(t\)</span>.</li>
@@ -987,13 +985,22 @@ window.Quarto = {
 <li><span class="math inline">\(SE_{\text{quasi}}\)</span>: quasi-Poisson standard errors: Poisson ones inflated by <span class="math inline">\(\sqrt{\hat\phi}\)</span>; the estimates are unchanged.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">glm</span>(visits <span class="sc">~</span> <span class="fu">I</span>(pm25 <span class="sc">/</span> <span class="dv">10</span>) <span class="sc">+</span> <span class="fu">sin</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>doy<span class="sc">/</span><span class="fl">365.25</span>) <span class="sc">+</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>      <span class="fu">cos</span>(<span class="dv">2</span><span class="sc">*</span>pi<span class="sc">*</span>doy<span class="sc">/</span><span class="fl">365.25</span>) <span class="sc">+</span> dow,</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">family =</span> quasipoisson, <span class="at">data =</span> city_daily)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="qReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L08.3"></div>
 <div class="callout callout-style-default callout-tip no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1123,6 +1130,9 @@ Zou, Guangyong. 2004. <span>“A Modified <span>P</span>oisson Regression Approa
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

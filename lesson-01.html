@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -731,9 +735,21 @@ window.Quarto = {
 <p><span class="math inline">\(Q(p)\)</span> is the value below which a fraction <span class="math inline">\(p\)</span> of the data lies.</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(\bar{x}\)</span>: the mean: the sum of all values divided by their number <span class="math inline">\(n\)</span>.</li>
+<li><span class="math inline">\(x_i\)</span>: the value for observation <span class="math inline">\(i\)</span>, for example one day’s visit count.</li>
+<li><span class="math inline">\(s\)</span>: the standard deviation: the typical distance of a value from the mean; dividing by <span class="math inline">\(n-1\)</span> corrects for having estimated the mean.</li>
+<li><span class="math inline">\(Q(0.5)\)</span>: the median: half the values lie below it; unlike the mean, it isn’t pulled by extreme values.</li>
+<li><span class="math inline">\(\text{IQR}\)</span>: the interquartile range: the spread of the middle half of the data.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>city_daily <span class="sc">|&gt;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
@@ -744,21 +760,9 @@ window.Quarto = {
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">q1     =</span> <span class="fu">quantile</span>(visits, <span class="fl">0.25</span>),</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">q3     =</span> <span class="fu">quantile</span>(visits, <span class="fl">0.75</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(\bar{x}\)</span>: the mean: the sum of all values divided by their number <span class="math inline">\(n\)</span>.</li>
-<li><span class="math inline">\(x_i\)</span>: the value for observation <span class="math inline">\(i\)</span>, for example one day’s visit count.</li>
-<li><span class="math inline">\(s\)</span>: the standard deviation: the typical distance of a value from the mean; dividing by <span class="math inline">\(n-1\)</span> corrects for having estimated the mean.</li>
-<li><span class="math inline">\(Q(0.5)\)</span>: the median: half the values lie below it; unlike the mean, it isn’t pulled by extreme values.</li>
-<li><span class="math inline">\(\text{IQR}\)</span>: the interquartile range: the spread of the middle half of the data.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="hReport"></span></p>
 <div class="note">
@@ -827,9 +831,21 @@ window.Quarto = {
 <p><span class="math inline">\(D\)</span> = cases or events, <span class="math inline">\(N\)</span> = people at risk, <span class="math inline">\(PT\)</span> = person-time.</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(R\)</span>: the risk: the share of people at risk who become cases over a period.</li>
+<li><span class="math inline">\(O\)</span>: the odds: cases per non-case. Close to the risk when the outcome is rare.</li>
+<li><span class="math inline">\(I\)</span>: the incidence rate: cases per unit of person-time, for example per 1,000 person-years.</li>
+<li><span class="math inline">\(D\)</span>: the number of cases or events.</li>
+<li><span class="math inline">\(PT\)</span>: person-time: the total time people were followed while at risk.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
@@ -844,25 +860,14 @@ window.Quarto = {
 <span id="cb5-11"><a href="#cb5-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">py     =</span> <span class="fu">sum</span>(population) <span class="sc">/</span> <span class="fl">365.25</span>,</span>
 <span id="cb5-12"><a href="#cb5-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">rate   =</span> <span class="dv">1000</span> <span class="sc">*</span> events <span class="sc">/</span> py)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(R\)</span>: the risk: the share of people at risk who become cases over a period.</li>
-<li><span class="math inline">\(O\)</span>: the odds: cases per non-case. Close to the risk when the outcome is rare.</li>
-<li><span class="math inline">\(I\)</span>: the incidence rate: cases per unit of person-time, for example per 1,000 person-years.</li>
-<li><span class="math inline">\(D\)</span>: the number of cases or events.</li>
-<li><span class="math inline">\(PT\)</span>: person-time: the total time people were followed while at risk.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="occReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L01.1"></div>
 <div class="cw grid2">
 <div class="cpanel">
   <h4 class="anchored">Risk and odds are not the same number</h4>
@@ -956,9 +961,21 @@ window.Quarto = {
 <p>Subscript 1 = exposed (high NO₂), 0 = unexposed; <span class="math inline">\(a, b, c, d\)</span> are the cells of the 2×2 table.</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(RD\)</span>: the risk difference: extra cases per person due to exposure, on the absolute scale.</li>
+<li><span class="math inline">\(RR\)</span>: the risk ratio: how many times higher the risk is in the exposed.</li>
+<li><span class="math inline">\(OR\)</span>: the odds ratio: the ratio of odds; close to the RR only when the outcome is rare.</li>
+<li><span class="math inline">\(R_1\)</span>: the risk in the exposed group (high NO₂); <span class="math inline">\(R_0\)</span> is the risk in the unexposed.</li>
+<li><span class="math inline">\(\frac{ad}{bc}\)</span>: the OR from a 2×2 table: exposed cases × unexposed non-cases, divided by exposed non-cases × unexposed cases.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>cohort <span class="sc">|&gt;</span></span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">high =</span> no2_modeled <span class="sc">&gt;=</span> <span class="dv">30</span>) <span class="sc">|&gt;</span></span>
@@ -969,21 +986,9 @@ window.Quarto = {
 <span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>         <span class="at">or =</span> (r1 <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> r1)) <span class="sc">/</span></span>
 <span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>              (r0 <span class="sc">/</span> (<span class="dv">1</span> <span class="sc">-</span> r0)))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(RD\)</span>: the risk difference: extra cases per person due to exposure, on the absolute scale.</li>
-<li><span class="math inline">\(RR\)</span>: the risk ratio: how many times higher the risk is in the exposed.</li>
-<li><span class="math inline">\(OR\)</span>: the odds ratio: the ratio of odds; close to the RR only when the outcome is rare.</li>
-<li><span class="math inline">\(R_1\)</span>: the risk in the exposed group (high NO₂); <span class="math inline">\(R_0\)</span> is the risk in the unexposed.</li>
-<li><span class="math inline">\(\frac{ad}{bc}\)</span>: the OR from a 2×2 table: exposed cases × unexposed non-cases, divided by exposed non-cases × unexposed cases.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="cmpReport"></span></p>
 <div class="note">
@@ -991,6 +996,7 @@ window.Quarto = {
 </div>
 </div>
 </div>
+<div class="pg-mount" data-pg="L01.2"></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1072,9 +1078,20 @@ window.Quarto = {
 <p><span class="math inline">\(j\)</span> = district, <span class="math inline">\(k\)</span> = age group. The crude rate weights each <span class="math inline">\(r_{jk}\)</span> by district <span class="math inline">\(j\)</span>’s own age structure instead of <span class="math inline">\(w_k\)</span>.</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(r_{jk}\)</span>: the rate in district <span class="math inline">\(j\)</span> and age group <span class="math inline">\(k\)</span>.</li>
+<li><span class="math inline">\(w_k\)</span>: the weight of age group <span class="math inline">\(k\)</span>: its share of the standard population, the same for every district.</li>
+<li><span class="math inline">\(N_k^{\text{std}}\)</span>: the size of age group <span class="math inline">\(k\)</span> in the chosen standard population.</li>
+<li><span class="math inline">\(ASR_j\)</span>: district <span class="math inline">\(j\)</span>’s age-standardized rate: its age-specific rates averaged with standard weights, so districts with different age structures can be compared.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>std_w <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span></span>
 <span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">distinct</span>(district, age_group, population) <span class="sc">|&gt;</span></span>
@@ -1090,20 +1107,9 @@ window.Quarto = {
 <span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(district) <span class="sc">|&gt;</span></span>
 <span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">asr =</span> <span class="fu">sum</span>(w <span class="sc">*</span> r))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(r_{jk}\)</span>: the rate in district <span class="math inline">\(j\)</span> and age group <span class="math inline">\(k\)</span>.</li>
-<li><span class="math inline">\(w_k\)</span>: the weight of age group <span class="math inline">\(k\)</span>: its share of the standard population, the same for every district.</li>
-<li><span class="math inline">\(N_k^{\text{std}}\)</span>: the size of age group <span class="math inline">\(k\)</span> in the chosen standard population.</li>
-<li><span class="math inline">\(ASR_j\)</span>: district <span class="math inline">\(j\)</span>’s age-standardized rate: its age-specific rates averaged with standard weights, so districts with different age structures can be compared.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="stdReport"></span></p>
 <div class="note">
@@ -1336,6 +1342,9 @@ Zhang, Jun, and Kai F. Yu. 1998. <span>“What’s the Relative Risk? A Method o
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

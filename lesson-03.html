@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -713,9 +717,19 @@ window.Quarto = {
 <p><span class="math inline">\(Y\)</span> = visits on a day; <span class="math inline">\(P(Y = y)\)</span> is estimated by the share of days with exactly <span class="math inline">\(y\)</span> visits.</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(E[Y]\)</span>: the expected value: the long-run average of <span class="math inline">\(Y\)</span>, each value weighted by its probability.</li>
+<li><span class="math inline">\(P(Y = y)\)</span>: the probability that <span class="math inline">\(Y\)</span> takes the value <span class="math inline">\(y\)</span>.</li>
+<li><span class="math inline">\(\mathrm{Var}(Y)\)</span>: the variance: the expected squared distance from the mean; its square root is the SD.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>visits <span class="sc">|&gt;</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(district <span class="sc">==</span> <span class="st">"Lakeside"</span>,</span>
@@ -724,19 +738,9 @@ window.Quarto = {
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>            <span class="at">var  =</span> <span class="fu">var</span>(visits),</span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>            <span class="at">ratio =</span> var <span class="sc">/</span> mean)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(E[Y]\)</span>: the expected value: the long-run average of <span class="math inline">\(Y\)</span>, each value weighted by its probability.</li>
-<li><span class="math inline">\(P(Y = y)\)</span>: the probability that <span class="math inline">\(Y\)</span> takes the value <span class="math inline">\(y\)</span>.</li>
-<li><span class="math inline">\(\mathrm{Var}(Y)\)</span>: the variance: the expected squared distance from the mean; its square root is the SD.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="rvReport"></span></p>
 </div>
@@ -769,9 +773,20 @@ window.Quarto = {
 <p>Binomial: <span class="math inline">\(E[Y] = n\pi\)</span>, <span class="math inline">\(\mathrm{Var}(Y) = n\pi(1-\pi)\)</span>. Poisson: <span class="math inline">\(E[Y] = \mathrm{Var}(Y) = \mu\)</span>.</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(\binom{n}{k}\)</span>: the number of ways to choose which <span class="math inline">\(k\)</span> of the <span class="math inline">\(n\)</span> people are cases.</li>
+<li><span class="math inline">\(\pi\)</span>: the probability that each person is a case.</li>
+<li><span class="math inline">\(\mu\)</span>: the Poisson mean: the expected count, for example visits per day. Its variance equals its mean.</li>
+<li><span class="math inline">\(k!\)</span>: <span class="math inline">\(k\)</span> factorial, <span class="math inline">\(k \times (k-1) \times \dots \times 1\)</span>.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># a class of 30 children</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>y <span class="sc">~</span> <span class="fu">binomial</span>(<span class="at">n =</span> <span class="dv">30</span>, <span class="at">p =</span> <span class="fl">0.13</span>)</span>
@@ -781,24 +796,14 @@ window.Quarto = {
 <span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>y <span class="sc">~</span> <span class="fu">poisson</span>(<span class="at">mu =</span> <span class="dv">8</span>)</span>
 <span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="fu">dpois</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">20</span>, <span class="at">lambda =</span> <span class="dv">8</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(\binom{n}{k}\)</span>: the number of ways to choose which <span class="math inline">\(k\)</span> of the <span class="math inline">\(n\)</span> people are cases.</li>
-<li><span class="math inline">\(\pi\)</span>: the probability that each person is a case.</li>
-<li><span class="math inline">\(\mu\)</span>: the Poisson mean: the expected count, for example visits per day. Its variance equals its mean.</li>
-<li><span class="math inline">\(k!\)</span>: <span class="math inline">\(k\)</span> factorial, <span class="math inline">\(k \times (k-1) \times \dots \times 1\)</span>.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="dReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L03.1"></div>
 <div class="further">
 <p><strong>Further reading:</strong> <span class="citation" data-cites="blitzstein2019introduction">Blitzstein and Hwang (<a href="#ref-blitzstein2019introduction" role="doc-biblioref">2019</a>)</span> derive the Poisson as a limit of the binomial; <span class="citation" data-cites="clayton1993statistical">Clayton and Hills (<a href="#ref-clayton1993statistical" role="doc-biblioref">1993</a>)</span> use both as the basis of epidemiological models; <span class="citation" data-cites="kirkwood2003essential">Kirkwood and Sterne (<a href="#ref-kirkwood2003essential" role="doc-biblioref">2003</a>)</span> give the practical rules for when each applies.</p>
 </div>
@@ -823,18 +828,9 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[f(x) = \frac{1}{\sigma\sqrt{2\pi}} \exp\!\left(-\frac{(x-\mu)^2}{2\sigma^2}\right)\]</span> <span class="math display">\[P(a \le X \le b) = \int_a^b f(x)\,dx\]</span></p>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>x <span class="sc">~</span> <span class="fu">normal</span>(mu, sigma)</span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(<span class="dv">0</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)  <span class="co"># height: 1.99</span></span>
-<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="fl">1.96</span>) <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fl">1.96</span>)    <span class="co"># area: 0.95</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(f(x)\)</span>: the density: its height shows where values are concentrated. It is not itself a probability and can exceed 1.</li>
@@ -843,13 +839,23 @@ window.Quarto = {
 <li><span class="math inline">\(\int_a^b f(x)\,dx\)</span>: the area under the density between <span class="math inline">\(a\)</span> and <span class="math inline">\(b\)</span>: that area is the probability.</li>
 </ul>
 </div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>x <span class="sc">~</span> <span class="fu">normal</span>(mu, sigma)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="fu">dnorm</span>(<span class="dv">0</span>, <span class="at">mean =</span> <span class="dv">0</span>, <span class="at">sd =</span> <span class="fl">0.2</span>)  <span class="co"># height: 1.99</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="fu">pnorm</span>(<span class="fl">1.96</span>) <span class="sc">-</span> <span class="fu">pnorm</span>(<span class="sc">-</span><span class="fl">1.96</span>)    <span class="co"># area: 0.95</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="nReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L03.2"></div>
 <div class="further">
 <p><strong>Further reading:</strong> <span class="citation" data-cites="altman1995normal">Altman and Bland (<a href="#ref-altman1995normal" role="doc-biblioref">1995</a>)</span> on the normal distribution in medical statistics; <span class="citation" data-cites="casella2002statistical">Casella and Berger (<a href="#ref-casella2002statistical" role="doc-biblioref">2002</a>)</span> on densities and distribution functions; <span class="citation" data-cites="blitzstein2019introduction">Blitzstein and Hwang (<a href="#ref-blitzstein2019introduction" role="doc-biblioref">2019</a>)</span> on continuous random variables.</p>
 </div>
@@ -877,9 +883,20 @@ window.Quarto = {
 <p>As <span class="math inline">\(\phi \to \infty\)</span> the negative binomial becomes Poisson. Method-of-moments estimate: <span class="math inline">\(\hat\phi = \bar y^2 / (s^2 - \bar y)\)</span>.</p>
 </div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(\mathrm{NegBin}\)</span>: a count distribution like the Poisson, but allowing more variation than the mean.</li>
+<li><span class="math inline">\(\mu\)</span>: the expected count, as in a Poisson model.</li>
+<li><span class="math inline">\(\phi\)</span>: the dispersion parameter: smaller <span class="math inline">\(\phi\)</span> means more extra variation; as <span class="math inline">\(\phi \to \infty\)</span> it becomes Poisson.</li>
+<li><span class="math inline">\(\frac{\mu^2}{\phi}\)</span>: the extra variance beyond the Poisson’s, growing with the square of the mean.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>y <span class="sc">~</span> <span class="fu">neg_binomial_2</span>(mu, phi)</span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a></span>
@@ -889,24 +906,14 @@ window.Quarto = {
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>phi_hat <span class="ot">&lt;-</span> m<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> (v <span class="sc">-</span> m)</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="fu">dnbinom</span>(<span class="dv">0</span><span class="sc">:</span><span class="dv">60</span>, <span class="at">mu =</span> m, <span class="at">size =</span> phi_hat)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(\mathrm{NegBin}\)</span>: a count distribution like the Poisson, but allowing more variation than the mean.</li>
-<li><span class="math inline">\(\mu\)</span>: the expected count, as in a Poisson model.</li>
-<li><span class="math inline">\(\phi\)</span>: the dispersion parameter: smaller <span class="math inline">\(\phi\)</span> means more extra variation; as <span class="math inline">\(\phi \to \infty\)</span> it becomes Poisson.</li>
-<li><span class="math inline">\(\frac{\mu^2}{\phi}\)</span>: the extra variance beyond the Poisson’s, growing with the square of the mean.</li>
-</ul>
-</div>
 <div class="c">
 <div class="lab">
-<p><span class="k">C</span>How it’s reported</p>
+<p><span class="k">D</span>How it’s reported</p>
 </div>
 <p><span id="oReport"></span></p>
 </div>
 </div>
+<div class="pg-mount" data-pg="L03.3"></div>
 <div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
@@ -1092,6 +1099,9 @@ Ver Hoef, Jay M., and Peter L. Boveng. 2007. <span>“Quasi-<span>P</span>oisson
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right

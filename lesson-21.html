@@ -105,9 +105,9 @@ div.csl-indent {
 <link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-3f29a53a5b9d7651047fb2f82079a3a2.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-f328ff9c84c2dea3a4ea5fd12d5a93cc.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -363,6 +363,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./methods.qmd"> 
 <span class="menu-text">Choosing a method</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./playground.qmd"> 
+<span class="menu-text">Model playground</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -712,9 +716,21 @@ window.Quarto = {
 </div>
 <p><span class="math display">\[\theta^* \sim \mathrm{Normal}(\theta^{(s)}, \sigma^2_{\text{step}})\]</span> <span class="math display">\[\theta^{(s+1)} = \begin{cases} \theta^* &amp; \text{with probability } \min\!\left(1, \dfrac{p(\theta^* \mid y)}{p(\theta^{(s)} \mid y)}\right) \\ \theta^{(s)} &amp; \text{otherwise} \end{cases}\]</span></p>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">B</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(\theta^{(s)}\)</span>: the current value of the chain.</li>
+<li><span class="math inline">\(\theta^*\)</span>: the proposal: a random step from the current value.</li>
+<li><span class="math inline">\(\sigma^2_{\text{step}}\)</span>: the step size: too small explores slowly, too large rejects most proposals.</li>
+<li><span class="math inline">\(\theta^{(s+1)}\)</span>: the next value: the proposal if accepted, otherwise the current value again.</li>
+<li><span class="math inline">\(p(\theta^* \mid y)\)</span>: the posterior density at the proposal: uphill moves are always accepted, downhill ones sometimes.</li>
+</ul>
+</div>
 <div class="b">
 <div class="lab">
-<p><span class="k">B</span>Model list and R</p>
+<p><span class="k">C</span>Model list and R</p>
 </div>
 <div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>log_post <span class="ot">&lt;-</span> <span class="cf">function</span>(p) <span class="cf">if</span> (p <span class="sc">&lt;=</span> <span class="dv">0</span> <span class="sc">||</span> p <span class="sc">&gt;=</span> <span class="dv">1</span>) <span class="sc">-</span><span class="cn">Inf</span> <span class="cf">else</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">dbinom</span>(<span class="dv">30</span>, <span class="dv">200</span>, p, <span class="at">log =</span> <span class="cn">TRUE</span>) <span class="sc">+</span> <span class="fu">dbeta</span>(p, <span class="dv">2</span>, <span class="dv">18</span>, <span class="at">log =</span> <span class="cn">TRUE</span>)</span>
@@ -724,18 +740,6 @@ window.Quarto = {
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  accept <span class="ot">&lt;-</span> <span class="fu">log</span>(<span class="fu">runif</span>(<span class="dv">1</span>)) <span class="sc">&lt;</span> <span class="fu">log_post</span>(prop) <span class="sc">-</span> <span class="fu">log_post</span>(theta[s <span class="sc">-</span> <span class="dv">1</span>])</span>
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  theta[s] <span class="ot">&lt;-</span> <span class="cf">if</span> (accept) prop <span class="cf">else</span> theta[s <span class="sc">-</span> <span class="dv">1</span>]</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
-<div class="d">
-<div class="lab">
-<p><span class="k">D</span>How to read it</p>
-</div>
-<ul>
-<li><span class="math inline">\(\theta^{(s)}\)</span>: the current value of the chain.</li>
-<li><span class="math inline">\(\theta^*\)</span>: the proposal: a random step from the current value.</li>
-<li><span class="math inline">\(\sigma^2_{\text{step}}\)</span>: the step size: too small explores slowly, too large rejects most proposals.</li>
-<li><span class="math inline">\(\theta^{(s+1)}\)</span>: the next value: the proposal if accepted, otherwise the current value again.</li>
-<li><span class="math inline">\(p(\theta^* \mid y)\)</span>: the posterior density at the proposal: uphill moves are always accepted, downhill ones sometimes.</li>
-</ul>
 </div>
 </div>
 <div class="callout callout-style-simple callout-note no-icon callout-titled">
@@ -801,19 +805,9 @@ window.Quarto = {
 <p>The last line is one leapfrog step, repeated L times per iteration; <span class="math inline">\(r\)</span> is a random momentum.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># brms / Stan use an adaptive HMC (NUTS):</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> brms<span class="sc">::</span><span class="fu">brm</span>(visits <span class="sc">~</span> <span class="fu">I</span>(temp <span class="sc">-</span> <span class="dv">20</span>),</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">family =</span> poisson, <span class="at">data =</span> d,</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">warmup =</span> <span class="dv">1000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(H(\theta, r)\)</span>: the Hamiltonian: “potential energy” (minus log posterior) plus “kinetic energy” of the momentum.</li>
@@ -822,6 +816,16 @@ window.Quarto = {
 <li><span class="math inline">\(\epsilon\)</span>: the leapfrog step size.</li>
 <li><span class="math inline">\(\nabla_\theta \log p(\theta \mid y)\)</span>: the gradient of the log posterior: which way is uphill. It steers HMC’s trajectories.</li>
 </ul>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># brms / Stan use an adaptive HMC (NUTS):</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> brms<span class="sc">::</span><span class="fu">brm</span>(visits <span class="sc">~</span> <span class="fu">I</span>(temp <span class="sc">-</span> <span class="dv">20</span>),</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">family =</span> poisson, <span class="at">data =</span> d,</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">chains =</span> <span class="dv">4</span>, <span class="at">iter =</span> <span class="dv">2000</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">warmup =</span> <span class="dv">1000</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="further">
@@ -849,17 +853,9 @@ window.Quarto = {
 <p><span class="math inline">\(W\)</span>: average within-chain variance; <span class="math inline">\(B\)</span>: between-chain variance (× <span class="math inline">\(N\)</span>); <span class="math inline">\(M\)</span> chains of length <span class="math inline">\(N\)</span> (after splitting each in half); <span class="math inline">\(\rho_k\)</span>: autocorrelation at lag <span class="math inline">\(k\)</span>.</p>
 </div>
 </div>
-<div class="b">
-<div class="lab">
-<p><span class="k">B</span>Model list and R</p>
-</div>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)            <span class="co"># Rhat, Bulk_ESS, Tail_ESS</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>bayesplot<span class="sc">::</span><span class="fu">mcmc_trace</span>(fit)</span>
-<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>posterior<span class="sc">::</span><span class="fu">summarise_draws</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-</div>
 <div class="d">
 <div class="lab">
-<p><span class="k">D</span>How to read it</p>
+<p><span class="k">B</span>How to read it</p>
 </div>
 <ul>
 <li><span class="math inline">\(\hat R\)</span>: R-hat: compares the spread between chains with the spread within them. Near 1.00 when chains agree.</li>
@@ -869,6 +865,14 @@ window.Quarto = {
 <li><span class="math inline">\(\text{ESS}\)</span>: the effective sample size: draws discounted for autocorrelation.</li>
 <li><span class="math inline">\(\rho_k\)</span>: the autocorrelation of the chain at lag <span class="math inline">\(k\)</span>.</li>
 </ul>
+</div>
+<div class="b">
+<div class="lab">
+<p><span class="k">C</span>Model list and R</p>
+</div>
+<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="fu">summary</span>(fit)            <span class="co"># Rhat, Bulk_ESS, Tail_ESS</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>bayesplot<span class="sc">::</span><span class="fu">mcmc_trace</span>(fit)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>posterior<span class="sc">::</span><span class="fu">summarise_draws</span>(fit)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
 </div>
 <div class="callout callout-style-default callout-warning callout-titled">
@@ -1009,6 +1013,9 @@ Vehtari, Aki, Andrew Gelman, Daniel Simpson, Bob Carpenter, and Paul-Christian B
 <script src="assets/purposes-data.js"></script>
 <script src="assets/methods-page.js"></script>
 <script src="assets/readit.js"></script>
+<script src="assets/playground.js"></script>
+<script src="assets/playground-specs-1.js"></script>
+<script src="assets/playground-specs-2.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
