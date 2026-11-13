@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lesson 8]{} [Threads: bias · frequentist ↔ Bayesian]{}
+[About 3 hours]{} [Before this: Lesson 8]{} [Threads: bias · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -109,6 +109,22 @@ dagitty::adjustmentSets(dag, "NO2", "Asthma")
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\rightarrow$: an arrow: a direct causal effect.
+- $Z$: the adjustment set: the variables to adjust for.
+- $Y^{x}$: the potential outcome: the outcome that would occur if exposure were set to $x$.
+- $\perp\!\!\!\perp$: "is independent of": within levels of $Z$, exposure is unrelated to the potential outcomes, so there is no confounding.
+- $X$: the exposure.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -199,6 +215,21 @@ glm(visits ~ age_group * I(temp - 22) + dow,
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\alpha_k$: the baseline log-rate in age group $k$.
+- $\beta_k$: the heat effect in age group $k$: allowing it to differ by group is what effect modification means.
+- $\hat\beta_{65+}$: the estimated effect for the oldest group, compared with the youngest group's effect.
+- $z$: the test of the difference between two effects: compare the effects directly, not their p-values.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -271,6 +302,20 @@ cohort |>
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $RERI$: the relative excess risk due to interaction: the joint effect beyond the sum of the separate effects. Above 0 means more than additive.
+- $RR_{11}$: the risk ratio when both NO₂ and the other factor are present, relative to neither.
+- $RR_{10}$: the risk ratio with NO₂ alone; $RR_{01}$ with the other factor alone.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -310,6 +355,19 @@ Hypotheses such as "heat harms the elderly more than children, and children not 
 - Adjusting for a collider, a mediator, or a consequence of the outcome introduces bias. Adjusting for a cause of the exposure only (an instrument) costs precision.
 - Effect modification is assessed by estimating the difference between effects, not by comparing p-values.
 - Interaction depends on the scale. Report effects on both additive and multiplicative scales.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Confounder** | A common cause of exposure and outcome. | Adjust for it. A mediator lies on the causal path; a collider is a common effect. |
+| **Mediator** | A variable on the path from exposure to outcome. | Adjusting for it removes part of the effect you want. |
+| **Collider** | A variable caused by both exposure and outcome (or their causes). | Adjusting or selecting on it creates bias. |
+| **Backdoor path** | A non-causal path from exposure to outcome, entering the exposure through an arrow into it. | Must be blocked by adjustment; causal (front-door) paths must stay open. |
+| **Effect modification** | The exposure's effect differs across levels of another variable. | About heterogeneity of one effect; interaction is about the joint effect of two exposures. |
+| **Additive vs multiplicative interaction** | Departure from additivity of risk differences (RERI) vs of risk ratios. | The same data can show interaction on one scale and not the other. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-09"><button type="button"></button><span></span></div>

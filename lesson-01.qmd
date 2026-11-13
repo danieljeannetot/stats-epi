@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 2 hours]{} [Before this: Lesson 0]{} [Threads: uncertainty (preview)]{}
+[About 2 hours]{} [Before this: Lesson 0]{} [Threads: uncertainty (preview)]{} [ ]{.pm-label}
 
 :::
 
@@ -113,6 +113,22 @@ city_daily |>
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\bar{x}$: the mean: the sum of all values divided by their number $n$.
+- $x_i$: the value for observation $i$, for example one day's visit count.
+- $s$: the standard deviation: the typical distance of a value from the mean; dividing by $n-1$ corrects for having estimated the mean.
+- $Q(0.5)$: the median: half the values lie below it; unlike the mean, it isn't pulled by extreme values.
+- $\text{IQR}$: the interquartile range: the spread of the middle half of the data.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -206,6 +222,22 @@ visits |>
     py     = sum(population) / 365.25,
     rate   = 1000 * events / py)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $R$: the risk: the share of people at risk who become cases over a period.
+- $O$: the odds: cases per non-case. Close to the risk when the outcome is rare.
+- $I$: the incidence rate: cases per unit of person-time, for example per 1,000 person-years.
+- $D$: the number of cases or events.
+- $PT$: person-time: the total time people were followed while at risk.
 
 ::::
 
@@ -325,6 +357,22 @@ cohort |>
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $RD$: the risk difference: extra cases per person due to exposure, on the absolute scale.
+- $RR$: the risk ratio: how many times higher the risk is in the exposed.
+- $OR$: the odds ratio: the ratio of odds; close to the RR only when the outcome is rare.
+- $R_1$: the risk in the exposed group (high NO₂); $R_0$ is the risk in the unexposed.
+- $\frac{ad}{bc}$: the OR from a 2×2 table: exposed cases × unexposed non-cases, divided by exposed non-cases × unexposed cases.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -440,6 +488,21 @@ visits |>
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $r_{jk}$: the rate in district $j$ and age group $k$.
+- $w_k$: the weight of age group $k$: its share of the standard population, the same for every district.
+- $N_k^{\text{std}}$: the size of age group $k$ in the chosen standard population.
+- $ASR_j$: district $j$'s age-standardized rate: its age-specific rates averaged with standard weights, so districts with different age structures can be compared.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -521,6 +584,22 @@ Each question gives feedback when you check it. Some are about statistics, some 
 - Risk, odds and rate answer different questions. Rates need person-time.
 - Risk differences and risk ratios are easier to interpret than odds ratios. The OR approximates the RR only when the outcome is rare.
 - Crude rates mix the effect of age structure with the effect of place. Direct standardization removes the first.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Mean** | The sum of the values divided by their number. | Pulled by extreme values; the median isn't. |
+| **Median** | The middle value: half the data lie below it. | Robust to outliers; summarizes skewed data better than the mean. |
+| **Standard deviation** | The typical distance of values from their mean. | Describes spread of the data; the standard error (Lesson 4) describes uncertainty of an estimate. |
+| **Risk** | Cases divided by people at risk over a period. | A proportion between 0 and 1; odds are cases per non-case. |
+| **Odds** | Cases divided by non-cases. | Close to the risk only when the outcome is rare. |
+| **Rate** | Cases per unit of person-time. | Has a time unit; risk doesn't. |
+| **Risk difference vs risk ratio** | The absolute vs the relative contrast between groups. | The same RR can mean many or few extra cases, depending on the baseline risk. |
+| **Odds ratio** | The ratio of the odds in two groups. | Approximates the RR only for rare outcomes; further from 1 than the RR otherwise. |
+| **Crude vs standardized rate** | A rate over the whole population vs one reweighted to a standard age structure. | Standardization removes differences due to age structure, so districts can be compared. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-01"><button type="button"></button><span></span></div>

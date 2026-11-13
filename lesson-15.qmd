@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lessons 8, 10 and 11]{} [Threads: bias · uncertainty]{}
+[About 3 hours]{} [Before this: Lessons 8, 10 and 11]{} [Threads: bias · uncertainty]{} [ ]{.pm-label}
 
 :::
 
@@ -103,6 +103,24 @@ fit <- glm(visits ~ pm01 +
            family = quasipoisson,
            data = city_daily)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\text{quasi-Poisson}$: a Poisson model whose variance is inflated by $\phi$ to allow overdispersion.
+- $\mu_t$: the expected visits on day $t$.
+- $\beta$: the PM₂.₅ effect: the change in log visits per µg/m³; $e^{10\beta}$ is the RR per 10 µg/m³.
+- $\overline{PM}_{t,t-1}$: the average PM₂.₅ over the same day and the day before.
+- $s(t; \text{df})$: the spline of time: controls season and trend; its df per year sets how finely.
+- $f(T_t)$: a spline of temperature: controls weather confounding.
+- $\gamma^\top \mathrm{dow}_t$: day-of-week effects.
 
 ::::
 
@@ -211,6 +229,23 @@ glm(visits ~ pm01 + splines::ns(temp, df = 3) +
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\alpha_{s(t)}$: a separate intercept for each stratum (year × month × weekday): controls time by design.
+- $\overline{PM}_{t,t-1}$: the exposure, as in the time-series model.
+- $L_c(\beta)$: the conditional likelihood: compares days within each stratum only, so the $\alpha_s$ drop out.
+- $\prod_s$: the product over strata.
+- $y_t$: the count on day $t$.
+- $\beta$: the exposure effect, the same quantity as in the time-series model.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -237,6 +272,42 @@ In a Bayesian time-series model, the smooth function of time can be given a rand
 
 :::
 
+## 15.5 A negative control exposure: tomorrow's pollution {#s5}
+
+How do we know the spline of time and the temperature terms have removed confounding? One check uses a **negative control exposure**: tomorrow's PM₂.₅. It cannot cause today's emergency visits, but it follows the same seasonal and weather patterns as today's pollution. Put it in the model next to today's PM₂.₅; if it shows an "effect", confounding by season or weather remains.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="ncDf">Control for time (spline of time)</label><select id="ncDf"><option value="0">none</option><option value="1">1 df per year</option><option value="2">2 df per year</option><option value="4">4 df per year</option><option value="7" selected>7 df per year</option><option value="10">10 df per year</option></select></div>
+  <div class="ctrl"><label class="small"><input type="checkbox" id="ncT" checked> adjust for temperature</label></div>
+  <svg id="ncTsPlot" viewBox="0 0 520 180" role="img" aria-label="Rate ratios for today's and tomorrow's PM2.5"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="ncTsStats"></div><div class="now" id="ncTsNow"></div></div>
+</div>
+```
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): tomorrow's pollution as a negative control"}
+
+```{r}
+city_nc <- visits |>
+  group_by(date) |>
+  summarise(visits = sum(visits), pm25 = first(pm25), temp = first(temp_city), dow = first(dow), .groups = "drop") |>
+  mutate(pm_today = (pm25 + lag(pm25)) / 20, pm_tomorrow = lead(pm25) / 10, t = as.numeric(date)) |>
+  filter(!is.na(pm_today), !is.na(pm_tomorrow))
+fit_nc <- glm(visits ~ pm_today + pm_tomorrow + splines::ns(t, df = 35) + splines::ns(temp, df = 3) + dow,
+              family = quasipoisson, data = city_nc)
+exp(coef(fit_nc)[c("pm_today", "pm_tomorrow")])     # tomorrow's should be close to 1
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @flanders2011method proposed future exposures as negative controls in time-series studies; @lipsitch2010negative on negative controls in general.
+
+:::
+
 ## Check your understanding {#quiz}
 
 ```{=html}
@@ -250,7 +321,22 @@ In a Bayesian time-series model, the smooth function of time can be given a rand
 - Residual autocorrelation and overdispersion show what the model misses; quasi-Poisson standard errors account for overdispersion.
 - The time-stratified case-crossover design controls time trends by design, and is equivalent to a conditional Poisson time-series model.
 
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Time-series design** | Comparing a population with itself from day to day. | Stable population traits cancel out; time-varying ones (season, weather) must be controlled. |
+| **Seasonality vs trend** | The repeating yearly pattern vs slow change over years. | Both are controlled by a spline of time; its df per year sets how finely. |
+| **Degrees of freedom per year** | The flexibility of the spline of time. | Too few leaves seasonal confounding; too many absorbs part of the exposure effect. |
+| **Autocorrelation** | Correlation between residuals on nearby days. | Leftover autocorrelation means time is under-controlled and SEs are too small. |
+| **Case-crossover** | Each case's exposure on the event day compared with their own referent days. | Controls person-level confounders by design; a time series controls population-level ones. |
+| **Time-stratified referents** | Referent days on the same weekday in the same month. | Avoids the bias of symmetric or fixed windows; equals a conditional Poisson time series. |
+| **Negative control exposure (time series)** | Tomorrow's pollution, added next to today's. | Can't cause today's visits; an apparent effect reveals leftover confounding by season or weather. |
+
 ```{=html}
 <div class="done" data-lesson="lesson-15"><button type="button"></button><span></span></div>
 <script src="assets/lesson-15.js"></script>
+<script src="assets/negcontrol.js"></script>
 ```

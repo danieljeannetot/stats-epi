@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lessons 4–5]{} [Threads: uncertainty · frequentist ↔ Bayesian]{}
+[About 3 hours]{} [Before this: Lessons 4–5]{} [Threads: uncertainty · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -91,6 +91,23 @@ binom.test(sum(smp$asthma), 200)$conf.int
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\hat\pi$: the estimated risk in the sample.
+- $z_{1-\alpha/2}$: the normal quantile that sets the confidence level: 1.96 for 95%.
+- $n$: the sample size: the interval narrows with $\sqrt{n}$.
+- $P_\pi$: a probability over repeated samples, computed as if the true risk were $\pi$.
+- $L$: the lower limit of the interval; $U$ is the upper limit. Both vary from sample to sample; $\pi$ doesn't.
+- $1 - \alpha$: the coverage: the share of repeated intervals that capture $\pi$, whatever its value.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -110,6 +127,12 @@ binom.test(sum(smp$asthma), 200)$conf.int
 "There is a 95% probability that the true risk lies between 9% and 18%." For a confidence interval, the 95% describes the method, not this interval. The statement in quotes is what a Bayesian credible interval says (Lesson 19).
 
 :::
+
+**Two ways.** A confidence interval and a p-value, next to a credible interval and a posterior probability, for the same question: is the asthma risk in this sample higher than a reference value of 12%?
+
+```{=html}
+<div class="cw twoways"><div class="tw-head">Two ways · Intervals and evidence</div><div class="tw-ctl"><div class='ctrl'><label for='tw6N'>Children in the sample</label><input type='range' id='tw6N' min='50' max='2000' step='50' value='300'><output id='tw6NO'></output></div></div><svg id="tw6Svg" viewBox="0 0 520 220" role="img" aria-label="Frequentist and Bayesian answers"></svg><div class="grid2"><div class="cpanel tw-f"><h5>Frequentist</h5><div id="tw6F"></div></div><div class="cpanel tw-b"><h5>Bayesian</h5><div id="tw6B"></div></div></div><div class="now" id="tw6Now"></div></div>
+```
 
 ::: {.further}
 
@@ -162,6 +185,23 @@ smp <- cohort |> slice_sample(n = 500) |>
 prop.test(table(smp$high, smp$asthma)[, 2:1],
           correct = FALSE)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $H_0$: the null hypothesis: equal risks in the two groups.
+- $H_1$: the alternative: the risks differ, in either direction.
+- $\hat\pi_1$: the estimated risk in group 1 (high NO₂); $\hat\pi_0$ in group 0.
+- $\bar\pi$: the pooled risk, assuming $H_0$ is true: used to compute the standard error under the null.
+- $z$: the test statistic: the difference in standard-error units.
+- $p$: the p-value: the probability, if $H_0$ were true, of a difference at least as large as observed.
 
 ::::
 
@@ -284,6 +324,21 @@ p.adjust(p_values, method = "holm")
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $m$: the number of tests.
+- $\alpha$: the significance level of each test, usually 0.05.
+- $1 - (1-\alpha)^m$: the chance of at least one false positive across $m$ independent tests: about 0.64 for 20 tests.
+- $p_j$: the p-value of test $j$; Bonferroni compares it with $\alpha/m$ instead of $\alpha$.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -347,7 +402,22 @@ A frequentist test can reject "no effect" but can never support it; that needs t
 - Testing many hypotheses inflates false positives; correct when confirming, interpret carefully when exploring.
 - Non-significant does not mean no effect. To support "no meaningful effect", use an equivalence margin.
 
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Confidence interval** | An interval from a procedure that captures the true value in 95% of repeated samples. | Not a 95% probability that the truth lies in this interval: that's a credible interval. |
+| **p-value** | The probability of data at least this extreme if the null hypothesis were true. | Not the probability that the null is true, and not a measure of effect size. |
+| **Statistical vs practical significance** | p < 0.05 vs an effect large enough to matter. | Large studies make trivial effects significant; small ones miss important effects. |
+| **Type I vs type II error** | Rejecting a true null vs missing a real effect. | Their probabilities are α and 1 − power. |
+| **Power** | The probability of detecting an effect of a given size. | Depends on sample size, effect size and noise; planned before the study. |
+| **Multiple testing** | Running many tests, inflating the chance of a false positive. | Bonferroni controls it by lowering each test's threshold. |
+| **Equivalence test** | Testing whether an effect lies within a margin of negligible size. | "Not significant" doesn't show equivalence; this test can. |
+
 ```{=html}
 <div class="done" data-lesson="lesson-06"><button type="button"></button><span></span></div>
 <script src="assets/lesson-06.js"></script>
+<script src="assets/twoways.js"></script>
 ```

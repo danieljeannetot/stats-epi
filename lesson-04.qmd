@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 2 hours]{} [Before this: Lessons 1–3]{} [Threads: uncertainty]{}
+[About 2 hours]{} [Before this: Lessons 1–3]{} [Threads: uncertainty]{} [ ]{.pm-label}
 
 :::
 
@@ -101,6 +101,21 @@ smp |>
             sd   = sd(visits),
             se   = sd / sqrt(n()))
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $SE(\bar{X})$: the standard error of the mean: how much the sample mean would vary between repeated samples.
+- $\sigma$: the SD of the population: the spread of individual values.
+- $\sqrt{n}$: the square root of the sample size: four times more data halves the standard error.
+- $\widehat{SE}$: the estimated standard error, using the sample SD $s$ in place of the unknown $\sigma$.
 
 ::::
 
@@ -225,6 +240,21 @@ quantile(boot, c(0.025, 0.975))  # percentile CI
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $y^{*(b)}$: bootstrap sample $b$: $n$ values drawn with replacement from the data.
+- $B$: the number of bootstrap samples, typically 1,000 or more.
+- $\hat\theta^{*(1)}$: the estimate computed in a bootstrap sample (here the first).
+- $\widehat{SE}_{\text{boot}}$: the bootstrap standard error: the SD of the estimates across bootstrap samples.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -280,6 +310,18 @@ The sampling distribution is a frequentist idea: it describes what would happen 
 - The SD describes the data; the SE describes the precision of an estimate. They answer different questions.
 - Averages of many values are approximately normal (central limit theorem), sooner for symmetric data than for skewed data.
 - The bootstrap estimates a standard error from a single sample by resampling it.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Population vs sample** | Everyone of interest vs the people actually observed. | Estimates come from samples; parameters belong to populations. |
+| **Sampling distribution** | The distribution of an estimate over repeated samples. | Not the distribution of the data: it is narrower, and narrows as n grows. |
+| **Standard error** | The SD of an estimate's sampling distribution. | The SD describes individuals; the SE describes the estimate's precision. |
+| **Central limit theorem** | Means of large samples are approximately normal, whatever the data's distribution. | Applies to the estimate, not to the data themselves. |
+| **Bootstrap** | Estimating the sampling distribution by resampling the data with replacement. | Uses the data instead of a formula; needs independent observations. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-04"><button type="button"></button><span></span></div>

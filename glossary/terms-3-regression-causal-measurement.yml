@@ -1018,3 +1018,36 @@
     The predictions are smoother than true exposure, which mixes classical and Berkson-type errors.
   related: [measurement-error, berkson-error]
   lessons: [13]
+
+- id: negative-control
+  term: Negative control
+  category: Causal inference
+  aliases: [negative control, negative controls, falsification test, falsification tests, placebo test, placebo tests]
+  short: >-
+    An outcome or exposure that cannot be causally related to the other, but shares the main analysis's sources of bias; an association signals bias.
+  full: >-
+    If NO₂ appears to "cause" dental caries, or tomorrow's pollution appears to "cause" today's visits, the
+    same confounding or selection is probably distorting the main estimate. A negative control can only
+    detect bias it shares with the main analysis, so the absence of an association is reassuring but not
+    proof. Placebo thresholds in regression discontinuity and pre-trend checks in differences-in-differences
+    apply the same idea.
+  related: [negative-control-outcome, negative-control-exposure, e-value, confounding]
+  lessons: [12, 15, 27]
+
+- id: negative-control-outcome
+  term: Negative control outcome
+  category: Causal inference
+  aliases: [negative control outcome, negative control outcomes]
+  short: >-
+    An outcome the exposure cannot cause, with the same confounders as the main outcome (e.g., dental caries for NO₂ and asthma).
+  related: [negative-control, negative-control-exposure]
+  lessons: [12]
+
+- id: negative-control-exposure
+  term: Negative control exposure
+  category: Causal inference
+  aliases: [negative control exposure, negative control exposures]
+  short: >-
+    An exposure that cannot affect the outcome, but shares the main exposure's confounders (e.g., tomorrow's pollution for today's visits).
+  related: [negative-control, negative-control-outcome]
+  lessons: [12, 15]

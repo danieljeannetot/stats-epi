@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 2.5 hours]{} [Before this: Part I]{} [Threads: likelihood]{}
+[About 2.5 hours]{} [Before this: Part I]{} [Threads: likelihood]{} [ ]{.pm-label}
 
 :::
 
@@ -78,6 +78,22 @@ mu[i]  = b0 + b1 * green[i]
 fit <- lm(no2_modeled ~ green, data = cohort)
 coef(fit)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $Y_i$: the outcome for child $i$ (here NO₂ exposure).
+- $\beta_0$: the intercept: the predicted outcome when $x_i = 0$.
+- $\beta_1$: the slope: the change in the mean outcome per unit of $x$.
+- $\varepsilon_i$: the error: how far child $i$ lies from the line; assumed normal with constant variance $\sigma^2$.
+- $\arg\min$: "the values that minimize": least squares picks the line with the smallest sum of squared vertical distances.
 
 ::::
 
@@ -152,6 +168,21 @@ fit <- lm(no2_modeled ~ green + ses + traffic,
                                      by = "district_id"))
 broom::tidy(fit, conf.int = TRUE)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $E[Y_i \mid x_i]$: the mean outcome for children with given values of the predictors.
+- $\beta_1$: the green-space coefficient: the difference in mean NO₂ per unit of green space, holding SES and traffic fixed.
+- $\beta_2$: the SES coefficient, adjusted for the other terms.
+- $\mathrm{traffic}_{j[i]}$: the traffic level of district $j[i]$, the district child $i$ lives in.
 
 ::::
 
@@ -282,6 +313,21 @@ predict(fit1, new, interval = "prediction")
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\hat y_0$: the predicted mean at the chosen values of the predictors.
+- $t$: the $t$ quantile for the confidence level: close to 1.96 with large samples.
+- $\widehat{\mathrm{Var}}(\hat y_0)$: the uncertainty of the estimated mean: shrinks as the sample grows.
+- $\hat\sigma^2$: the residual variance: how much individual children vary around the mean. It doesn't shrink with more data, so prediction intervals stay wide.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -321,6 +367,18 @@ In Bayesian regression, both questions are answered from the same posterior draw
 - Adding a predictor can change other coefficients a lot. Only some coefficients in a model are meant as effect estimates.
 - Residual plots reveal curvature, non-constant variance and outliers. Counts often violate linear-regression assumptions.
 - A confidence interval describes the mean; a prediction interval describes a new individual and is always wider.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Regression slope** | The change in the mean outcome per unit of the predictor. | Correlation measures strength of linear association, without units; the slope has units. |
+| **Residual vs error** | The observed minus fitted value vs the unobservable deviation from the true line. | Residuals estimate errors and are used to check the model. |
+| **Adjusted coefficient** | A slope holding the other predictors fixed. | Differs from the crude slope when predictors are related to each other. |
+| **R²** | The share of outcome variance explained by the model. | Says nothing about bias or causation; a low R² can still give a precise slope. |
+| **Confidence vs prediction interval** | Uncertainty about the mean vs about a new individual. | The prediction interval adds individual variation, so it's much wider and doesn't shrink to zero. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-07"><button type="button"></button><span></span></div>

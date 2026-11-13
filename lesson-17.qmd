@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lessons 1, 8 and 10]{} [Threads: shrinkage · bias]{}
+[About 3 hours]{} [Before this: Lessons 1, 8 and 10]{} [Threads: shrinkage · bias]{} [ ]{.pm-label}
 
 :::
 
@@ -86,6 +86,24 @@ visits |> left_join(rates, by = "age_group") |>
             E = sum(r * population),
             smr = O / E)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $E_j$: the expected count in district $j$ if it had the city-wide age-specific rates.
+- $r_k$: the city-wide rate in age group $k$.
+- $PT_{jk}$: person-time in district $j$, age group $k$.
+- $SMR_j$: the standardized morbidity ratio: observed over expected.
+- $O_j$: the observed count.
+- $\theta_j$: the district's true relative risk.
+- $\mathrm{SE}(SMR_j)$: its standard error: large when the expected count is small.
 
 ::::
 
@@ -165,6 +183,22 @@ lw <- spdep::nb2listw(nb, style = "W")
 spdep::moran.mc(districts$deprivation, lw,
                 nsim = 999)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $I$: Moran's I: positive when neighbors are alike, negative when they differ.
+- $w_{ij}$: the neighbor weight between districts $i$ and $j$.
+- $x_i$: the value in district $i$.
+- $\bar x$: the citywide mean.
+- $n$: the number of districts.
 
 ::::
 
@@ -270,6 +304,23 @@ smr_eb <- w * smr + (1 - w) * mu
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\hat\theta_j^{\text{EB}}$: the empirical Bayes estimate: a weighted average of the district's SMR and the citywide mean.
+- $w_j$: the weight on the district's own SMR: small for districts with few expected cases.
+- $SMR_j$: the district's own, noisy estimate.
+- $\hat\mu$: the estimated mean of the true relative risks.
+- $\hat\sigma^2_\theta$: the estimated variance of the true relative risks between districts.
+- $E_j$: the expected count, which sets how noisy the SMR is.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -309,6 +360,19 @@ Empirical Bayes shrinks every district toward one city-wide value. A full Bayesi
 - Neighboring areas tend to be similar. Moran's I measures this, and permutation tests it.
 - Ecological associations can differ from individual-level ones because of area-level confounding and aggregation.
 - Shrinking noisy area estimates toward a common value, or toward neighbors, gives more accurate maps.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **SMR** | Observed cases divided by those expected from reference rates. | Comparing SMRs between areas assumes similar age structures; noisy in small areas. |
+| **Funnel plot** | Area rates plotted against expected counts, with control limits. | Separates real outliers from small-number noise better than a ranked map. |
+| **Spatial autocorrelation** | Nearby areas being more alike than distant ones. | Moran's I measures it; ignoring it overstates precision. |
+| **Moran's I** | A statistic for spatial autocorrelation over a neighbor structure. | Depends on how neighbors are defined. |
+| **Ecological fallacy** | Assuming an association between areas holds for individuals. | An area-level association can differ in size, or even sign, from the individual one. |
+| **Empirical Bayes smoothing** | Shrinking each area's rate toward the overall rate, more for small areas. | Uses one estimated prior; full Bayes (BYM2, Lesson 25) also models its uncertainty and spatial structure. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-17"><button type="button"></button><span></span></div>

@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lessons 2, 5 and 8]{} [Threads: likelihood · uncertainty · frequentist ↔ Bayesian]{}
+[About 3 hours]{} [Before this: Lessons 2, 5 and 8]{} [Threads: likelihood · uncertainty · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -30,6 +30,8 @@ By the end of this lesson you will be able to
 ::: {.why}
 
 **Why it matters.** Bayesian analysis is often presented as a different kind of statistics. It isn't: it uses the same model equations and the same likelihood as the models in Parts II–IV. What it adds is a prior, and a different answer: not one best estimate, but a whole distribution of plausible parameter values. This lesson connects the two views step by step.
+
+The preceding lesson, [Frequentist and Bayesian, side by side](freqbayes.qmd), compares the two approaches directly; this lesson starts building Bayesian models.
 
 :::
 
@@ -86,6 +88,21 @@ p ~ beta(a, b)
 a_post <- a + d; b_post <- b + n - d
 qbeta(c(0.025, 0.5, 0.975), a_post, b_post)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\mathrm{Beta}(a, b)$: the prior for the risk: like having seen $a$ cases and $b$ non-cases before the study.
+- $\pi$: the unknown risk of asthma.
+- $d$: the number of cases observed among $n$ children.
+- $\mathrm{Beta}(a + d,\ b + n - d)$: the posterior: prior counts plus observed counts. This simple updating is what makes the beta prior conjugate.
 
 ::::
 
@@ -180,6 +197,22 @@ loglik <- function(a, b)
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $y_t$: the visits on day $t$.
+- $\mu_t$: the expected visits on day $t$.
+- $\alpha$: the log expected visits at 20°C.
+- $\beta$: the heat effect: the change in log visits per °C.
+- $L(\alpha, \beta)$: the likelihood: the probability of all the observed counts, as a function of $\alpha$ and $\beta$.
+
+::::
+
 :::::
 
 ::: {.further}
@@ -247,6 +280,22 @@ brms::brm(visits ~ I(temp - 20), family = poisson,
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $p(\alpha, \beta \mid y)$: the posterior: what is known about the parameters after seeing the data.
+- $\propto$: "proportional to": the normalizing constant is left out.
+- $p(y \mid \alpha, \beta)$: the likelihood, as in 19.2.
+- $p(\beta)$: the prior on the heat effect.
+- $m$: the prior mean of $\beta$; $s$ is its prior SD.
+
+::::
+
 :::::
 
 ::: {.further}
@@ -299,6 +348,20 @@ mean(exp(draws$b_Intercept +
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $(\alpha^{(s)}, \beta^{(s)})$: draw $s$ from the posterior: one plausible pair of parameter values.
+- $S$: the number of posterior draws.
+- $\beta_{(0.025)}$: the 2.5th percentile of the draws of $\beta$: the lower limit of the 95% credible interval.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -338,6 +401,18 @@ Thinking a Bayesian model has a different equation from the frequentist one. The
 - Multiplying prior and likelihood point by point gives the posterior; it lies between them, closer to whichever is more precise.
 - Posterior draws, plugged into the model equation, give a bundle of curves; any question is answered by computing on the draws.
 - A 95% credible interval contains the parameter with 95% posterior probability, given the model, prior and data.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Prior** | What is believed about a parameter before seeing the data. | Combined with the likelihood to give the posterior. |
+| **Likelihood** | What the data say about the parameter. | Identical in frequentist and Bayesian analyses. |
+| **Posterior** | The updated belief: prior × likelihood, normalized. | A full distribution, not a point estimate. |
+| **Conjugate prior** | A prior that gives a posterior of the same family (e.g., beta–binomial). | Convenient, not required; MCMC handles any prior. |
+| **Posterior mean, median, mode** | Three point summaries of the posterior. | Coincide for symmetric posteriors; the median is the usual default. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-19"><button type="button"></button><span></span></div>

@@ -767,7 +767,7 @@
 - id: bayes-factor
   term: Bayes factor
   category: Bayesian model comparison
-  aliases: [Bayes factor, Bayes factors, BF, BF10, BF01]
+  aliases: [Bayes factor, Bayes factors, BF, BF10, BF01, Bayesian factor, Bayesian factors]
   short: >-
     The ratio of how well two models or hypotheses predicted the observed data.
   full: >-

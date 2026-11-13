@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lessons 8 and 12]{} [Threads: bias · uncertainty · frequentist ↔ Bayesian]{}
+[About 3 hours]{} [Before this: Lessons 8 and 12]{} [Threads: bias · uncertainty · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -90,6 +90,24 @@ glm(asthma ~ I(no2_true / 10) + ses + green,
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $X$: the true exposure, never observed.
+- $W$: the measured exposure, e.g. modeled NO₂.
+- $U$: the measurement error: independent of $X$ (classical) or of $W$ (Berkson).
+- $\hat\beta_W$: the slope estimated with the measured exposure: shrunk toward zero under classical error.
+- $\lambda$: the reliability ratio: the share of exposure variation that is real. The slope is multiplied by it.
+- $\sigma^2_{X \mid Z}$: the true exposure's variance after accounting for covariates $Z$.
+- $\sigma^2_U$: the error variance: larger error, stronger attenuation.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -156,6 +174,23 @@ cohort$no2_cal <- predict(cal, newdata = cohort)
 glm(asthma ~ I(no2_cal / 10) + ses + green,
     family = binomial, data = cohort)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $E[X \mid W, Z]$: the calibration model: the expected true exposure given the measured one and covariates, fitted in validation data.
+- $\alpha_1$: the calibration slope: how much true exposure changes per unit of measured exposure (below 1 under classical error).
+- $\widehat{E}[X \mid W, Z]$: each child's predicted true exposure, used in place of $W$ in the outcome model.
+- $\beta_0$: the intercept of the outcome model.
+- $\beta$: the exposure effect, now corrected for attenuation.
+- $\gamma^\top Z$: the covariates, in both models.
 
 ::::
 
@@ -273,6 +308,22 @@ correct <- function(pos, n, se, sp)
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $a^*$: the number classified as exposed (or as cases) by the imperfect measure.
+- $Se$: sensitivity of the classification: the share of truly positive classified as positive.
+- $Sp$: specificity: the share of truly negative classified as negative.
+- $\hat a$: the corrected count: back-calculated from $a^*$, $Se$ and $Sp$.
+- $n$: the size of the group.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -318,6 +369,19 @@ A Bayesian measurement-error model treats each child's true exposure as an unkno
 - Validation data make correction possible: regression calibration replaces the measured exposure by its expected true value.
 - SIMEX adds error deliberately and extrapolates back to zero error.
 - Non-differential misclassification usually, not always, biases toward the null; differential misclassification can bias in either direction.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Classical error** | Measured value = true value + independent noise. | Attenuates slopes toward zero. |
+| **Berkson error** | True value = assigned value + independent noise (e.g., everyone in a district gets the district mean). | Little bias in slopes, but less precision. |
+| **Non-differential vs differential** | Error unrelated vs related to the outcome. | Differential error can bias in any direction. |
+| **Attenuation** | Shrinkage of an estimated effect toward the null by measurement error. | Applies to classical, non-differential error in a single exposure. |
+| **Regression calibration vs SIMEX** | Replace exposure by its predicted true value vs add more error and extrapolate back. | Calibration needs validation data; SIMEX needs the error variance. |
+| **Misclassification** | Measurement error in a categorical variable. | Sensitivity and specificity of the classification describe it. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-13"><button type="button"></button><span></span></div>

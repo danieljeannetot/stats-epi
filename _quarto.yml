@@ -13,8 +13,8 @@ project:
 website:
   title: "Statistics for epidemiology"
   description: "An interactive course from probability to Bayesian hierarchical models, for MSc students in epidemiology and public health."
-  site-url: https://danieljeannetot.github.io/stats-epi/
-  repo-url: https://github.com/danieljeannetot/stats-epi
+  # site-url: https://YOUR-USER.github.io/stats-epi-course/
+  # repo-url: https://github.com/YOUR-USER/stats-epi-course
   search: true
   page-navigation: true
   reader-mode: false
@@ -22,6 +22,8 @@ website:
     left:
       - href: index.qmd
         text: Home
+      - href: methods.qmd
+        text: Choosing a method
       - href: glossary.qmd
         text: Glossary
       - href: course-plan.html
@@ -32,43 +34,76 @@ website:
     contents:
       - section: "Part I · Foundations"
         contents:
-          - lesson-00.qmd
-          - lesson-01.qmd
-          - lesson-02.qmd
-          - lesson-03.qmd
-          - lesson-04.qmd
-          - lesson-05.qmd
-          - lesson-06.qmd
+          - href: lesson-00.qmd
+            text: "0 · Welcome: the city, the data and how to use the course"
+          - href: lesson-01.qmd
+            text: "1 · Describing data and epidemiological measures"
+          - design.qmd
+          - href: lesson-02.qmd
+            text: "2 · Probability and conditional probability"
+          - href: lesson-03.qmd
+            text: "3 · Random variables and probability distributions"
+          - href: lesson-04.qmd
+            text: "4 · Sampling, sampling distributions and the central limit theorem"
+          - href: lesson-05.qmd
+            text: "5 · Likelihood and estimation"
+          - href: lesson-06.qmd
+            text: "6 · Confidence intervals and hypothesis tests"
       - section: "Part II · Frequentist regression"
         contents:
-          - lesson-07.qmd
-          - lesson-08.qmd
-          - lesson-09.qmd
-          - lesson-10.qmd
-          - lesson-11.qmd
+          - href: lesson-07.qmd
+            text: "7 · Linear regression"
+          - href: lesson-08.qmd
+            text: "8 · Generalized linear models: logistic and Poisson regression"
+          - href: lesson-09.qmd
+            text: "9 · Confounding, effect modification and interaction"
+          - href: lesson-10.qmd
+            text: "10 · Model checking, comparison and selection"
+          - href: lesson-11.qmd
+            text: "11 · Nonlinear effects: categories, polynomials, splines and GAMs"
       - section: "Part III · Causal inference, measurement and burden"
         contents:
-          - lesson-12.qmd
-          - lesson-13.qmd
-          - lesson-14.qmd
+          - href: lesson-12.qmd
+            text: "12 · Causal inference: from association to effect"
+          - href: lesson-13.qmd
+            text: "13 · Measurement error and misclassification"
+          - href: lesson-14.qmd
+            text: "14 · Measuring disease burden"
       - section: "Part IV · Time, space and clustering"
         contents:
-          - lesson-15.qmd
-          - lesson-16.qmd
-          - lesson-17.qmd
-          - lesson-18.qmd
+          - href: lesson-15.qmd
+            text: "15 · Time-series regression for health data"
+          - href: lesson-16.qmd
+            text: "16 · Distributed lag and distributed lag non-linear models"
+          - href: lesson-17.qmd
+            text: "17 · Spatial data and spatial autocorrelation"
+          - href: lesson-18.qmd
+            text: "18 · Clustered data and mixed-effects models"
       - section: "Part V · Bayesian modeling"
         contents:
-          - lesson-19.qmd
-          - lesson-20.qmd
-          - lesson-21.qmd
-          - lesson-22.qmd
-                    - lesson-23.qmd
-          - lesson-24.qmd
-          - lesson-25.qmd
+          - freqbayes.qmd
+          - href: lesson-19.qmd
+            text: "19 · Bayesian thinking: from Bayes' rule to a model equation"
+          - href: lesson-20.qmd
+            text: "20 · Priors: what they say and how much they matter"
+          - href: lesson-21.qmd
+            text: "21 · Computing the posterior: Markov chain Monte Carlo"
+          - href: lesson-22.qmd
+            text: "22 · Bayesian regression and GLMs"
+          - href: lesson-23.qmd
+            text: "23 · Bayesian hypothesis testing and model comparison"
+          - href: lesson-24.qmd
+            text: "24 · Bayesian hierarchical models"
+          - href: lesson-25.qmd
+            text: "25 · Capstone: a district-level Bayesian DLNM with spatial pooling"
       - section: "Part VI · Machine learning meets Bayesian inference"
         contents:
-          - lesson-26.qmd
+          - href: lesson-26.qmd
+            text: "26 · Bayesian additive regression trees (BART) and bartisan"
+      - section: "Part VII · Causal tools from econometrics"
+        contents:
+          - href: lesson-27.qmd
+            text: "27 · Causal tools from econometrics: trials, regression, IV, RD and DiD"
   page-footer:
     left: "All data are simulated. Course text CC BY 4.0, code MIT."
     right: "Built with [Quarto](https://quarto.org)"

@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 4 hours]{} [Before this: Lessons 11, 12, 16, 18 and 19–22]{} [Threads: shrinkage · bias · frequentist ↔ Bayesian]{}
+[About 4 hours]{} [Before this: Lessons 11, 12, 16, 18 and 19–22]{} [Threads: shrinkage · bias · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -86,6 +86,20 @@ tree <- rpart::rpart(visits ~ temp,
                      control = rpart::rpart.control(
                        maxdepth = 3, cp = 0))
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $g(x; T, M)$: one tree's prediction: $T$ is its structure (splits), $M$ its leaf values.
+- $\mu_b$: the value in leaf $b$.
+- $b$: a leaf: a final group of the tree.
 
 ::::
 
@@ -168,6 +182,21 @@ bartisan::partial_dependence(fit, ~ temp) |>
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $f(x)$: the regression function: the sum of all trees.
+- $g(x; T_j, M_j)$: tree $j$'s contribution.
+- $m$: the number of trees.
+- $\varepsilon_i$: the residual error, with variance $\sigma^2$.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -236,6 +265,24 @@ bartisan::bartisan_control(
   gate = "smoothstep",   # soft rules (default)
   sparsity = FALSE)      # DART prior off
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\gamma$: the base probability that a node splits.
+- $\beta$: how fast splitting becomes less likely with depth.
+- $d$: the depth of a node: 0 for the root.
+- $\sigma_\mu$: the prior SD of leaf values: shrinks as trees are added, so no tree dominates.
+- $k$: the leaf-shrinkage parameter.
+- $\psi$: the gate function of a soft rule: a smooth step.
+- $\tau$: the soft rule's bandwidth: as it tends to zero the rule becomes hard.
 
 ::::
 
@@ -332,6 +379,22 @@ fit <- bartisan::bartisan(
 marginaleffects::avg_comparisons(fit,
   variables = list(no2 = -10))
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\Phi^{-1}$: the probit link.
+- $f(x_i, z_i)$: BART with exposure and confounders together in the trees.
+- $\beta\, x_i$: the exposure's own linear term (semiparametric model).
+- $f(z_i)$: BART for the confounders only.
+- $\Delta^{(s)}$: cases prevented in draw $s$, by g-computation.
 
 ::::
 
@@ -619,6 +682,22 @@ for (k in seq_along(origins[-1])) {
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\hat y_{t+h \mid t}$: the forecast for $h$ days ahead, made at origin $t$.
+- $\mathcal{F}_t$: the information available at the origin: nothing later.
+- $h$: the horizon.
+- $\mathrm{RMSE}_h$: the root mean squared forecast error at horizon $h$.
+- $\mathcal{T}$: the forecast origins in the test period, never used for fitting.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -697,6 +776,20 @@ A vector autoregression with trees (BAVART, Section 26.8) forecasts several seri
 - In environmental epidemiology, BART suits confounding-heavy cohort questions, effect heterogeneity and mixtures. It doesn't replace time-series, lag, spatial or measurement-error models, and it cannot extrapolate.
 - Prediction estimates unobserved values; forecasting predicts the future from what is known at the origin; neither estimates effects. Evaluate forecasts on later data with rolling origins, never by random splits.
 - Extensions exist for lags (treed DLMs in `dlmtree`), temporal smoothing (tsBART), case-crossover designs (CL-BART), spatial random effects and random slopes (stan4bart). General spatio-temporal BART for health counts is still an open research area.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Regression tree (CART)** | A single tree splitting the data into leaves with constant predictions. | Unstable alone; BART sums many small trees. |
+| **BART** | A Bayesian sum of many small trees. | Learns form and interactions; returns a posterior. |
+| **Hard vs soft rules** | Splits sending each observation one way vs partly both ways. | Soft rules give smooth fitted functions. |
+| **Partial dependence** | The average prediction as one predictor varies. | A summary; can hide interactions. |
+| **Regularization-induced confounding** | Shrinkage blurring the exposure effect with confounders' effects. | Fixed by giving the exposure its own term (vc, BCF). |
+| **Prediction vs forecasting vs effect estimation** | An unobserved value vs the future from what is known now vs what would happen if exposure changed. | Need different data, checks and models. |
+| **Data leakage** | Using information a real forecaster wouldn't have. | Makes accuracy look better than it is. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-26"><button type="button"></button><span></span></div>

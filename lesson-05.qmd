@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 2.5 hours]{} [Before this: Lessons 3–4]{} [Threads: likelihood · uncertainty · frequentist ↔ Bayesian]{}
+[About 2.5 hours]{} [Before this: Lessons 3–4]{} [Threads: likelihood · uncertainty · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -82,6 +82,22 @@ optimize(loglik, c(0, 1), maximum = TRUE)
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $L(\pi)$: the likelihood: the probability of the observed data, viewed as a function of the unknown risk $\pi$.
+- $\ell(\pi)$: the log-likelihood: easier to work with; it peaks at the same value.
+- $d$: the number of children with asthma among the $n$ observed.
+- $\hat\pi$: the maximum likelihood estimate: the value of $\pi$ that makes the data most probable, here simply $d/n$.
+- $\text{const}$: terms that don't involve $\pi$; they don't change where the curve peaks.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -101,6 +117,12 @@ optimize(loglik, c(0, 1), maximum = TRUE)
 Reading the likelihood as the probability that π takes a given value. L(π) is the probability of the *data* given π. It doesn't sum to 1 over π, and turning it into a probability for π requires a prior: that is what Bayesian inference does.
 
 :::
+
+**Two ways.** The same likelihood, read two ways: as a function to maximize, or multiplied by a prior to give a posterior.
+
+```{=html}
+<div class="cw twoways"><div class="tw-head">Two ways · Likelihood and posterior</div><div class="tw-ctl"><div class='ctrl'><label for='tw5N'>Children observed</label><input type='range' id='tw5N' min='10' max='1000' step='10' value='60'><output id='tw5NO'></output></div><div class='ctrl'><label for='tw5P'>Prior</label><select id='tw5P'><option value='1,1'>flat, Beta(1, 1)</option><option value='14,86'>informative: worth 100 children, 14%</option></select></div></div><svg id="tw5Svg" viewBox="0 0 520 220" role="img" aria-label="Frequentist and Bayesian answers"></svg><div class="grid2"><div class="cpanel tw-f"><h5>Frequentist</h5><div id="tw5F"></div></div><div class="cpanel tw-b"><h5>Bayesian</h5><div id="tw5B"></div></div></div><div class="now" id="tw5Now"></div></div>
+```
 
 ::: {.further}
 
@@ -155,6 +177,21 @@ ll <- function(l) sum(dpois(y, l, log = TRUE))
 glm(y ~ 1, family = poisson) |>
   coef() |> exp()          # equals mean(y)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $y_t$: the count on day $t$.
+- $\lambda$: the unknown daily rate: the expected number of visits per day.
+- $\ell(\lambda)$: the log-likelihood of the rate, summed over the $n$ days.
+- $\hat\lambda$: the maximum likelihood estimate of the rate: the mean daily count.
 
 ::::
 
@@ -247,6 +284,21 @@ confint(fit) |> plogis()         # profile likelihood
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $I(\hat\pi)$: the information: the curvature of the log-likelihood at its peak. Sharper peak, more information.
+- $\ell''(\hat\pi)$: the second derivative of the log-likelihood, which measures the curvature.
+- $SE$: the standard error: one over the square root of the information.
+- $1.92$: half of 3.84, the 95% point of a chi-squared distribution with one degree of freedom: values within 1.92 log-likelihood units of the peak form the likelihood interval.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -310,7 +362,21 @@ Multiply the likelihood curve by a prior distribution for π, rescale so the are
 - Wald intervals assume a symmetric, quadratic log-likelihood. With few events, likelihood-based intervals are more accurate.
 - Likelihood ratios compare how well the data support two parameter values.
 
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Probability vs likelihood** | Probability: data given fixed parameters. Likelihood: the same expression as a function of the parameters, data fixed. | A likelihood isn't a probability distribution over parameters; it doesn't sum to 1. |
+| **Log-likelihood** | The logarithm of the likelihood. | Same peak, easier arithmetic; differences in log-likelihood measure relative support. |
+| **Maximum likelihood estimate** | The parameter value that makes the data most probable. | A point; its uncertainty comes from the curvature of the likelihood. |
+| **Information (curvature)** | How sharply the log-likelihood peaks. | More information means a smaller standard error. |
+| **Wald vs likelihood interval** | Estimate ± 1.96 SE vs all values within 1.92 log-likelihood units of the peak. | They agree when the likelihood is symmetric; the likelihood interval behaves better near boundaries. |
+| **Likelihood ratio** | The ratio of likelihoods at two parameter values. | Measures relative evidence; the likelihood ratio test turns it into a p-value. |
+
 ```{=html}
 <div class="done" data-lesson="lesson-05"><button type="button"></button><span></span></div>
 <script src="assets/lesson-05.js"></script>
+<script src="assets/twoways.js"></script>
 ```

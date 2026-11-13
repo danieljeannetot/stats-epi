@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lesson 19]{} [Threads: shrinkage · frequentist ↔ Bayesian]{}
+[About 3 hours]{} [Before this: Lesson 19]{} [Threads: shrinkage · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -79,6 +79,21 @@ exp(a + b * (35 - 20))     # visits at 35°C
 
 brms::brm(..., sample_prior = "only")
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $p(\alpha)$: the prior on the intercept.
+- $p(\beta)$: the prior on the heat effect.
+- $\tilde\mu^{(s)}(T)$: the expected visits at temperature $T$ implied by prior draw $s$.
+- $\tilde y^{(s)}$: visits simulated from the prior alone: the prior predictive distribution. Absurd values mean an unreasonable prior.
 
 ::::
 
@@ -155,6 +170,22 @@ m <- (log1p(L) + log1p(U)) / 2
 s <- (log1p(U) - log1p(L)) / (2 * 1.96)
 prior(normal(m, s), class = b)   # brms
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $m$: the prior mean on the log scale: the midpoint of the plausible range.
+- $s$: the prior SD: chosen so that 95% of the prior lies within the plausible range.
+- $\log(1 + L)$: the lower end of the experts' plausible range ($L$ = −0.02 means −2% per °C), on the log scale.
+- $\log(1 + U)$: the upper end of the plausible range, on the log scale.
+- $1.96$: the normal quantile for 95%.
 
 ::::
 
@@ -256,6 +287,22 @@ mgcv::gam(visits ~ s(lag_matrix, by = temp_matrix,
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\beta_\ell$: the effect at lag $\ell$.
+- $\beta_{\ell-1}$: the effect at the previous lag: a random-walk prior pulls neighboring lags together, making the curve smooth.
+- $\lambda$: the precision of the prior: larger means stronger smoothing (or shrinkage).
+- $P$: the penalty matrix: identity for independent priors, a difference matrix for a random walk.
+- $\ell(\beta)$: the log-likelihood: the posterior is likelihood minus a penalty, which is why a penalty is a prior.
+
+::::
+
 :::::
 
 ::: {.callout-tip icon="false" title="Bayesian preview"}
@@ -283,6 +330,18 @@ Here λ is fixed by hand. In a hierarchical model it becomes a parameter with it
 - Plausible ranges from subject knowledge translate directly into normal priors on log relative risks.
 - The prior's influence fades as data accumulate; report sensitivity to reasonable alternatives.
 - A normal prior acts as a penalty. Independent priors shrink toward zero; random-walk priors smooth.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Flat or vague prior** | A prior spreading probability very widely. | Not neutral: on a transformed scale it can be informative, and it can imply absurd predictions. |
+| **Weakly informative prior** | A prior that rules out implausible values without favoring any plausible one. | The usual default for regression coefficients. |
+| **Informative prior** | A prior expressing real knowledge, e.g., from earlier studies. | Should be justified and tested with a sensitivity analysis. |
+| **Prior predictive check** | Simulating data from the prior alone. | Checks whether the prior implies sensible data, before fitting. |
+| **Penalty ↔ prior** | A penalized likelihood equals a posterior mode with a matching prior. | Ridge = normal prior; a spline penalty = a random-walk prior. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-20"><button type="button"></button><span></span></div>

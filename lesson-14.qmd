@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lessons 1, 12 and 13]{} [Threads: uncertainty · bias · frequentist ↔ Bayesian]{}
+[About 3 hours]{} [Before this: Lessons 1, 12 and 13]{} [Threads: uncertainty · bias · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -88,6 +88,23 @@ paf_miet  <- pc * (rr_adj - 1) / rr_adj
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $PAF_{\text{Levin}}$: Levin's PAF, from the share of the population exposed and the RR. Biased if the RR is confounded.
+- $p_e$: the proportion of the population exposed.
+- $PAF_{\text{Miettinen}}$: Miettinen's PAF, from the share of cases exposed and an adjusted RR. Valid under confounding.
+- $p_c$: the proportion of cases that were exposed.
+- $RR_{\text{adj}}$: the confounder-adjusted risk ratio.
+- $RR$: the risk ratio for exposure.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -161,6 +178,22 @@ r_cf  <- mean(predict(fit,
   type = "response"))
 paf <- 1 - r_cf / r_obs
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $PAF$: the population attributable fraction: the share of cases that the intervention would prevent.
+- $x^*$: the counterfactual exposure: NO₂ above $x^*$ is capped at $x^*$; lower values are left alone.
+- $x_i$: child $i$'s actual exposure.
+- $AN$: the attributable number: cases prevented.
+- $D$: the total number of cases.
 
 ::::
 
@@ -262,6 +295,24 @@ daly <- yll + yld
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $DALY$: disability-adjusted life years: healthy years lost.
+- $YLL$: years of life lost: deaths times the remaining life expectancy at the age of death.
+- $YLD$: years lived with disability.
+- $D_a$: deaths at age $a$; $L_a$ is the remaining life expectancy at that age.
+- $I$: new cases of the condition.
+- $DW$: the disability weight: 0 for full health, 1 for death.
+- $L_{\text{dur}}$: the average duration of the condition.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -324,6 +375,18 @@ Monte Carlo propagation is the frequentist analyst borrowing a Bayesian idea: tr
 - Attributable cases = PAF × total cases. DALYs add years of life lost and years lived with disability.
 - Burden estimates inherit uncertainty and bias from every input: propagate uncertainty by simulation and correct the relative risk for confounding and measurement error first.
 - PAFs for different risk factors can sum to more than 100%, because cases can have several causes.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Attributable fraction (PAF)** | The share of cases that would not occur if exposure were removed or reduced. | Needs a causal RR and an explicit counterfactual. |
+| **Levin vs Miettinen formula** | PAF from exposure prevalence in the population vs among cases. | Miettinen's works with adjusted RRs; Levin's with crude ones is biased under confounding. |
+| **Counterfactual exposure** | The alternative exposure level the burden is compared with (e.g., 10 µg/m³). | Different counterfactuals give different burdens for the same data. |
+| **Attributable number** | PAF × total cases. | A count, not a share. |
+| **DALY** | Years of life lost plus years lived with disability. | Combines death and illness in one unit; ED visits alone can't give DALYs. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-14"><button type="button"></button><span></span></div>

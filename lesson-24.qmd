@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3.5 hours]{} [Before this: Lessons 13, 18 and 19–22]{} [Threads: shrinkage · uncertainty · bias · frequentist ↔ Bayesian]{}
+[About 3.5 hours]{} [Before this: Lessons 13, 18 and 19–22]{} [Threads: shrinkage · uncertainty · bias · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -87,6 +87,23 @@ brms::brm(asthma ~ 1 + (1 | school),
   family = bernoulli, data = cohort,
   prior = brms::prior(normal(0, 1), class = sd))
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\hat\theta_j$: group $j$'s own estimate, with sampling variance $v_j$.
+- $\theta_j$: group $j$'s true value.
+- $\mu$: the mean of the true values.
+- $\tau$: the between-group SD, with its own (hyper)prior.
+- $V_\mu$: the variance of the estimated mean given $\tau$.
+- $\hat\mu_\tau$: the precision-weighted mean of the estimates, given $\tau$.
 
 ::::
 
@@ -216,6 +233,21 @@ brms::brm(..., control = list(adapt_delta = 0.99))
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\theta_j$: group $j$'s effect.
+- $\mu$: the mean effect.
+- $\tau$: the between-group SD.
+- $z_j$: the standardized group effect: what the sampler moves in the non-centered form.
+
+::::
+
 :::::
 
 ::: {.further}
@@ -284,6 +316,24 @@ model {
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $X_i$: child $i$'s true NO₂: an unknown parameter.
+- $\alpha^\top z_i$: the exposure model: true NO₂ predicted from traffic, green space and SES.
+- $\sigma_X^2$: the variation of true exposure around the exposure model.
+- $W_i$: the modeled NO₂, with error variance $\sigma_U^2$.
+- $P_i$: the personal-monitor reading, available for validation children only.
+- $\beta_X$: the effect of true NO₂ (per 10 µg/m³) on the probit scale.
+- $\Phi^{-1}$: the probit link: the inverse of the standard normal distribution function.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -322,6 +372,19 @@ In this model, a child's asthma status slightly informs their estimated true exp
 - With few groups the prior for τ matters. Prefer half-normal or half-Cauchy priors on τ; avoid inverse-gamma(ε, ε).
 - Hierarchical posteriors can form funnels. Divergent transitions are the warning; the non-centered parameterization is the usual cure.
 - A Bayesian measurement-error model treats true exposure as a parameter, combining every source of information and uncertainty.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Empirical Bayes** | Estimate the between-group SD, then treat it as known. | Intervals too narrow when τ is uncertain; full Bayes averages over τ. |
+| **Hyperprior** | A prior on the parameters of the group-level distribution, such as τ. | Matters most with few groups. |
+| **Half-normal vs inverse-gamma prior** | Priors for a variance parameter. | Inverse-gamma(ε, ε) piles mass near zero; half-normal on τ is safer. |
+| **Funnel** | A posterior shape where small τ forces group effects together. | Causes divergent transitions in centered models. |
+| **Centered vs non-centered** | Sampling group effects directly vs as μ + τ·z. | Same model; the non-centered form removes the funnel. |
+| **Measurement-error model** | Treating true exposure as a parameter informed by all data. | Propagates calibration uncertainty, which regression calibration ignores. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-24"><button type="button"></button><span></span></div>

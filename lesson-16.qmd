@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3.5 hours]{} [Before this: Lessons 11 and 15]{} [Threads: uncertainty · shrinkage · frequentist ↔ Bayesian]{}
+[About 3.5 hours]{} [Before this: Lessons 11 and 15]{} [Threads: uncertainty · shrinkage · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -82,6 +82,24 @@ fit <- glm(visits ~ cb + splines::ns(t, df = 35) + dow,
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\beta_\ell$: the effect of heat on day $t-\ell$ on visits on day $t$: the lag-specific effect.
+- $h_{t-\ell}$: the heat exposure $\ell$ days earlier.
+- $h_t$: heat on day $t$: degrees above 20°C (0 below).
+- $L$: the maximum lag, here 21 days.
+- $\theta_k$: the coefficients of the lag basis: a few numbers that define the whole smooth lag curve.
+- $c_k(\ell)$: the lag basis functions: smooth curves over lags.
+- $\text{cumulative}$: the cumulative effect: the sum over all lags.
+
+::::
+
 :::::
 
 ::: {.further}
@@ -148,6 +166,22 @@ fit <- glm(visits ~ cb + splines::ns(t, df = 35) +
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\eta_{jk}$: the cross-basis coefficients: together they define the whole exposure–lag–response surface.
+- $w_{t,jk}$: the cross-basis variable: exposure history on day $t$ transformed by basis $j$ and weighted by lag basis $k$.
+- $b_j(T_{t-\ell})$: exposure basis function $j$ applied to the temperature $\ell$ days earlier.
+- $c_k(\ell)$: lag basis function $k$ at lag $\ell$.
+- $L$: the maximum lag.
+
+::::
+
 :::::
 
 ::: {.further}
@@ -207,6 +241,22 @@ pred2$allRRfit; pred2$allRRlow; pred2$allRRhigh
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\log RR_{\text{cum}}(x)$: the cumulative log relative risk at temperature $x$, summed over lags.
+- $b_j(x)$: exposure basis function $j$ at temperature $x$.
+- $x_{\text{ref}}$: the reference temperature: RRs are relative to it.
+- $\mathrm{MMT}$: the minimum morbidity temperature: where the cumulative curve is lowest.
+- $\arg\min_x$: "the value of $x$ that minimizes".
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -248,6 +298,12 @@ mmt
 ```
 
 :::
+
+**Two ways.** The MMT's uncertainty, simulated from the fitted coefficients (frequentist) or drawn from their posterior (Bayesian). With flat priors the two use the same draws; a prior that shrinks the cross-basis changes them.
+
+```{=html}
+<div class="cw twoways"><div class="tw-head">Two ways · The minimum morbidity temperature</div><div class="tw-ctl"><div class='ctrl'><label for='tw16L'>Bayesian prior on the cross-basis coefficients</label><select id='tw16L'><option value='0'>flat</option><option value='1'>Normal(0, 1²): weak</option><option value='0.1'>Normal(0, 0.1²): strong</option></select></div><div class='btns'><button type='button' id='tw16Run'>Compute both</button></div></div><svg id="tw16Svg" viewBox="0 0 520 220" role="img" aria-label="Frequentist and Bayesian answers"></svg><div class="grid2"><div class="cpanel tw-f"><h5>Frequentist</h5><div id="tw16F"></div></div><div class="cpanel tw-b"><h5>Bayesian</h5><div id="tw16B"></div></div></div><div class="now" id="tw16Now"></div></div>
+```
 
 ::: {.further}
 
@@ -302,6 +358,22 @@ $$AF_{\text{heat}} = \frac{\sum_{t: T_t > \mathrm{MMT}} y_t\, AF_t}{\sum_t y_t}$
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $AF_t$: the share of day $t$'s visits attributable to its temperature (relative to the MMT).
+- $y_t$: the visits on day $t$.
+- $AN$: the attributable number: summed over days.
+- $AF_{\text{heat}}$: the heat-attributable fraction: from days above the MMT only. Cold uses days below.
+- $\mathrm{MMT}$: the reference temperature separating heat from cold.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -341,6 +413,25 @@ A Bayesian DLNM gives the lag curve a smoothing prior instead of a fixed number 
 - A DLNM crosses a spline in exposure with a spline in lag, giving an exposure–lag–response surface.
 - The cumulative curve sums effects over lags; its minimum, the MMT, is the usual reference, and it is uncertain.
 - Attributable fractions for heat and cold follow from the cumulative curve, with uncertainty from simulation.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Lag** | The delay between exposure and outcome, in days. | Lag 0 is the same day; lag 3 is three days later. |
+| **Lag-specific effect** | The effect of exposure on one day on the outcome a given number of days later. | The cumulative effect sums lag-specific effects over all lags. |
+| **Cumulative effect** | The total effect of a sustained exposure over the whole lag period. | What burden calculations use; individual lags can be noisy or negative. |
+| **Distributed lag model (DLM)** | A model for the effect at each lag, constrained to be smooth over lags. | Assumes a linear exposure–response; a DLNM lets it be non-linear too. |
+| **DLNM** | A model whose effect varies smoothly over both exposure level and lag. | Built from a cross-basis; generalizes the DLM. |
+| **Cross-basis** | Every exposure basis function multiplied by every lag basis function. | Its coefficients describe a surface; neither basis alone does. |
+| **Exposure basis vs lag basis** | The spline over temperature vs the spline over lags. | Two separate choices of type, knots and df; the cross-basis combines them. |
+| **Knots in the exposure dimension** | Temperatures where the exposure spline's pieces join (e.g., percentiles). | Shape the exposure–response curve; lag knots shape the lag curve. |
+| **Knots in the lag dimension** | Lags where the lag spline's pieces join (often log-spaced: dense early, sparse late). | Shape how the effect spreads over days; unrelated to temperature values. |
+| **Spline vs natural spline** | A piecewise polynomial vs one constrained to be linear beyond the outer knots. | Natural splines behave better at extreme temperatures, where data are sparse. |
+| **Minimum morbidity temperature (MMT)** | The temperature with the lowest cumulative risk. | The usual reference for RRs and the heat/cold split; it has its own uncertainty. |
+| **Harvesting** | A deficit of events after a peak, as frail people's events were brought forward by a few days. | Shows as negative effects at later lags; ignored by single-lag models. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-16"><button type="button"></button><span></span></div>

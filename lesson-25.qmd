@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 5 hours]{} [Before this: the whole course, especially Lessons 14, 16, 17, 18 and 24]{} [Threads: all five]{}
+[About 5 hours]{} [Before this: the whole course, especially Lessons 14, 16, 17, 18 and 24]{} [Threads: all five]{} [ ]{.pm-label}
 
 :::
 
@@ -115,6 +115,24 @@ coef(red); vcov(red)
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\eta_{jkq}$: district $j$'s cross-basis coefficients.
+- $w_{jt,kq}$: district $j$'s cross-basis variables on day $t$.
+- $s_j(t)$: the district's spline of time.
+- $\hat\theta_{jk}$: the reduced coefficients: the cumulative curve's coefficients for district $j$.
+- $c_q(\ell)$: the lag basis, summed over lags to reduce the surface to a curve.
+- $\log RR_j(x)$: district $j$'s cumulative log RR at temperature $x$.
+- $x_{\text{ref}}$: the reference temperature.
+
+::::
+
 :::::
 
 ::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): stage 1 for all districts with dlnm"}
@@ -207,6 +225,24 @@ INLA::inla(f, data = s1k, family = "gaussian",
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\hat\theta_j$: district $j$'s stage-1 coefficients, with covariance $S_j$.
+- $\mu_k$: the citywide mean of coefficient $k$.
+- $\sigma_k$: the between-district SD of coefficient $k$.
+- $\phi$: the spatial share: 0 means exchangeable pooling, 1 purely spatial.
+- $v_{jk}$: the unstructured part: district-specific noise.
+- $u_{jk}$: the spatially structured part: similar for neighbors.
+- $u_{\cdot k}$: all districts' structured effects, with a scaled ICAR prior.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -274,6 +310,23 @@ an  <- sum(y_j[temp_j > mmt] *
 # then summarise over draws:
 mean(an / pop_j * 1e5 / years > 60)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\mathrm{AN}_j^{(s)}$: heat-attributable visits in district $j$, computed from draw $s$.
+- $\mathrm{MMT}_j^{(s)}$: the district's MMT in that draw.
+- $y_{jt}$: the district's visits on day $t$.
+- $f_j^{(s)}$: the district's cumulative curve in draw $s$.
+- $\mathrm{pop}_j$: the district's population, to express the burden per person.
+- $c$: the policy threshold for the exceedance probability.
 
 ::::
 
@@ -365,6 +418,18 @@ A **random-walk prior** on the long-term trend, instead of a spline of time, let
 - With few districts, spatial pooling may add little to exchangeable pooling; the data decide, and the result should be reported either way.
 - Every derived quantity, including MMTs, attributable visits and exceedance probabilities, is computed on each posterior draw.
 - Check prior sensitivity, compare with simpler analyses, and report every modeling choice.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Two-stage design** | A model per location, then pooling of the location estimates. | A one-stage model fits everything at once. |
+| **Reduction** | Summarizing a DLNM by its cumulative curve's coefficients. | Keeps what stage 2 needs, with a small covariance matrix. |
+| **BYM2** | A prior splitting area effects into spatially structured and unstructured parts. | φ is the spatial share; ICAR alone is purely spatial. |
+| **ICAR** | A prior where each area's effect is centered on its neighbors' average. | Assumes spatial smoothness; needs a neighbor structure. |
+| **Exceedance probability** | The posterior probability that a quantity exceeds a threshold. | Answers "how sure are we?", which a point estimate doesn't. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-25"><button type="button"></button><span></span></div>

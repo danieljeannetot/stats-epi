@@ -87,8 +87,8 @@ from being linked, wrap it in `::: {.no-gloss}`.
 Some lessons show code that is not run when the site builds, so these packages are not
 needed to render: `brms` and `loo` (Part V), `bain` (Lesson 23), `INLA` (Lesson 25; install from
 https://www.r-inla.org, it is not on CRAN), and `bartisan`, `marginaleffects`, `dlmtree` and
-`stan4bart` (Lesson 26). To run that code yourself:
-`install.packages(c("brms", "loo", "bain", "bartisan", "marginaleffects", "dlmtree", "stan4bart"))`.
+`stan4bart` (Lesson 26), and `fixest`, `AER` and `rdrobust` (Lesson 27). To run that code yourself:
+`install.packages(c("brms", "loo", "bain", "bartisan", "marginaleffects", "dlmtree", "stan4bart", "fixest", "AER", "rdrobust"))`.
 
 ## References
 

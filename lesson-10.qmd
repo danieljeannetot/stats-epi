@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 2.5 hours]{} [Before this: Lessons 6 and 8]{} [Threads: uncertainty · frequentist ↔ Bayesian]{}
+[About 2.5 hours]{} [Before this: Lessons 6 and 8]{} [Threads: uncertainty · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -90,6 +90,23 @@ m1 <- update(m0, . ~ . + sin(2*pi*doy/365.25) +
 anova(m0, m1, test = "F")   # quasi-Poisson
 acf(residuals(m1, type = "pearson"))
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $LR$: the likelihood ratio statistic: twice the gain in log-likelihood from adding terms.
+- $\ell_1$: the log-likelihood of the bigger model; $\ell_0$ of the smaller.
+- $\chi^2_{k}$: the chi-squared distribution with $k$ degrees of freedom: the reference distribution when the added terms do nothing.
+- $QAIC$: AIC for quasi-likelihood models, with the log-likelihood divided by $\hat\phi$.
+- $AIC$: Akaike's information criterion: fit ($-2\ell$) plus a penalty of 2 per parameter. Lower is better.
+- $p$: the number of parameters in the model.
 
 ::::
 
@@ -225,6 +242,20 @@ Bayesian analysis compares models in two ways: by Bayes factors, which ask which
 - More complex models always fit the training data better. Cross-validation estimates how well they predict new data.
 - Influential points combine high leverage with large residuals. Check them; don't silently delete them.
 - Data-driven selection, such as stepwise regression, invalidates the p-values and intervals of the final model.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Overfitting** | A model that fits noise in this sample. | Fits the data well but predicts new data badly. |
+| **Likelihood ratio test** | Compares nested models by their log-likelihoods. | Tests a hypothesis; AIC estimates predictive accuracy and works for non-nested models. |
+| **AIC** | Fit plus a penalty of 2 per parameter. | Lower is better; differences matter, not absolute values. |
+| **Cross-validation** | Estimating prediction error on data left out of the fit. | Direct and assumption-light; AIC approximates it. |
+| **Residual autocorrelation** | Correlation between residuals of nearby observations, e.g. consecutive days. | Violates independence and makes standard errors too small. |
+| **Influential point vs outlier** | A point that changes the estimates when removed vs a point far from the fit. | An outlier can have little influence; an influential point need not look unusual. |
+| **Stepwise selection** | Adding or dropping variables by significance. | Selects noise and biases estimates; prefer pre-specification or penalization. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-10"><button type="button"></button><span></span></div>

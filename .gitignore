@@ -7,3 +7,5 @@
 *_files/
 # keep _freeze/: it stores the results of expensive computations
 __pycache__/
+
+**/*.quarto_ipynb

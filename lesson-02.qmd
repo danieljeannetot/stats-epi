@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 2 hours]{} [Before this: Lesson 1]{} [Threads: frequentist ↔ Bayesian (first appearance of Bayes' rule)]{}
+[About 2 hours]{} [Before this: Lesson 1]{} [Threads: frequentist ↔ Bayesian (first appearance of Bayes' rule)]{} [ ]{.pm-label}
 
 :::
 
@@ -87,6 +87,21 @@ cohort |>
     p_A_givB  = mean(asthma[parent_smoke]),
     p_A_givnB = mean(asthma[!parent_smoke]))
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $P(A \cup B)$: the probability of A or B (or both); subtracting $P(A \cap B)$ avoids counting the overlap twice.
+- $P(A \cap B)$: the probability of A and B together.
+- $P(A \mid B)$: the conditional probability of A given that B happened: restrict attention to B, then ask how often A occurs.
+- $\iff$: "if and only if": events are independent exactly when the joint probability equals the product.
 
 ::::
 
@@ -205,6 +220,21 @@ cohort |>
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $Se$: sensitivity: the share of children with asthma who test positive.
+- $Sp$: specificity: the share of children without asthma who test negative.
+- $PPV$: positive predictive value: the probability of asthma given a positive test; what a clinician needs.
+- $p$: the prevalence before testing. With low prevalence, most positives can be false, even with a good test.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -296,6 +326,21 @@ p_post    <- post_odds / (1 + post_odds)
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $LR^+$: the positive likelihood ratio: how much a positive test multiplies the odds of disease.
+- $LR^-$: the negative likelihood ratio: how much a negative test multiplies the odds (it shrinks them).
+- $\text{pre-test odds}$: the odds of disease before the test, from the prevalence: $p/(1-p)$.
+- $\text{post-test odds}$: the odds after the test result: Bayes' theorem in its simplest form.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -335,6 +380,19 @@ Replace "has asthma" with "the true effect of NO₂ is β" and "test result" wit
 - Events are independent when conditioning on one doesn't change the probability of the other. An exposure–outcome association is a departure from independence.
 - Bayes' theorem reverses a conditional probability. Predictive values depend strongly on prevalence.
 - On the odds scale, updating is a multiplication by the likelihood ratio, the simplest form of Bayesian reasoning.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Conditional probability** | P(A | B): the probability of A among cases where B happened. | P(A | B) is not P(B | A): confusing them is the prosecutor's fallacy. |
+| **Independence** | Knowing B doesn't change the probability of A. | Not the same as mutually exclusive: exclusive events can't both happen, so they're dependent. |
+| **Sensitivity / specificity** | Properties of the test among people with / without the disease. | Don't depend on prevalence; predictive values do. |
+| **Positive predictive value** | The probability of disease given a positive test. | What a clinician needs; falls with prevalence even for a good test. |
+| **Likelihood ratio (diagnostic)** | How much a test result multiplies the odds of disease. | Combines sensitivity and specificity; prior odds come from prevalence. |
+| **Prior vs posterior probability** | The probability before vs after seeing the test result. | Linked by Bayes' theorem; the same idea scales up to Bayesian statistics (Part V). |
 
 ```{=html}
 <div class="done" data-lesson="lesson-02"><button type="button"></button><span></span></div>

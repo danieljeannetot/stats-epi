@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lessons 3, 5 and 7]{} [Threads: likelihood · uncertainty]{}
+[About 3 hours]{} [Before this: Lessons 3, 5 and 7]{} [Threads: likelihood · uncertainty]{} [ ]{.pm-label}
 
 :::
 
@@ -82,6 +82,22 @@ glm(y ~ x, family = gaussian)              # identity
 glm(y ~ x, family = binomial(link = "logit"))
 glm(y ~ x, family = poisson(link = "log"))
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $Y_i$: the outcome for observation $i$.
+- $\mu_i$: its expected value: a mean, a probability or an expected count.
+- $g(\mu_i)$: the link function: transforms the mean onto a scale where effects add up (identity, logit, log).
+- $\eta_i$: the linear predictor: the sum of coefficients times predictors.
+- $\beta$: the effect of $x$ on the link scale.
 
 ::::
 
@@ -158,6 +174,23 @@ broom::tidy(fit, exponentiate = TRUE,
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\mathrm{Bernoulli}$: the distribution of a yes/no outcome.
+- $\pi_i$: child $i$'s probability of asthma.
+- $\mathrm{logit}$: the log-odds link.
+- $\beta$: the change in log-odds per 10 µg/m³ of NO₂.
+- $\gamma^\top z_i$: the adjustment terms: the confounders $z_i$ (SES, green space, …) times their coefficients.
+- $OR_{10}$: the odds ratio per 10 µg/m³: $e^{\beta}$.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -196,6 +229,12 @@ exp(coef(fit_rr)[2] + c(estimate = 0, low = -1.96, high = 1.96) * rr_se)
 ```
 
 :::
+
+**Two ways.** Logistic regression with and without a prior. With the full cohort the answers coincide; with few children they part.
+
+```{=html}
+<div class="cw twoways"><div class="tw-head">Two ways · Logistic regression</div><div class="tw-ctl"><div class='ctrl'><label for='tw8N'>Children in the analysis</label><input type='range' id='tw8N' min='100' max='5000' step='100' value='300'><output id='tw8NO'></output></div></div><svg id="tw8Svg" viewBox="0 0 520 220" role="img" aria-label="Frequentist and Bayesian answers"></svg><div class="grid2"><div class="cpanel tw-f"><h5>Frequentist</h5><div id="tw8F"></div></div><div class="cpanel tw-b"><h5>Bayesian</h5><div id="tw8B"></div></div></div><div class="now" id="tw8Now"></div></div>
+```
 
 ::: {.further}
 
@@ -259,6 +298,22 @@ agg <- visits |>
 glm(D ~ age_group + deprivation + offset(log(PT)),
     family = poisson, data = agg)
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $D_{jk}$: the number of cases in district $j$ and age group $k$.
+- $\mu_{jk}$: the expected number of cases.
+- $\log PT_{jk}$: the offset: log person-time, entered with coefficient fixed at 1, so the model describes rates rather than counts.
+- $\gamma_k$: the age-group effects; $e^{\gamma_k}$ is the rate ratio relative to the reference age group.
+- $\mathrm{dep}_j$: district $j$'s deprivation score; $e^{\beta}$ is the rate ratio per unit.
 
 ::::
 
@@ -343,6 +398,21 @@ glm(visits ~ I(pm25 / 10) + sin(2*pi*doy/365.25) +
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\mu_t$: the expected count on day $t$.
+- $\phi$: the dispersion: the variance is $\phi$ times the mean. Poisson assumes $\phi = 1$.
+- $\hat\phi$: its estimate: the average squared Pearson residual, corrected for the number of parameters $p$.
+- $SE_{\text{quasi}}$: quasi-Poisson standard errors: Poisson ones inflated by $\sqrt{\hat\phi}$; the estimates are unchanged.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -383,7 +453,21 @@ In a Bayesian model, overdispersion is handled by choosing a negative binomial l
 - In Poisson regression for rates, log(person-time) is an offset. Without it, a model describes counts, not rates.
 - Overdispersion leaves estimates unbiased but makes Poisson standard errors too small; quasi-Poisson or negative binomial models fix this.
 
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Distribution** | The assumed distribution of the outcome: normal, Bernoulli, Poisson… | Chosen by the type of outcome. |
+| **Link function** | The transformation relating the mean to the linear predictor. | Not a transformation of the data: the GLM models the transformed mean, not transformed outcomes. |
+| **Linear predictor** | α + βx: the sum of coefficients times predictors. | Lives on the link scale; the mean is obtained by inverting the link. |
+| **Odds ratio vs rate ratio** | exp(β) in logistic vs Poisson regression. | Each is the natural effect measure for its link. |
+| **Offset** | A term with coefficient fixed at 1, usually log person-time. | Not a covariate: it isn't estimated, and turns counts into rates. |
+| **Quasi-Poisson vs negative binomial** | Two ways to handle overdispersion: inflate SEs by φ, or model extra variation explicitly. | Same point estimates in quasi-Poisson; the negative binomial weights observations differently. |
+
 ```{=html}
 <div class="done" data-lesson="lesson-08"><button type="button"></button><span></span></div>
 <script src="assets/lesson-08.js"></script>
+<script src="assets/twoways.js"></script>
 ```

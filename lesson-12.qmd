@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3.5 hours]{} [Before this: Lessons 8–9]{} [Threads: bias · uncertainty · frequentist ↔ Bayesian]{}
+[About 3.5 hours]{} [Before this: Lessons 8–9]{} [Threads: bias · uncertainty · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -90,6 +90,22 @@ Only $Y_i^{X_i}$, the outcome under the exposure actually received, is ever obse
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $Y_i^{x}$: child $i$'s potential outcome: whether they would have asthma if their exposure were set to $x$.
+- $E[Y^{X}]$: the average outcome if everyone kept their actual exposure.
+- $E[Y^{X-\Delta}]$: the average outcome if everyone's exposure were lowered by $\Delta$ (here 10 µg/m³): a hypothetical intervention.
+- $RR_{\text{causal}}$: the causal risk ratio: average risk under the intervention divided by average risk without it.
+- $RD_{\text{causal}}$: the causal risk difference: cases prevented per child; × 1,000 for cases per 1,000.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -165,6 +181,22 @@ c(rr = r0 / r1, rd = r0 - r1)
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\widehat{E}[Y^{x}]$: the estimated average outcome if exposure were set to $x$ for everyone.
+- $\frac{1}{n}\sum_{i=1}^{n}$: average over all children: g-computation predicts each child's risk, then averages.
+- $\widehat{P}$: the predicted risk from the fitted outcome model (here logistic regression).
+- $x_i$: child $i$'s exposure, set to the value of the scenario (actual, or 10 µg/m³ lower).
+- $z_i$: child $i$'s confounders, kept at their observed values.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -203,6 +235,12 @@ apply(boot, 2, quantile, c(0.025, 0.975))
 Reading an adjusted odds ratio as a population effect. The aOR is conditional on the covariates, and because odds ratios are non-collapsible it differs from the marginal OR even without confounding. G-computation turns a model into the marginal risk ratio or risk difference the question asks for.
 
 :::
+
+**Two ways.** Two routes to the uncertainty of the same causal estimate: resampling the data (bootstrap) or drawing from the posterior.
+
+```{=html}
+<div class="cw twoways"><div class="tw-head">Two ways · G-computation</div><div class="tw-ctl"><div class='btns'><button type='button' id='tw12Run'>Compute both (about 8 seconds)</button></div><div class='small' id='tw12Prog'></div></div><svg id="tw12Svg" viewBox="0 0 520 220" role="img" aria-label="Frequentist and Bayesian answers"></svg><div class="grid2"><div class="cpanel tw-f"><h5>Frequentist</h5><div id="tw12F"></div></div><div class="cpanel tw-b"><h5>Bayesian</h5><div id="tw12B"></div></div></div><div class="now" id="tw12Now"></div></div>
+```
 
 ::: {.further}
 
@@ -258,6 +296,22 @@ d$w <- ifelse(d$high, 1 / ps, 1 / (1 - ps))
 with(d, weighted.mean(asthma[high], w[high]) /
         weighted.mean(asthma[!high], w[!high]))
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $e(z)$: the propensity score: the probability of high exposure given the confounders $z$.
+- $A_i$: child $i$'s exposure group: 1 if highly exposed, 0 if not.
+- $w_i$: the inverse probability weight: rarely exposed children with high exposure (and vice versa) count more.
+- $e(z_i)$: child $i$'s own propensity score.
+- $\widehat{E}[Y^{a}]$: the weighted average outcome in group $a$: an estimate of the average outcome if everyone had exposure $a$.
 
 ::::
 
@@ -356,6 +410,21 @@ e_value(1.01)   # lower confidence limit
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $E$: the E-value: the minimum strength of association an unmeasured confounder would need, with both exposure and outcome, to explain the RR away.
+- $RR$: the observed risk ratio (inverted if below 1).
+- $RR_{EU}$: the confounder–exposure association (as a risk ratio).
+- $RR_{UD}$: the confounder–outcome association (as a risk ratio).
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -382,6 +451,43 @@ In a Bayesian analysis, g-computation is done on every posterior draw of the out
 
 :::
 
+## 12.5 Negative controls: looking for hidden confounding {#s5}
+
+The E-value asks how strong unmeasured confounding would *need* to be. A **negative control** looks for evidence that it is actually there. A **negative control outcome** is an outcome the exposure cannot plausibly cause, but which shares the main outcome's confounders. If the exposure appears to affect it, the same bias is probably at work in the main analysis. Here the negative control outcome is dental caries: NO₂ doesn't cause tooth decay, but caries, like asthma, is more common in deprived households, with parental smoking and with less green space.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="ncA">Adjust for</label><select id="ncA"><option value="none">nothing</option><option value="ses">SES only</option><option value="all" selected>all measured confounders</option></select></div>
+  <div class="ctrl"><label class="small"><input type="checkbox" id="ncU"> add an unmeasured confounder (household deprivation not captured by the SES score)</label></div>
+  <svg id="ncCohPlot" viewBox="0 0 520 180" role="img" aria-label="Odds ratios for the main and the negative control outcome"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="ncCohStats"></div><div class="now" id="ncCohNow"></div></div>
+</div>
+```
+
+A good negative control shares the main analysis's sources of bias, and is unaffected by the exposure. Its mirror image is a **negative control exposure**: an exposure that cannot affect the outcome but shares the main exposure's confounders, such as pollution measured *after* the outcome occurred (Lesson 15 uses tomorrow's pollution). Negative controls detect bias; on their own they don't correct it, although extensions use them to adjust estimates.
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): a negative control outcome"}
+
+```{r}
+set.seed(12)
+nc <- cohort |>
+  mutate(caries = rbinom(n(), 1, plogis(-1.3 - 0.5 * ses + 0.4 * parent_smoke - 0.5 * (green - 0.5))),
+         x = no2_true / 10)
+broom::tidy(glm(caries ~ x + ses + green + parent_smoke + sex, family = binomial, data = nc),
+            exponentiate = TRUE, conf.int = TRUE) |>
+  filter(term == "x")       # should be close to 1
+```
+
+:::
+
+::: {.further}
+
+**Further reading:** @lipsitch2010negative introduced negative controls to epidemiology; @shi2020selective review the methods, including bias correction with negative controls.
+
+:::
+
 ## Check your understanding {#quiz}
 
 ```{=html}
@@ -397,7 +503,25 @@ In a Bayesian analysis, g-computation is done on every posterior draw of the out
 - Don't put non-confounders that strongly predict exposure into a propensity model: they worsen positivity and precision.
 - E-values express how strong unmeasured confounding would need to be to explain an association away.
 
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Potential outcomes** | The outcomes a person would have under each exposure level. | Only one is observed: the missing one is the causal inference problem. |
+| **Average treatment effect** | The difference in mean potential outcomes in the population. | A marginal effect; a regression coefficient is a conditional effect. |
+| **Marginal vs conditional odds ratio** | Population-averaged vs within strata of covariates. | Differ for odds ratios even without confounding (non-collapsibility). |
+| **G-computation** | Predict everyone's outcome under each exposure with an outcome model, then average. | Models the outcome; IPW models the exposure. |
+| **Inverse probability weighting** | Reweight people by the inverse of their probability of the exposure they had. | Models the exposure (propensity score); creates a balanced pseudo-population. |
+| **Exchangeability vs positivity** | No unmeasured confounding vs everyone having a chance of each exposure level. | Both needed; positivity can be checked in data, exchangeability can't. |
+| **E-value** | How strong unmeasured confounding would need to be to explain the estimate away. | A sensitivity measure, not a test or a correction. |
+| **Negative control** | An outcome the exposure can't cause, or an exposure that can't cause the outcome, sharing the main analysis's biases. | Detects bias rather than correcting it; the E-value instead asks how strong hidden bias would need to be. |
+| **Negative control outcome vs exposure** | Swap the outcome (e.g., dental caries) vs swap the exposure (e.g., tomorrow's pollution). | Each detects only biases it shares with the main analysis. |
+
 ```{=html}
 <div class="done" data-lesson="lesson-12"><button type="button"></button><span></span></div>
 <script src="assets/lesson-12.js"></script>
+<script src="assets/negcontrol.js"></script>
+<script src="assets/twoways.js"></script>
 ```

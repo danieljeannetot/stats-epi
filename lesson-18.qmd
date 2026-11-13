@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lessons 8 and 17]{} [Threads: shrinkage · frequentist ↔ Bayesian]{}
+[About 3 hours]{} [Before this: Lessons 8 and 17]{} [Threads: shrinkage · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -83,6 +83,23 @@ fit <- lme4::glmer(asthma ~ 1 + (1 | school),
 tau2 <- as.numeric(lme4::VarCorr(fit)$school)
 tau2 / (tau2 + pi^2 / 3)       # ICC
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\pi_{ij}$: the risk for child $i$ in school $j$.
+- $u_j$: school $j$'s random effect: its departure from the average log-odds.
+- $\tau^2$: the variance of the school effects.
+- $ICC$: the intraclass correlation: the share of variance between schools, on the latent scale.
+- $\pi^2/3$: the variance of the logistic distribution, used as the within-school variance.
+- $m$: the average school size.
 
 ::::
 
@@ -171,6 +188,23 @@ coef(fit0)$school |>         # alpha + u_j
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\hat\theta_j^{\text{pp}}$: the partially pooled estimate for school $j$.
+- $w_j$: the weight on the school's own data: near 1 for precise schools, near 0 for noisy ones.
+- $\hat\theta_j$: the school's own (unpooled) log-odds.
+- $\hat\mu$: the overall log-odds.
+- $\tau^2$: the between-school variance.
+- $s_j^2$: the school's own sampling variance.
+
+::::
+
 :::::
 
 ::: {.further}
@@ -225,6 +259,25 @@ blup(meta)      # shrunken district effects
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\hat\beta_j$: district $j$'s estimated heat effect.
+- $\beta_j$: district $j$'s true effect.
+- $\mu$: the mean of the true effects: the pooled effect.
+- $\tau^2$: the between-district variance of the true effects.
+- $Q$: Cochran's Q: the weighted spread of the estimates around the fixed-effect mean.
+- $\hat\beta_{\text{FE}}$: the fixed-effect (inverse-variance weighted) mean.
+- $I^2$: the share of the spread due to real differences rather than chance.
+- $J$: the number of districts.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -265,6 +318,12 @@ c(pooled_pct_per_degC = 100 * (exp(sum(wr * stage1$b) / sum(wr)) - 1),
 ```
 
 :::
+
+**Two ways.** The same 12 district heat effects pooled two ways: DerSimonian–Laird random-effects meta-analysis, and a Bayesian hierarchical model with a half-normal(0, 1) prior on τ.
+
+```{=html}
+<div class="cw twoways"><div class="tw-head">Two ways · Pooling districts</div><div class="tw-ctl"><div class='btns'><button type='button' id='tw18Run'>Compute both</button></div></div><svg id="tw18Svg" viewBox="0 0 520 220" role="img" aria-label="Frequentist and Bayesian answers"></svg><div class="grid2"><div class="cpanel tw-f"><h5>Frequentist</h5><div id="tw18F"></div></div><div class="cpanel tw-b"><h5>Bayesian</h5><div id="tw18B"></div></div></div><div class="now" id="tw18Now"></div></div>
+```
 
 ::: {.further}
 
@@ -325,6 +384,23 @@ sqrt(diag(sandwich::vcovCL(fit,
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\widehat{\mathrm{Var}}_{\text{CR}}(\hat\beta)$: the cluster-robust variance of the estimates.
+- $I^{-1}$: the inverse information matrix from the ordinary model: the "bread".
+- $\sum_{c}$: the sum over clusters (schools or districts): the "meat".
+- $U_c$: cluster $c$'s score: the summed contributions of its members, which may be correlated.
+- $\hat\pi_i$: the fitted risk for child $i$.
+- $x_i$: child $i$'s predictors.
+
+::::
+
 :::::
 
 ::: {.callout-tip icon="false" title="Bayesian preview"}
@@ -353,7 +429,21 @@ A random effect is a prior whose spread τ is estimated from the data. Bayesian 
 - Two-stage meta-analysis pools location-specific effects and quantifies heterogeneity with τ² and I².
 - Ignoring clustering makes standard errors too small, especially for exposures measured at the cluster level.
 
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **ICC** | The share of outcome variance between clusters. | Small ICCs still matter when clusters are large (design effect). |
+| **Design effect** | How much clustering inflates the variance compared with independent data. | 1 + (m − 1) × ICC for clusters of size m. |
+| **No, complete and partial pooling** | Each group alone vs all groups as one vs groups shrunk toward the mean. | Partial pooling borrows strength in proportion to each group's noise. |
+| **Random vs fixed effect** | Group effects drawn from a distribution vs estimated separately. | Random effects shrink; fixed effects don't, and absorb all group-level variation. |
+| **τ vs I²** | The SD of true effects between groups vs the share of observed variation due to them. | τ is on the effect's scale; I² depends on how precise the studies are. |
+| **Cluster-robust SE** | Standard errors allowing correlation within clusters. | Need many clusters to be reliable. |
+
 ```{=html}
 <div class="done" data-lesson="lesson-18"><button type="button"></button><span></span></div>
 <script src="assets/lesson-18.js"></script>
+<script src="assets/twoways.js"></script>
 ```

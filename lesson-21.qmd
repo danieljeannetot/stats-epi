@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3 hours]{} [Before this: Lessons 19–20]{} [Threads: uncertainty · frequentist ↔ Bayesian]{}
+[About 3 hours]{} [Before this: Lessons 19–20]{} [Threads: uncertainty · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -83,6 +83,22 @@ for (s in 2:5000) {
   theta[s] <- if (accept) prop else theta[s - 1]
 }
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\theta^{(s)}$: the current value of the chain.
+- $\theta^*$: the proposal: a random step from the current value.
+- $\sigma^2_{\text{step}}$: the step size: too small explores slowly, too large rejects most proposals.
+- $\theta^{(s+1)}$: the next value: the proposal if accepted, otherwise the current value again.
+- $p(\theta^* \mid y)$: the posterior density at the proposal: uphill moves are always accepted, downhill ones sometimes.
 
 ::::
 
@@ -168,6 +184,22 @@ fit <- brms::brm(visits ~ I(temp - 20),
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $H(\theta, r)$: the Hamiltonian: "potential energy" (minus log posterior) plus "kinetic energy" of the momentum.
+- $r$: the momentum: a random push given to the parameters at each iteration.
+- $\tfrac12 r^\top r$: the kinetic energy.
+- $\epsilon$: the leapfrog step size.
+- $\nabla_\theta \log p(\theta \mid y)$: the gradient of the log posterior: which way is uphill. It steers HMC's trajectories.
+
+::::
+
 :::::
 
 ::: {.further}
@@ -227,6 +259,23 @@ posterior::summarise_draws(fit)
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\hat R$: R-hat: compares the spread between chains with the spread within them. Near 1.00 when chains agree.
+- $W$: the average variance within chains.
+- $B$: the variance between chain means (scaled).
+- $N$: the number of draws per chain; $M$ is the number of chains.
+- $\text{ESS}$: the effective sample size: draws discounted for autocorrelation.
+- $\rho_k$: the autocorrelation of the chain at lag $k$.
+
+::::
+
 :::::
 
 ::: {.callout-warning title="Common pitfall"}
@@ -260,6 +309,19 @@ The hardest posterior shape for samplers is the **funnel** that appears in hiera
 - HMC uses the posterior's gradient to make long, well-aimed moves; Stan's NUTS tunes it automatically.
 - Centering predictors reduces posterior correlation and helps every sampler.
 - Run several chains; check trace plots, R-hat (≤ 1.01) and effective sample size before interpreting results.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **MCMC** | A method that draws a dependent sequence of samples from the posterior. | Draws are correlated, so they carry less information than independent ones. |
+| **Metropolis vs HMC** | Random-walk proposals vs proposals following the posterior's gradient. | HMC explores high-dimensional posteriors far more efficiently. |
+| **Warm-up** | Early iterations discarded while the sampler tunes and finds the posterior. | Not part of the posterior sample. |
+| **Effective sample size** | The number of independent draws equivalent to the correlated chain. | Can be much smaller than the number of iterations. |
+| **R-hat** | Agreement between chains; near 1.00 when they've converged. | Necessary, not sufficient: all chains can miss the same region. |
+| **Acceptance rate** | The share of proposals accepted. | Too high or too low both mean poor mixing. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-21"><button type="button"></button><span></span></div>

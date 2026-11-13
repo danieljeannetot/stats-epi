@@ -11,7 +11,7 @@ source("R/course-data.R")
 
 ::: {.meta-pills}
 
-[About 3.5 hours]{} [Before this: Lessons 6, 10 and 19–22]{} [Threads: uncertainty · frequentist ↔ Bayesian]{}
+[About 3.5 hours]{} [Before this: Lessons 6, 10 and 19–22]{} [Threads: uncertainty · frequentist ↔ Bayesian]{} [ ]{.pm-label}
 
 :::
 
@@ -85,6 +85,20 @@ quantile(b, c(.025, .975))    # compare with ROPE
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\text{ROPE}$: the region of practical equivalence: effects too small to matter.
+- $r$: the ROPE's half-width, fixed before seeing the data.
+- $\beta$: the effect.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -107,7 +121,7 @@ quantile(b, c(.025, .975))    # compare with ROPE
 
 ## 23.2 Bayes factors and Lindley's paradox {#s2}
 
-A **Bayes factor** compares how well two hypotheses *predicted* the data before seeing them: the probability of the data under H₁ divided by that under H₀. For "no effect" (β = 0) against "some effect" (β drawn from a prior), it is easily computed as the ratio of the posterior and prior densities at zero (the **Savage–Dickey ratio**). The catch is that H₁'s prediction depends on its prior. A very wide prior spreads its bets over absurd effects, predicts the data poorly, and so loses to H₀, however small the p-value. This is **Lindley's paradox**.
+A **Bayes factor** (sometimes called a "Bayesian factor") compares how well two hypotheses *predicted* the data before seeing them: the probability of the data under H₁ divided by that under H₀. For "no effect" (β = 0) against "some effect" (β drawn from a prior), it is easily computed as the ratio of the posterior and prior densities at zero (the **Savage–Dickey ratio**). The catch is that H₁'s prediction depends on its prior. A very wide prior spreads its bets over absurd effects, predicts the data poorly, and so loses to H₀, however small the p-value. This is **Lindley's paradox**.
 
 ```{=html}
 <div class="cw grid2">
@@ -155,6 +169,22 @@ brms::hypothesis(fit, "heat = 0")   # Savage–Dickey
 # or marginal likelihoods for any two models:
 brms::bayes_factor(fit1, fit0)      # bridge sampling
 ```
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $BF_{10}$: the Bayes factor for $H_1$ over $H_0$: how much better $H_1$ predicted the data.
+- $p(y \mid H_1)$: the marginal likelihood of $H_1$: its prediction of the data, averaged over its prior.
+- $p(\beta = 0 \mid H_1)$: the prior density at zero; divided by the posterior density at zero, it gives the Savage–Dickey Bayes factor.
+- $\hat\beta$: the estimate, with standard error $s$.
+- $\tau^2$: the prior variance under $H_1$: larger $\tau$ predicts larger effects, and penalizes $H_1$ if they don't appear.
 
 ::::
 
@@ -263,6 +293,20 @@ bain::bain(est, "old > adult > child",
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $BF_{\text{order}, u}$: the Bayes factor for the ordered hypothesis against the unconstrained model.
+- $\beta_{65+}$: the heat effect in the oldest group.
+- $H_u$: the unconstrained hypothesis.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -336,6 +380,21 @@ plot(loo2)                  # Pareto k diagnostics
 
 ::::
 
+:::: {.d}
+
+::: {.lab}
+
+[D]{.k}How to read it
+
+:::
+
+- $\mathrm{elpd}_{\text{loo}}$: the expected log predictive density: how well the model predicts each observation when it is left out.
+- $p(y_i \mid y_{-i})$: the predictive density for observation $i$ from a model fitted without it.
+- $w_i^{(s)}$: importance weights that approximate leaving observation $i$ out, Pareto-smoothed in PSIS.
+- $p(y_i \mid \theta^{(s)})$: the likelihood of observation $i$ under draw $s$.
+
+::::
+
 :::: {.c}
 
 ::: {.lab}
@@ -375,6 +434,19 @@ A Bayes factor asks which model's **prior predictions** matched the data, so it 
 - Bayes factors are most useful for scientific hypotheses with realistic priors, such as ordered or constrained effects.
 - LOO compares models by predictive accuracy for new data; check Pareto k and the standard error of differences.
 - Bayes factors and LOO answer different questions, and can disagree.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **ROPE** | A range of effects too small to matter. | Supports decisions: inside, outside or undecided. |
+| **Bayes factor** | How much better one hypothesis predicted the data than another. | Depends strongly on the prior; LOO doesn't, much. |
+| **Lindley's paradox** | A small p-value alongside a Bayes factor favoring the null. | Arises with wide priors and large samples. |
+| **LOO / ELPD** | Expected predictive accuracy for left-out observations. | Judges posterior predictions; Bayes factors judge prior predictions. |
+| **Pareto k** | A diagnostic for each observation's PSIS-LOO estimate. | Values above 0.7 need exact refits. |
+| **Stacking** | Weighting models' predictions to maximize LOO accuracy. | Combines models rather than choosing one. |
 
 ```{=html}
 <div class="done" data-lesson="lesson-23"><button type="button"></button><span></span></div>
