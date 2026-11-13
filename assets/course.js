@@ -161,10 +161,16 @@ var onTheme=function(cb){let last=document.body.className;new MutationObserver((
 
 /* quizzes: labels carry data-ok="1" on the right answer and data-fb on every option */
 var buildQuiz=function(containerId,Q){const qz=document.getElementById(containerId);if(!qz)return;
+  /* the questions sit in a collapsible block, closed until the reader opens it */
+  const det=document.createElement("details");det.className="quiz-wrap";const sm=document.createElement("summary");
+  const closedLabel="Show the "+Q.length+" question"+(Q.length===1?"":"s");sm.textContent=closedLabel;det.appendChild(sm);
+  det.addEventListener("toggle",()=>{sm.textContent=det.open?"Hide the questions":closedLabel;});
+  const openIfQuiz=()=>{if(location.hash==="#quiz")det.open=true;};openIfQuiz();window.addEventListener("hashchange",openIfQuiz);
+  qz.appendChild(det);
   Q.forEach((x,i)=>{const d=document.createElement("div");d.className="quiz";
     d.innerHTML="<div class='qn'>Question "+(i+1)+"<span class='tagq'>"+(x.t==="epi"?"epidemiology":"statistics")+"</span></div><p class='qtext'>"+x.q+"</p>"+
       x.o.map((o,j)=>"<label data-ok='"+o[2]+"' data-fb='"+o[1].replace(/'/g,"&#39;")+"'><input type='radio' name='"+containerId+"-q"+i+"' value='"+j+"'><span>"+o[0]+"</span></label>").join("")+
-      "<button type='button' class='qcheck'>Check answer</button><p class='qerr' role='alert'></p><div class='qfb' aria-live='polite'></div>";qz.appendChild(d);});
+      "<button type='button' class='qcheck'>Check answer</button><p class='qerr' role='alert'></p><div class='qfb' aria-live='polite'></div>";det.appendChild(d);});
   initQuizzes();};
 var initQuizzes=function(){document.querySelectorAll(".quiz").forEach(q=>{if(q.dataset.ready)return;q.dataset.ready="1";const btn=q.querySelector(".qcheck"),err=q.querySelector(".qerr"),fb=q.querySelector(".qfb");
   q.querySelectorAll("input").forEach(i=>i.addEventListener("change",()=>{err.textContent="";}));
@@ -185,9 +191,9 @@ var COURSE_LESSONS=[[0,"Welcome: the city, the data and how to use the course","
  [7,"Linear regression","II"],[8,"Generalized linear models: logistic and Poisson regression","II"],[9,"Confounding, effect modification and interaction","II"],[10,"Model checking, comparison and selection","II"],[11,"Nonlinear effects: categories, polynomials, splines and GAMs","II"],
  [12,"Causal inference: from association to effect","III"],[13,"Measurement error and misclassification","III"],[14,"Measuring disease burden","III"],
  [15,"Time-series regression for health data","IV"],[16,"Distributed lag and distributed lag non-linear models","IV"],[17,"Spatial data and spatial autocorrelation","IV"],[18,"Clustered data and mixed-effects models","IV"],
- [19,"Bayesian thinking: from Bayes' rule to a model equation","V"],[20,"Priors: choosing, eliciting and checking them","V"],[21,"Computing the posterior: MCMC and its diagnostics","V"],[22,"Bayesian regression and GLMs","V"],[23,"Bayesian hypothesis testing and model comparison","V"],[24,"Bayesian hierarchical models","V"],[25,"Capstone: Bayesian spatio-temporal hierarchical models","V"],[26,"Bayesian additive regression trees (BART) and bartisan","VI"]];
-var COURSE_PARTS={I:["Foundations: data, probability and inference","--p1"],II:["Frequentist regression","--p2"],III:["Causal inference, measurement and disease burden","--p5"],IV:["Time, space and clustering","--p3"],V:["Bayesian modeling","--p4"],VI:["Machine learning meets Bayesian inference","--p2"]};
-var COURSE_AVAILABLE=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26];
+ [19,"Bayesian thinking: from Bayes' rule to a model equation","V"],[20,"Priors: choosing, eliciting and checking them","V"],[21,"Computing the posterior: MCMC and its diagnostics","V"],[22,"Bayesian regression and GLMs","V"],[23,"Bayesian hypothesis testing and model comparison","V"],[24,"Bayesian hierarchical models","V"],[25,"Capstone: Bayesian spatio-temporal hierarchical models","V"],[26,"Bayesian additive regression trees (BART) and bartisan","VI"],[27,"Causal tools from econometrics: trials, regression, IV, RD and DiD","VII"]];
+var COURSE_PARTS={I:["Foundations: data, probability and inference","--p1"],II:["Frequentist regression","--p2"],III:["Causal inference, measurement and disease burden","--p5"],IV:["Time, space and clustering","--p3"],V:["Bayesian modeling","--p4"],VI:["Machine learning meets Bayesian inference","--p2"],VII:["Causal tools from econometrics","--p3"]};
+var COURSE_AVAILABLE=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27];
 var lessonHref=function(n){return "lesson-"+String(n).padStart(2,"0")+".html";};
 var buildHome=function(){const g=document.getElementById("lessonGrid");if(!g)return;const p=getProgress();let html="",done=0;
   Object.keys(COURSE_PARTS).forEach(k=>{const part=COURSE_PARTS[k];html+="<section class='lpart' style='--pc:var("+part[1]+")'><div class='plab'>Part "+k+"</div><h3>"+part[0]+"</h3><div class='lgrid'>";

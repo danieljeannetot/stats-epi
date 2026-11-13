@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.11.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -95,18 +95,19 @@ div.csl-indent {
 <link href="./lesson-14.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7eead303e38f083faf515323c8b5fe44.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b468af426e9c805ad947c565d190ce64.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7eead303e38f083faf515323c8b5fe44.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-834954c7d0557eb2ddddecfcfdec3bc8.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-ccf064502f84f33c623e2a83f91e4349.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-42b405ec74c69eb6010bd27de046b5d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-ccf064502f84f33c623e2a83f91e4349.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -169,7 +170,7 @@ window.Quarto = {
 <link rel="stylesheet" href="assets/course.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar docked nav-fixed quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -192,6 +193,7 @@ window.Quarto = {
       for (let i=0; i < toggles.length; i++) {
         const toggle = toggles[i];
         if (toggle) {
+          toggle.setAttribute("aria-checked", alternate ? "true" : "false");
           if (alternate) {
             toggle.classList.add("alternate");
           } else {
@@ -221,13 +223,19 @@ window.Quarto = {
       manageTransitions('#quarto-margin-sidebar .nav-link', true);
       // Switch the toggles
       setColorSchemeToggle(alternate)
-      // Hack to workaround the fact that safari doesn't
-      // properly recolor the scrollbar when toggling (#1455)
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455).
+    // Not run on load: stylesheets are set before first paint there, and
+    // scrolling would undo the scroll to a URL fragment (#14973).
+    // The one pixel nudge keeps the reader where they were.
+    const refreshSafariScrollbar = () => {
       if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
         manageTransitions("body", false);
-        window.scrollTo(0, 1);
+        const scrollY = window.scrollY;
+        window.scrollTo(0, scrollY > 0 ? scrollY - 1 : 1);
         setTimeout(() => {
-          window.scrollTo(0, 0);
+          window.scrollTo(0, scrollY);
           manageTransitions("body", true);
         }, 40);
       }
@@ -321,6 +329,7 @@ window.Quarto = {
       // Read the current dark / light value
       let toAlternate = !hasAlternateSentinel();
       toggleColorMode(toAlternate);
+      refreshSafariScrollbar();
       setStyleSentinel(toAlternate);
       toggleGiscusIfUsed(toAlternate, darkModeDefault);
       window.dispatchEvent(new Event('resize'));
@@ -335,15 +344,14 @@ window.Quarto = {
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark" aria-label="Site">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Statistics for epidemiology</span>
     </a>
   </div>
-            <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -351,6 +359,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./methods.qmd"> 
+<span class="menu-text">Choosing a method</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -363,17 +375,18 @@ window.Quarto = {
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <button type="button" role="switch" aria-checked="false" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode" aria-label="Toggle dark mode"><i class="bi"></i></button>
 </div>
+            <div id="quarto-search" class="" title="Search"></div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
+  <nav class="quarto-secondary-nav" aria-label="Toolbar">
     <div class="container-fluid d-flex">
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-15.html">Part IV · Time, space and clustering</a></li><li class="breadcrumb-item"><a href="./lesson-15.html">Lesson 15 · Time-series regression for health data</a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-15.html">Part IV · Time, space and clustering</a></li><li class="breadcrumb-item"><a href="./lesson-15.html">15 · Time-series regression for health data</a></li></ol></nav>
+        <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
   </nav>
@@ -381,224 +394,235 @@ window.Quarto = {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto" aria-label="Section">
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Part I · Foundations</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-controls="quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-1-label">Part I · Foundations</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-1" aria-labelledby="quarto-sidebar-section-1-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-00.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 0 · Welcome: the city, the data and how to use the course</span></a>
+ <span class="menu-text">0 · Welcome: the city, the data and how to use the course</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-01.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 1 · Describing data and epidemiological measures</span></a>
+ <span class="menu-text">1 · Describing data and epidemiological measures</span></a>
   </div>
 </li>
           <li class="sidebar-item">
+ <span class="menu-text">design.qmd</span>
+  </li>
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-02.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 2 · Probability and conditional probability</span></a>
+ <span class="menu-text">2 · Probability and conditional probability</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-03.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 3 · Random variables and probability distributions</span></a>
+ <span class="menu-text">3 · Random variables and probability distributions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-04.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 4 · Sampling, sampling distributions and the central limit theorem</span></a>
+ <span class="menu-text">4 · Sampling, sampling distributions and the central limit theorem</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-05.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 5 · Likelihood and estimation</span></a>
+ <span class="menu-text">5 · Likelihood and estimation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-06.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 6 · Confidence intervals and hypothesis tests</span></a>
+ <span class="menu-text">6 · Confidence intervals and hypothesis tests</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Part II · Frequentist regression</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-controls="quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-2-label">Part II · Frequentist regression</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-2" aria-labelledby="quarto-sidebar-section-2-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-07.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 7 · Linear regression</span></a>
+ <span class="menu-text">7 · Linear regression</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-08.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 8 · Generalized linear models: logistic and Poisson regression</span></a>
+ <span class="menu-text">8 · Generalized linear models: logistic and Poisson regression</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-09.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 9 · Confounding, effect modification and interaction</span></a>
+ <span class="menu-text">9 · Confounding, effect modification and interaction</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-10.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 10 · Model checking, comparison and selection</span></a>
+ <span class="menu-text">10 · Model checking, comparison and selection</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-11.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 11 · Nonlinear effects: categories, polynomials, splines and GAMs</span></a>
+ <span class="menu-text">11 · Nonlinear effects: categories, polynomials, splines and GAMs</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Part III · Causal inference, measurement and burden</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-controls="quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-3-label">Part III · Causal inference, measurement and burden</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-3" aria-labelledby="quarto-sidebar-section-3-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-12.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 12 · Causal inference: from association to effect</span></a>
+ <span class="menu-text">12 · Causal inference: from association to effect</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-13.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 13 · Measurement error and misclassification</span></a>
+ <span class="menu-text">13 · Measurement error and misclassification</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-14.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 14 · Measuring disease burden</span></a>
+ <span class="menu-text">14 · Measuring disease burden</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Part IV · Time, space and clustering</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-controls="quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-4-label">Part IV · Time, space and clustering</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-4" aria-labelledby="quarto-sidebar-section-4-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-15.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Lesson 15 · Time-series regression for health data</span></a>
+ <span class="menu-text">15 · Time-series regression for health data</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-16.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 16 · Distributed lag and distributed lag non-linear models</span></a>
+ <span class="menu-text">16 · Distributed lag and distributed lag non-linear models</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-17.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 17 · Spatial data and spatial autocorrelation</span></a>
+ <span class="menu-text">17 · Spatial data and spatial autocorrelation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-18.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 18 · Clustered data and mixed-effects models</span></a>
+ <span class="menu-text">18 · Clustered data and mixed-effects models</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Part V · Bayesian modeling</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-controls="quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-5-label">Part V · Bayesian modeling</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" aria-labelledby="quarto-sidebar-section-5-label" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+ <span class="menu-text">freqbayes.qmd</span>
+  </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-19.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 19 · Bayesian thinking: from Bayes’ rule to a model equation</span></a>
+ <span class="menu-text">19 · Bayesian thinking: from Bayes’ rule to a model equation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-20.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 20 · Priors: what they say and how much they matter</span></a>
+ <span class="menu-text">20 · Priors: what they say and how much they matter</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-21.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 21 · Computing the posterior: Markov chain Monte Carlo</span></a>
+ <span class="menu-text">21 · Computing the posterior: Markov chain Monte Carlo</span></a>
   </div>
 </li>
           <li class="sidebar-item">
- <span class="menu-text">lesson-22.qmd - lesson-23.qmd</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-22.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">22 · Bayesian regression and GLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-23.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">23 · Bayesian hypothesis testing and model comparison</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-24.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 24 · Bayesian hierarchical models</span></a>
+ <span class="menu-text">24 · Bayesian hierarchical models</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-25.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling</span></a>
+ <span class="menu-text">25 · Capstone: a district-level Bayesian DLNM with spatial pooling</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Part VI · Machine learning meets Bayesian inference</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-controls="quarto-sidebar-section-6" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-6-label">Part VI · Machine learning meets Bayesian inference</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-6" aria-labelledby="quarto-sidebar-section-6-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-26.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 26 · Bayesian additive regression trees (BART) and bartisan</span></a>
+ <span class="menu-text">26 · Bayesian additive regression trees (BART) and bartisan</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-controls="quarto-sidebar-section-7" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-7-label">Part VII · Causal tools from econometrics</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+      </div>
+      <ul id="quarto-sidebar-section-7" aria-labelledby="quarto-sidebar-section-7-label" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-27.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">27 · Causal tools from econometrics: trials, regression, IV, RD and DiD</span></a>
   </div>
 </li>
       </ul>
@@ -609,7 +633,7 @@ window.Quarto = {
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
+        <nav id="TOC" role="doc-toc" aria-labelledby="toc-title" class="toc-active">
     <h2 id="toc-title">In this lesson</h2>
    
   <ul class="collapse">
@@ -617,17 +641,19 @@ window.Quarto = {
   <li><a href="#s2" id="toc-s2" class="nav-link" data-scroll-target="#s2">15.2 How much to control for time?</a></li>
   <li><a href="#s3" id="toc-s3" class="nav-link" data-scroll-target="#s3">15.3 Residual autocorrelation and dispersion</a></li>
   <li><a href="#s4" id="toc-s4" class="nav-link" data-scroll-target="#s4">15.4 The time-stratified case-crossover design</a></li>
+  <li><a href="#s5" id="toc-s5" class="nav-link" data-scroll-target="#s5">15.5 A negative control exposure: tomorrow’s pollution</a></li>
   <li><a href="#quiz" id="toc-quiz" class="nav-link" data-scroll-target="#quiz">Check your understanding</a></li>
   <li><a href="#take" id="toc-take" class="nav-link" data-scroll-target="#take">Key takeaways</a></li>
+  <li><a href="#concepts" id="toc-concepts" class="nav-link" data-scroll-target="#concepts">Concepts at a glance</a></li>
   <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content" id="quarto-document-content" tabindex="-1">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-15.html">Part IV · Time, space and clustering</a></li><li class="breadcrumb-item"><a href="./lesson-15.html">Lesson 15 · Time-series regression for health data</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-15.html">Part IV · Time, space and clustering</a></li><li class="breadcrumb-item"><a href="./lesson-15.html">15 · Time-series regression for health data</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Lesson 15 · Time-series regression for health data</h1>
 <p class="subtitle lead">Part IV · Time, space and clustering</p>
@@ -653,7 +679,7 @@ window.Quarto = {
 
 
 <div class="meta-pills">
-<p><span>About 3 hours</span> <span>Before this: Lessons 8, 10 and 11</span> <span>Threads: bias · uncertainty</span></p>
+<p><span>About 3 hours</span> <span>Before this: Lessons 8, 10 and 11</span> <span>Threads: bias · uncertainty</span> <span class="pm-label"></span></p>
 </div>
 <div class="objectives">
 <p>By the end of this lesson you will be able to</p>
@@ -712,8 +738,22 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>           <span class="at">family =</span> quasipoisson,</span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>           <span class="at">data =</span> city_daily)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">D</span>How to read it</p>
 </div>
-<div class="callout callout-style-default callout-warning callout-titled" title="Common pitfall">
+<ul>
+<li><span class="math inline">\(\text{quasi-Poisson}\)</span>: a Poisson model whose variance is inflated by <span class="math inline">\(\phi\)</span> to allow overdispersion.</li>
+<li><span class="math inline">\(\mu_t\)</span>: the expected visits on day <span class="math inline">\(t\)</span>.</li>
+<li><span class="math inline">\(\beta\)</span>: the PM₂.₅ effect: the change in log visits per µg/m³; <span class="math inline">\(e^{10\beta}\)</span> is the RR per 10 µg/m³.</li>
+<li><span class="math inline">\(\overline{PM}_{t,t-1}\)</span>: the average PM₂.₅ over the same day and the day before.</li>
+<li><span class="math inline">\(s(t; \text{df})\)</span>: the spline of time: controls season and trend; its df per year sets how finely.</li>
+<li><span class="math inline">\(f(T_t)\)</span>: a spline of temperature: controls weather confounding.</li>
+<li><span class="math inline">\(\gamma^\top \mathrm{dow}_t\)</span>: day-of-week effects.</li>
+</ul>
+</div>
+</div>
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -726,7 +766,7 @@ window.Quarto = {
 <p>Choosing the degrees of freedom for time by looking at which value gives the most striking (or the most significant) pollution estimate. Fix the choice in advance from the literature, typically 4 to 8 per year, and report the sensitivity analysis.</p>
 </div>
 </div>
-<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (optional): sensitivity of the PM2.5 estimate to the time spline">
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-2-contents" aria-controls="callout-2" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
@@ -811,6 +851,19 @@ window.Quarto = {
 <span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">data =</span> city_daily)</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a><span class="co"># or gnm::gnm(..., eliminate = stratum)</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">D</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(\alpha_{s(t)}\)</span>: a separate intercept for each stratum (year × month × weekday): controls time by design.</li>
+<li><span class="math inline">\(\overline{PM}_{t,t-1}\)</span>: the exposure, as in the time-series model.</li>
+<li><span class="math inline">\(L_c(\beta)\)</span>: the conditional likelihood: compares days within each stratum only, so the <span class="math inline">\(\alpha_s\)</span> drop out.</li>
+<li><span class="math inline">\(\prod_s\)</span>: the product over strata.</li>
+<li><span class="math inline">\(y_t\)</span>: the count on day <span class="math inline">\(t\)</span>.</li>
+<li><span class="math inline">\(\beta\)</span>: the exposure effect, the same quantity as in the time-series model.</li>
+</ul>
+</div>
 <div class="c">
 <div class="lab">
 <p><span class="k">C</span>How it’s reported</p>
@@ -818,7 +871,7 @@ window.Quarto = {
 <p><span id="ccReport"></span></p>
 </div>
 </div>
-<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Bayesian preview">
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
@@ -835,6 +888,50 @@ window.Quarto = {
 <p><strong>Further reading:</strong> <span class="citation" data-cites="maclure1991case">Maclure (<a href="#ref-maclure1991case" role="doc-biblioref">1991</a>)</span> introduced the case-crossover design; <span class="citation" data-cites="janes2005case">Janes et al. (<a href="#ref-janes2005case" role="doc-biblioref">2005</a>)</span> show why time-stratified referents avoid bias; <span class="citation" data-cites="armstrong2014conditional">Armstrong et al. (<a href="#ref-armstrong2014conditional" role="doc-biblioref">2014</a>)</span> explain the conditional Poisson model and its equivalence with case-crossover analysis.</p>
 </div>
 </section>
+<section id="s5" class="level2">
+<h2 class="anchored" data-anchor-id="s5">15.5 A negative control exposure: tomorrow’s pollution</h2>
+<p>How do we know the spline of time and the temperature terms have removed confounding? One check uses a <strong>negative control exposure</strong>: tomorrow’s PM₂.₅. It cannot cause today’s emergency visits, but it follows the same seasonal and weather patterns as today’s pollution. Put it in the model next to today’s PM₂.₅; if it shows an “effect”, confounding by season or weather remains.</p>
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="ncDf">Control for time (spline of time)</label><select id="ncDf"><option value="0">none</option><option value="1">1 df per year</option><option value="2">2 df per year</option><option value="4">4 df per year</option><option value="7" selected="">7 df per year</option><option value="10">10 df per year</option></select></div>
+  <div class="ctrl"><label class="small"><input type="checkbox" id="ncT" checked=""> adjust for temperature</label></div>
+  <svg id="ncTsPlot" viewbox="0 0 520 180" role="img" aria-label="Rate ratios for today's and tomorrow's PM2.5"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="ncTsStats"></div><div class="now" id="ncTsNow"></div></div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
+<div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-4-contents" aria-controls="callout-4" aria-expanded="false" aria-label="Toggle callout">
+<div class="callout-icon-container">
+<i class="callout-icon no-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+<span class="screen-reader-only">Note</span>R code (optional): tomorrow’s pollution as a negative control
+</div>
+<div class="callout-btn-toggle d-inline-block border-0 py-1 ps-1 pe-0 float-end"><i class="callout-toggle"></i></div>
+</div>
+<div id="callout-4" class="callout-4-contents callout-collapse collapse">
+<div class="callout-body-container callout-body">
+<div class="cell">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>city_nc <span class="ot">&lt;-</span> visits <span class="sc">|&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(date) <span class="sc">|&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">visits =</span> <span class="fu">sum</span>(visits), <span class="at">pm25 =</span> <span class="fu">first</span>(pm25), <span class="at">temp =</span> <span class="fu">first</span>(temp_city), <span class="at">dow =</span> <span class="fu">first</span>(dow), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pm_today =</span> (pm25 <span class="sc">+</span> <span class="fu">lag</span>(pm25)) <span class="sc">/</span> <span class="dv">20</span>, <span class="at">pm_tomorrow =</span> <span class="fu">lead</span>(pm25) <span class="sc">/</span> <span class="dv">10</span>, <span class="at">t =</span> <span class="fu">as.numeric</span>(date)) <span class="sc">|&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(<span class="sc">!</span><span class="fu">is.na</span>(pm_today), <span class="sc">!</span><span class="fu">is.na</span>(pm_tomorrow))</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>fit_nc <span class="ot">&lt;-</span> <span class="fu">glm</span>(visits <span class="sc">~</span> pm_today <span class="sc">+</span> pm_tomorrow <span class="sc">+</span> splines<span class="sc">::</span><span class="fu">ns</span>(t, <span class="at">df =</span> <span class="dv">35</span>) <span class="sc">+</span> splines<span class="sc">::</span><span class="fu">ns</span>(temp, <span class="at">df =</span> <span class="dv">3</span>) <span class="sc">+</span> dow,</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>              <span class="at">family =</span> quasipoisson, <span class="at">data =</span> city_nc)</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="fu">exp</span>(<span class="fu">coef</span>(fit_nc)[<span class="fu">c</span>(<span class="st">"pm_today"</span>, <span class="st">"pm_tomorrow"</span>)])     <span class="co"># tomorrow's should be close to 1</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>#&gt;    pm_today pm_tomorrow 
+#&gt;    1.064280    1.000193</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="further">
+<p><strong>Further reading:</strong> <span class="citation" data-cites="flanders2011method">Flanders et al. (<a href="#ref-flanders2011method" role="doc-biblioref">2011</a>)</span> proposed future exposures as negative controls in time-series studies; <span class="citation" data-cites="lipsitch2010negative">Lipsitch et al. (<a href="#ref-lipsitch2010negative" role="doc-biblioref">2010</a>)</span> on negative controls in general.</p>
+</div>
+</section>
 <section id="quiz" class="level2">
 <h2 class="anchored" data-anchor-id="quiz">Check your understanding</h2>
 <div class="cw" id="quizzes"></div>
@@ -847,8 +944,64 @@ window.Quarto = {
 <li>Residual autocorrelation and overdispersion show what the model misses; quasi-Poisson standard errors account for overdispersion.</li>
 <li>The time-stratified case-crossover design controls time trends by design, and is equivalent to a conditional Poisson time-series model.</li>
 </ul>
+</section>
+<section id="concepts" class="level2">
+<h2 class="anchored" data-anchor-id="concepts">Concepts at a glance</h2>
+<p>Ideas from this lesson that are easily confused, side by side.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>What it is</th>
+<th>How it differs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Time-series design</strong></td>
+<td>Comparing a population with itself from day to day.</td>
+<td>Stable population traits cancel out; time-varying ones (season, weather) must be controlled.</td>
+</tr>
+<tr class="even">
+<td><strong>Seasonality vs trend</strong></td>
+<td>The repeating yearly pattern vs slow change over years.</td>
+<td>Both are controlled by a spline of time; its df per year sets how finely.</td>
+</tr>
+<tr class="odd">
+<td><strong>Degrees of freedom per year</strong></td>
+<td>The flexibility of the spline of time.</td>
+<td>Too few leaves seasonal confounding; too many absorbs part of the exposure effect.</td>
+</tr>
+<tr class="even">
+<td><strong>Autocorrelation</strong></td>
+<td>Correlation between residuals on nearby days.</td>
+<td>Leftover autocorrelation means time is under-controlled and SEs are too small.</td>
+</tr>
+<tr class="odd">
+<td><strong>Case-crossover</strong></td>
+<td>Each case’s exposure on the event day compared with their own referent days.</td>
+<td>Controls person-level confounders by design; a time series controls population-level ones.</td>
+</tr>
+<tr class="even">
+<td><strong>Time-stratified referents</strong></td>
+<td>Referent days on the same weekday in the same month.</td>
+<td>Avoids the bias of symmetric or fixed windows; equals a conditional Poisson time series.</td>
+</tr>
+<tr class="odd">
+<td><strong>Negative control exposure (time series)</strong></td>
+<td>Tomorrow’s pollution, added next to today’s.</td>
+<td>Can’t cause today’s visits; an apparent effect reveals leftover confounding by season or weather.</td>
+</tr>
+</tbody>
+</table>
 <div class="done" data-lesson="lesson-15"><button type="button"></button><span></span></div>
 <script src="assets/lesson-15.js"></script>
+<script src="assets/negcontrol.js"></script>
 
 
 </section>
@@ -867,11 +1020,17 @@ Armstrong, Ben G., Antonio Gasparrini, and Aurelio Tobias. 2014. <span>“Condit
 <div id="ref-bhaskaran2013time" class="csl-entry" role="listitem">
 Bhaskaran, Krishnan, Antonio Gasparrini, Shakoor Hajat, Liam Smeeth, and Ben Armstrong. 2013. <span>“Time Series Regression Studies in Environmental Epidemiology.”</span> <em>International Journal of Epidemiology</em> 42 (4): 1187–95. <a href="https://doi.org/10.1093/ije/dyt092">https://doi.org/10.1093/ije/dyt092</a>.
 </div>
+<div id="ref-flanders2011method" class="csl-entry" role="listitem">
+Flanders, W. Dana, Mitchel Klein, Lyndsey A. Darrow, et al. 2011. <span>“A Method for Detection of Residual Confounding in Time-Series and Other Observational Studies.”</span> <em>Epidemiology</em> 22 (1): 59–67.
+</div>
 <div id="ref-fox2016applied" class="csl-entry" role="listitem">
 Fox, John. 2016. <em>Applied Regression Analysis and Generalized Linear Models</em>. 3rd ed. Sage.
 </div>
 <div id="ref-janes2005case" class="csl-entry" role="listitem">
 Janes, Holly, Lianne Sheppard, and Thomas Lumley. 2005. <span>“Case-Crossover Analyses of Air Pollution Exposure Data: Referent Selection Strategies and Their Implications for Bias.”</span> <em>Epidemiology</em> 16 (6): 717–26.
+</div>
+<div id="ref-lipsitch2010negative" class="csl-entry" role="listitem">
+Lipsitch, Marc, Eric Tchetgen Tchetgen, and Ted Cohen. 2010. <span>“Negative Controls: A Tool for Detecting Confounding and Bias in Observational Studies.”</span> <em>Epidemiology</em> 21 (3): 383–88.
 </div>
 <div id="ref-maclure1991case" class="csl-entry" role="listitem">
 Maclure, Malcolm. 1991. <span>“The Case-Crossover Design: A Method for Studying Transient Effects on the Risk of Acute Events.”</span> <em>American Journal of Epidemiology</em> 133 (2): 144–53.
@@ -886,19 +1045,57 @@ Peng, Roger D., Francesca Dominici, and Thomas A. Louis. 2006. <span>“Model Ch
 <script src="assets/course.js"></script>
 <script src="assets/glossary-data.js"></script>
 <script src="assets/glossary-ui.js"></script>
+<script src="assets/purposes-data.js"></script>
+<script src="assets/methods-page.js"></script>
+<script src="assets/readit.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
     if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
-      const a = window.document.createElement('a');
-      a.classList.add('top-right');
-      a.classList.add('quarto-color-scheme-toggle');
-      a.href = "";
-      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const toggle = window.document.createElement('button');
+      toggle.type = "button";
+      toggle.setAttribute("role", "switch");
+      toggle.setAttribute("aria-checked", "false");
+      toggle.classList.add('top-right');
+      toggle.classList.add('quarto-color-scheme-toggle');
+      toggle.setAttribute("aria-label", "Toggle dark mode");
+      toggle.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
       const i = window.document.createElement("i");
       i.classList.add('bi');
-      a.appendChild(i);
-      window.document.body.appendChild(a);
+      toggle.appendChild(i);
+      // Put the toggle in a landmark of its own, so that landmark navigation
+      // can reach it.
+      //
+      // The container is always a fresh direct child of body, and the toggle is
+      // never moved into page furniture that the theme or the author controls.
+      // The toggle is positioned against the page, so any ancestor that
+      // establishes a containing block captures it: a positioned element or a
+      // grid for position: absolute, and transform, filter, will-change or
+      // contain for position: fixed. A direct child of body has none of these
+      // to inherit, and the shift when one appears is silent and visual.
+      //
+      // ARIA says a document should have at most one banner, and axe reports a
+      // duplicate whether or not the banners carry distinct labels. So use a
+      // header when the page has no banner yet, and a named region otherwise.
+      //
+      // A header is a banner wherever it sits, unless it is inside sectioning
+      // content, so this cannot just look at the children of body: a custom
+      // page layout wraps the title block header in a plain div. An explicit
+      // role="banner" always counts.
+      const sectioning = 'article, aside, main, nav, section, [role="article"], [role="complementary"], [role="main"], [role="navigation"], [role="region"]';
+      const hasBanner = Array.from(
+        window.document.querySelectorAll('header:not([role]), [role="banner"]')
+      ).some(function(el) {
+        return el.hasAttribute("role") || el.closest(sectioning) === null;
+      });
+      const container = window.document.createElement(hasBanner ? "div" : "header");
+      if (hasBanner) {
+        container.setAttribute("role", "region");
+        container.setAttribute("aria-label", "Toggle dark mode");
+      }
+      container.classList.add('quarto-color-scheme-toggle-container');
+      container.appendChild(toggle);
+      window.document.body.appendChild(container);
     }
     setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
@@ -977,7 +1174,8 @@ Peng, Roger D., Francesca Dominici, and Thomas A. Louis. 2006. <span>“Model Ch
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
       // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
       for (var i=0; i<links.length; i++) {
         const link = links[i];
         if (!isInternal(link.href)) {
@@ -986,8 +1184,69 @@ Peng, Roger D., Francesca Dominici, and Thomas A. Louis. 2006. <span>“Model Ch
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
+          if (!link.classList.contains('no-external-icon')) {
+          }
         }
       }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
       const config = {
         allowHTML: true,
@@ -1001,6 +1260,7 @@ Peng, Roger D., Francesca Dominici, and Thomas A. Louis. 2006. <span>“Model Ch
         interactiveBorder: 10,
         theme: 'quarto',
         placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
       };
       if (contentFn) {
         config.content = contentFn;
@@ -1163,44 +1423,54 @@ Peng, Roger D., Francesca Dominici, and Thomas A. Louis. 2006. <span>“Model Ch
           const lineIds = lines.map((line) => {
             return targetCell + "-" + line;
           })
-          let top = null;
-          let height = null;
-          let parent = null;
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
           if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
             }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
             }
+            placeBand(gutterDiv, el, lastEl);
             selectedAnnoteEl = annoteEl;
           }
         };
@@ -1299,15 +1569,18 @@ Peng, Roger D., Francesca Dominici, and Thomas A. Louis. 2006. <span>“Model Ch
     }
   });
   </script>
-<nav class="page-navigation">
+  <script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
+  </script>
+<nav class="page-navigation" aria-label="Page">
   <div class="nav-page nav-page-previous">
-      <a href="./lesson-14.html" class="pagination-link" aria-label="Lesson 14 · Measuring disease burden">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lesson 14 · Measuring disease burden</span>
+      <a href="./lesson-14.html" class="pagination-link" aria-label="14 · Measuring disease burden">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">14 · Measuring disease burden</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./lesson-16.html" class="pagination-link" aria-label="Lesson 16 · Distributed lag and distributed lag non-linear models">
-        <span class="nav-page-text">Lesson 16 · Distributed lag and distributed lag non-linear models</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./lesson-16.html" class="pagination-link" aria-label="16 · Distributed lag and distributed lag non-linear models">
+        <span class="nav-page-text">16 · Distributed lag and distributed lag non-linear models</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>

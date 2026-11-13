@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
 
 <meta charset="utf-8">
-<meta name="generator" content="quarto-1.10.18">
+<meta name="generator" content="quarto-1.11.9">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
@@ -95,18 +95,19 @@ div.csl-indent {
 <link href="./lesson-19.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js" type="module"></script>
 <script src="site_libs/quarto-html/tabsets/tabsets.js" type="module"></script>
+<script src="site_libs/quarto-html/scrollable-regions/scrollable-regions.js" type="module"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
 <script src="site_libs/quarto-html/anchor.min.js"></script>
 <link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7eead303e38f083faf515323c8b5fe44.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-b468af426e9c805ad947c565d190ce64.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
-<link href="site_libs/quarto-html/quarto-syntax-highlighting-7eead303e38f083faf515323c8b5fe44.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-dark-834954c7d0557eb2ddddecfcfdec3bc8.css" rel="stylesheet" class="quarto-color-scheme quarto-color-alternate" id="quarto-text-highlighting-styles">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting-31be2fb8b1dcb723956cc3878b38905f.css" rel="stylesheet" class="quarto-color-scheme-extra" id="quarto-text-highlighting-styles">
 <script src="site_libs/bootstrap/bootstrap.min.js"></script>
 <link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
-<link href="site_libs/bootstrap/bootstrap-ccf064502f84f33c623e2a83f91e4349.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
-<link href="site_libs/bootstrap/bootstrap-dark-42b405ec74c69eb6010bd27de046b5d0.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
-<link href="site_libs/bootstrap/bootstrap-ccf064502f84f33c623e2a83f91e4349.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme" id="quarto-bootstrap" data-mode="light">
+<link href="site_libs/bootstrap/bootstrap-dark-2c83a40f1b05bd1178fb7cbbb72bf025.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme quarto-color-alternate" id="quarto-bootstrap" data-mode="dark">
+<link href="site_libs/bootstrap/bootstrap-842b9f5be83d551e922fa50bf2bea256.min.css" rel="stylesheet" append-hash="true" class="quarto-color-scheme-extra" id="quarto-bootstrap" data-mode="light">
 <script id="quarto-search-options" type="application/json">{
   "location": "navbar",
   "copy-button": false,
@@ -169,7 +170,7 @@ window.Quarto = {
 <link rel="stylesheet" href="assets/course.css">
 </head>
 
-<body class="nav-sidebar docked nav-fixed quarto-light"><script id="quarto-html-before-body" type="application/javascript">
+<body class="nav-sidebar docked nav-fixed quarto-light"><a id="quarto-skip-link" class="visually-hidden-focusable" href="#quarto-document-content">Skip to main content</a><script id="quarto-html-before-body" type="application/javascript">
     const toggleBodyColorMode = (bsSheetEl) => {
       const mode = bsSheetEl.getAttribute("data-mode");
       const bodyEl = window.document.querySelector("body");
@@ -192,6 +193,7 @@ window.Quarto = {
       for (let i=0; i < toggles.length; i++) {
         const toggle = toggles[i];
         if (toggle) {
+          toggle.setAttribute("aria-checked", alternate ? "true" : "false");
           if (alternate) {
             toggle.classList.add("alternate");
           } else {
@@ -221,13 +223,19 @@ window.Quarto = {
       manageTransitions('#quarto-margin-sidebar .nav-link', true);
       // Switch the toggles
       setColorSchemeToggle(alternate)
-      // Hack to workaround the fact that safari doesn't
-      // properly recolor the scrollbar when toggling (#1455)
+    }
+    // Hack to workaround the fact that safari doesn't
+    // properly recolor the scrollbar when toggling (#1455).
+    // Not run on load: stylesheets are set before first paint there, and
+    // scrolling would undo the scroll to a URL fragment (#14973).
+    // The one pixel nudge keeps the reader where they were.
+    const refreshSafariScrollbar = () => {
       if (navigator.userAgent.indexOf('Safari') > 0 && navigator.userAgent.indexOf('Chrome') == -1) {
         manageTransitions("body", false);
-        window.scrollTo(0, 1);
+        const scrollY = window.scrollY;
+        window.scrollTo(0, scrollY > 0 ? scrollY - 1 : 1);
         setTimeout(() => {
-          window.scrollTo(0, 0);
+          window.scrollTo(0, scrollY);
           manageTransitions("body", true);
         }, 40);
       }
@@ -321,6 +329,7 @@ window.Quarto = {
       // Read the current dark / light value
       let toAlternate = !hasAlternateSentinel();
       toggleColorMode(toAlternate);
+      refreshSafariScrollbar();
       setStyleSentinel(toAlternate);
       toggleGiscusIfUsed(toAlternate, darkModeDefault);
       window.dispatchEvent(new Event('resize'));
@@ -335,15 +344,14 @@ window.Quarto = {
 
 <div id="quarto-search-results"></div>
   <header id="quarto-header" class="headroom fixed-top">
-    <nav class="navbar navbar-expand-lg " data-bs-theme="dark">
+    <nav class="navbar navbar-expand-lg " data-bs-theme="dark" aria-label="Site">
       <div class="navbar-container container-fluid">
       <div class="navbar-brand-container mx-auto">
     <a class="navbar-brand" href="./index.html">
     <span class="navbar-title">Statistics for epidemiology</span>
     </a>
   </div>
-            <div id="quarto-search" class="" title="Search"></div>
-          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" role="menu" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
   <span class="navbar-toggler-icon"></span>
 </button>
           <div class="collapse navbar-collapse" id="navbarCollapse">
@@ -351,6 +359,10 @@ window.Quarto = {
   <li class="nav-item">
     <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Home</span></a>
+  </li>  
+  <li class="nav-item">
+    <a class="nav-link" href="./methods.qmd"> 
+<span class="menu-text">Choosing a method</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./glossary.html"> 
@@ -363,17 +375,18 @@ window.Quarto = {
 </ul>
           </div> <!-- /navcollapse -->
             <div class="quarto-navbar-tools">
-  <a href="" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode"><i class="bi"></i></a>
+  <button type="button" role="switch" aria-checked="false" class="quarto-color-scheme-toggle quarto-navigation-tool  px-1" onclick="window.quartoToggleColorScheme(); return false;" title="Toggle dark mode" aria-label="Toggle dark mode"><i class="bi"></i></button>
 </div>
+            <div id="quarto-search" class="" title="Search"></div>
       </div> <!-- /container-fluid -->
     </nav>
-  <nav class="quarto-secondary-nav">
+  <nav class="quarto-secondary-nav" aria-label="Toolbar">
     <div class="container-fluid d-flex">
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-19.html">Part V · Bayesian modeling</a></li><li class="breadcrumb-item"><a href="./lesson-20.html">Lesson 20 · Priors: what they say and how much they matter</a></li></ol></nav>
-        <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+        <nav class="quarto-page-breadcrumbs" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item">Part V · Bayesian modeling</li><li class="breadcrumb-item"><a href="./lesson-20.html">20 · Priors: what they say and how much they matter</a></li></ol></nav>
+        <a class="flex-grow-1" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
     </div>
   </nav>
@@ -381,224 +394,235 @@ window.Quarto = {
 <!-- content -->
 <div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
 <!-- sidebar -->
-  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto">
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal quarto-sidebar-collapse-item sidebar-navigation docked overflow-auto" aria-label="Section">
     <div class="sidebar-menu-container"> 
     <ul class="list-unstyled mt-1">
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true">
- <span class="menu-text">Part I · Foundations</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-1" aria-controls="quarto-sidebar-section-1" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-1-label">Part I · Foundations</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-1" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-1" aria-labelledby="quarto-sidebar-section-1-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-00.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 0 · Welcome: the city, the data and how to use the course</span></a>
+ <span class="menu-text">0 · Welcome: the city, the data and how to use the course</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-01.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 1 · Describing data and epidemiological measures</span></a>
+ <span class="menu-text">1 · Describing data and epidemiological measures</span></a>
   </div>
 </li>
           <li class="sidebar-item">
+ <span class="menu-text">design.qmd</span>
+  </li>
+          <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-02.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 2 · Probability and conditional probability</span></a>
+ <span class="menu-text">2 · Probability and conditional probability</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-03.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 3 · Random variables and probability distributions</span></a>
+ <span class="menu-text">3 · Random variables and probability distributions</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-04.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 4 · Sampling, sampling distributions and the central limit theorem</span></a>
+ <span class="menu-text">4 · Sampling, sampling distributions and the central limit theorem</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-05.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 5 · Likelihood and estimation</span></a>
+ <span class="menu-text">5 · Likelihood and estimation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-06.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 6 · Confidence intervals and hypothesis tests</span></a>
+ <span class="menu-text">6 · Confidence intervals and hypothesis tests</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true">
- <span class="menu-text">Part II · Frequentist regression</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-2" aria-controls="quarto-sidebar-section-2" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-2-label">Part II · Frequentist regression</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-2" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-2" aria-labelledby="quarto-sidebar-section-2-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-07.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 7 · Linear regression</span></a>
+ <span class="menu-text">7 · Linear regression</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-08.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 8 · Generalized linear models: logistic and Poisson regression</span></a>
+ <span class="menu-text">8 · Generalized linear models: logistic and Poisson regression</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-09.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 9 · Confounding, effect modification and interaction</span></a>
+ <span class="menu-text">9 · Confounding, effect modification and interaction</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-10.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 10 · Model checking, comparison and selection</span></a>
+ <span class="menu-text">10 · Model checking, comparison and selection</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-11.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 11 · Nonlinear effects: categories, polynomials, splines and GAMs</span></a>
+ <span class="menu-text">11 · Nonlinear effects: categories, polynomials, splines and GAMs</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true">
- <span class="menu-text">Part III · Causal inference, measurement and burden</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-3" aria-controls="quarto-sidebar-section-3" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-3-label">Part III · Causal inference, measurement and burden</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-3" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-3" aria-labelledby="quarto-sidebar-section-3-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-12.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 12 · Causal inference: from association to effect</span></a>
+ <span class="menu-text">12 · Causal inference: from association to effect</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-13.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 13 · Measurement error and misclassification</span></a>
+ <span class="menu-text">13 · Measurement error and misclassification</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-14.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 14 · Measuring disease burden</span></a>
+ <span class="menu-text">14 · Measuring disease burden</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true">
- <span class="menu-text">Part IV · Time, space and clustering</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-4" aria-controls="quarto-sidebar-section-4" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-4-label">Part IV · Time, space and clustering</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-4" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-4" aria-labelledby="quarto-sidebar-section-4-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-15.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 15 · Time-series regression for health data</span></a>
+ <span class="menu-text">15 · Time-series regression for health data</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-16.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 16 · Distributed lag and distributed lag non-linear models</span></a>
+ <span class="menu-text">16 · Distributed lag and distributed lag non-linear models</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-17.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 17 · Spatial data and spatial autocorrelation</span></a>
+ <span class="menu-text">17 · Spatial data and spatial autocorrelation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-18.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 18 · Clustered data and mixed-effects models</span></a>
+ <span class="menu-text">18 · Clustered data and mixed-effects models</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true">
- <span class="menu-text">Part V · Bayesian modeling</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-5" aria-controls="quarto-sidebar-section-5" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-5-label">Part V · Bayesian modeling</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-5" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-5" aria-labelledby="quarto-sidebar-section-5-label" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+ <span class="menu-text">freqbayes.qmd</span>
+  </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-19.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 19 · Bayesian thinking: from Bayes’ rule to a model equation</span></a>
+ <span class="menu-text">19 · Bayesian thinking: from Bayes’ rule to a model equation</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-20.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text">Lesson 20 · Priors: what they say and how much they matter</span></a>
+ <span class="menu-text">20 · Priors: what they say and how much they matter</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-21.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 21 · Computing the posterior: Markov chain Monte Carlo</span></a>
+ <span class="menu-text">21 · Computing the posterior: Markov chain Monte Carlo</span></a>
   </div>
 </li>
           <li class="sidebar-item">
- <span class="menu-text">lesson-22.qmd - lesson-23.qmd</span>
-  </li>
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-22.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">22 · Bayesian regression and GLMs</span></a>
+  </div>
+</li>
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-23.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">23 · Bayesian hypothesis testing and model comparison</span></a>
+  </div>
+</li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-24.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 24 · Bayesian hierarchical models</span></a>
+ <span class="menu-text">24 · Bayesian hierarchical models</span></a>
   </div>
 </li>
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-25.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 25 · Capstone: a district-level Bayesian DLNM with spatial pooling</span></a>
+ <span class="menu-text">25 · Capstone: a district-level Bayesian DLNM with spatial pooling</span></a>
   </div>
 </li>
       </ul>
   </li>
         <li class="sidebar-item sidebar-item-section">
       <div class="sidebar-item-container"> 
-            <a class="sidebar-item-text sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true">
- <span class="menu-text">Part VI · Machine learning meets Bayesian inference</span></a>
-          <a class="sidebar-item-toggle text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" role="navigation" aria-expanded="true" aria-label="Toggle section">
-            <i class="bi bi-chevron-right ms-2"></i>
-          </a> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-6" aria-controls="quarto-sidebar-section-6" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-6-label">Part VI · Machine learning meets Bayesian inference</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
       </div>
-      <ul id="quarto-sidebar-section-6" class="collapse list-unstyled sidebar-section depth1 show">  
+      <ul id="quarto-sidebar-section-6" aria-labelledby="quarto-sidebar-section-6-label" class="collapse list-unstyled sidebar-section depth1 show">  
           <li class="sidebar-item">
   <div class="sidebar-item-container"> 
   <a href="./lesson-26.html" class="sidebar-item-text sidebar-link">
- <span class="menu-text">Lesson 26 · Bayesian additive regression trees (BART) and bartisan</span></a>
+ <span class="menu-text">26 · Bayesian additive regression trees (BART) and bartisan</span></a>
+  </div>
+</li>
+      </ul>
+  </li>
+        <li class="sidebar-item sidebar-item-section">
+      <div class="sidebar-item-container"> 
+            <button type="button" class="sidebar-item-text sidebar-item-toggle sidebar-link text-start" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar-section-7" aria-controls="quarto-sidebar-section-7" aria-expanded="true">
+ <span class="menu-text" id="quarto-sidebar-section-7-label">Part VII · Causal tools from econometrics</span><i class="bi bi-chevron-right" aria-hidden="true"></i></button>
+      </div>
+      <ul id="quarto-sidebar-section-7" aria-labelledby="quarto-sidebar-section-7-label" class="collapse list-unstyled sidebar-section depth1 show">  
+          <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./lesson-27.qmd" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">27 · Causal tools from econometrics: trials, regression, IV, RD and DiD</span></a>
   </div>
 </li>
       </ul>
@@ -609,7 +633,7 @@ window.Quarto = {
 <div id="quarto-sidebar-glass" class="quarto-sidebar-collapse-item" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item"></div>
 <!-- margin-sidebar -->
     <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
-        <nav id="TOC" role="doc-toc" class="toc-active">
+        <nav id="TOC" role="doc-toc" aria-labelledby="toc-title" class="toc-active">
     <h2 id="toc-title">In this lesson</h2>
    
   <ul class="collapse">
@@ -619,15 +643,16 @@ window.Quarto = {
   <li><a href="#s4" id="toc-s4" class="nav-link" data-scroll-target="#s4">20.4 Priors as penalties: shrinking and smoothing</a></li>
   <li><a href="#quiz" id="toc-quiz" class="nav-link" data-scroll-target="#quiz">Check your understanding</a></li>
   <li><a href="#take" id="toc-take" class="nav-link" data-scroll-target="#take">Key takeaways</a></li>
+  <li><a href="#concepts" id="toc-concepts" class="nav-link" data-scroll-target="#concepts">Concepts at a glance</a></li>
   <li><a href="#bibliography" id="toc-bibliography" class="nav-link" data-scroll-target="#bibliography">References</a></li>
   </ul>
 </nav>
     </div>
 <!-- main -->
-<main class="content" id="quarto-document-content">
+<main class="content" id="quarto-document-content" tabindex="-1">
 
 
-<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./lesson-19.html">Part V · Bayesian modeling</a></li><li class="breadcrumb-item"><a href="./lesson-20.html">Lesson 20 · Priors: what they say and how much they matter</a></li></ol></nav>
+<header id="title-block-header" class="quarto-title-block default"><nav class="quarto-page-breadcrumbs quarto-title-breadcrumbs d-none d-lg-block" aria-label="Breadcrumbs"><ol class="breadcrumb"><li class="breadcrumb-item">Part V · Bayesian modeling</li><li class="breadcrumb-item"><a href="./lesson-20.html">20 · Priors: what they say and how much they matter</a></li></ol></nav>
 <div class="quarto-title">
 <h1 class="title">Lesson 20 · Priors: what they say and how much they matter</h1>
 <p class="subtitle lead">Part V · Bayesian modeling</p>
@@ -653,7 +678,7 @@ window.Quarto = {
 
 
 <div class="meta-pills">
-<p><span>About 3 hours</span> <span>Before this: Lesson 19</span> <span>Threads: shrinkage · frequentist ↔︎ Bayesian</span></p>
+<p><span>About 3 hours</span> <span>Before this: Lesson 19</span> <span>Threads: shrinkage · frequentist ↔︎ Bayesian</span> <span class="pm-label"></span></p>
 </div>
 <div class="objectives">
 <p>By the end of this lesson you will be able to</p>
@@ -697,8 +722,19 @@ window.Quarto = {
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>brms<span class="sc">::</span><span class="fu">brm</span>(..., <span class="at">sample_prior =</span> <span class="st">"only"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">D</span>How to read it</p>
 </div>
-<div class="callout callout-style-simple callout-note no-icon callout-titled" title="R code (optional): a prior predictive check">
+<ul>
+<li><span class="math inline">\(p(\alpha)\)</span>: the prior on the intercept.</li>
+<li><span class="math inline">\(p(\beta)\)</span>: the prior on the heat effect.</li>
+<li><span class="math inline">\(\tilde\mu^{(s)}(T)\)</span>: the expected visits at temperature <span class="math inline">\(T\)</span> implied by prior draw <span class="math inline">\(s\)</span>.</li>
+<li><span class="math inline">\(\tilde y^{(s)}\)</span>: visits simulated from the prior alone: the prior predictive distribution. Absurd values mean an unreasonable prior.</li>
+</ul>
+</div>
+</div>
+<div class="callout callout-style-simple callout-note no-icon callout-titled">
 <div class="callout-header d-flex align-content-center collapsed" data-bs-toggle="collapse" data-bs-target=".callout-1-contents" aria-controls="callout-1" aria-expanded="false" aria-label="Toggle callout">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
@@ -765,6 +801,18 @@ window.Quarto = {
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>s <span class="ot">&lt;-</span> (<span class="fu">log1p</span>(U) <span class="sc">-</span> <span class="fu">log1p</span>(L)) <span class="sc">/</span> (<span class="dv">2</span> <span class="sc">*</span> <span class="fl">1.96</span>)</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="fu">prior</span>(<span class="fu">normal</span>(m, s), <span class="at">class =</span> b)   <span class="co"># brms</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">D</span>How to read it</p>
+</div>
+<ul>
+<li><span class="math inline">\(m\)</span>: the prior mean on the log scale: the midpoint of the plausible range.</li>
+<li><span class="math inline">\(s\)</span>: the prior SD: chosen so that 95% of the prior lies within the plausible range.</li>
+<li><span class="math inline">\(\log(1 + L)\)</span>: the lower end of the experts’ plausible range (<span class="math inline">\(L\)</span> = −0.02 means −2% per °C), on the log scale.</li>
+<li><span class="math inline">\(\log(1 + U)\)</span>: the upper end of the plausible range, on the log scale.</li>
+<li><span class="math inline">\(1.96\)</span>: the normal quantile for 95%.</li>
+</ul>
+</div>
 <div class="c">
 <div class="lab">
 <p><span class="k">C</span>How it’s reported</p>
@@ -783,7 +831,7 @@ window.Quarto = {
 <div class="cpanel"><svg id="snPlot" viewbox="0 0 520 300" role="img" aria-label="Posterior estimates under four priors by amount of data"></svg><div class="legend" id="snLeg"></div></div>
 <div class="cpanel"><div class="ctrl"><label for="snN">Highlight: summer days of data</label><input type="range" id="snN" min="0" max="6" value="2"><output id="snNO"></output></div><div class="tw"><table data-quarto-disable-processing="true" class="t" id="snTab"></table></div><div class="now" id="snNow"></div></div>
 </div>
-<div class="callout callout-style-default callout-warning callout-titled" title="Common pitfall">
+<div class="callout callout-style-default callout-warning callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon"></i>
@@ -831,8 +879,20 @@ window.Quarto = {
 <span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>mgcv<span class="sc">::</span><span class="fu">gam</span>(visits <span class="sc">~</span> <span class="fu">s</span>(lag_matrix, <span class="at">by =</span> temp_matrix,</span>
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">bs =</span> <span class="st">"ps"</span>), ...)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </div>
+<div class="d">
+<div class="lab">
+<p><span class="k">D</span>How to read it</p>
 </div>
-<div class="callout callout-style-default callout-tip no-icon callout-titled" title="Bayesian preview">
+<ul>
+<li><span class="math inline">\(\beta_\ell\)</span>: the effect at lag <span class="math inline">\(\ell\)</span>.</li>
+<li><span class="math inline">\(\beta_{\ell-1}\)</span>: the effect at the previous lag: a random-walk prior pulls neighboring lags together, making the curve smooth.</li>
+<li><span class="math inline">\(\lambda\)</span>: the precision of the prior: larger means stronger smoothing (or shrinkage).</li>
+<li><span class="math inline">\(P\)</span>: the penalty matrix: identity for independent priors, a difference matrix for a random walk.</li>
+<li><span class="math inline">\(\ell(\beta)\)</span>: the log-likelihood: the posterior is likelihood minus a penalty, which is why a penalty is a prior.</li>
+</ul>
+</div>
+</div>
+<div class="callout callout-style-default callout-tip no-icon callout-titled">
 <div class="callout-header d-flex align-content-center">
 <div class="callout-icon-container">
 <i class="callout-icon no-icon"></i>
@@ -862,6 +922,51 @@ window.Quarto = {
 <li>The prior’s influence fades as data accumulate; report sensitivity to reasonable alternatives.</li>
 <li>A normal prior acts as a penalty. Independent priors shrink toward zero; random-walk priors smooth.</li>
 </ul>
+</section>
+<section id="concepts" class="level2">
+<h2 class="anchored" data-anchor-id="concepts">Concepts at a glance</h2>
+<p>Ideas from this lesson that are easily confused, side by side.</p>
+<table class="caption-top table">
+<colgroup>
+<col style="width: 33%">
+<col style="width: 33%">
+<col style="width: 33%">
+</colgroup>
+<thead>
+<tr class="header">
+<th>Concept</th>
+<th>What it is</th>
+<th>How it differs</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><strong>Flat or vague prior</strong></td>
+<td>A prior spreading probability very widely.</td>
+<td>Not neutral: on a transformed scale it can be informative, and it can imply absurd predictions.</td>
+</tr>
+<tr class="even">
+<td><strong>Weakly informative prior</strong></td>
+<td>A prior that rules out implausible values without favoring any plausible one.</td>
+<td>The usual default for regression coefficients.</td>
+</tr>
+<tr class="odd">
+<td><strong>Informative prior</strong></td>
+<td>A prior expressing real knowledge, e.g., from earlier studies.</td>
+<td>Should be justified and tested with a sensitivity analysis.</td>
+</tr>
+<tr class="even">
+<td><strong>Prior predictive check</strong></td>
+<td>Simulating data from the prior alone.</td>
+<td>Checks whether the prior implies sensible data, before fitting.</td>
+</tr>
+<tr class="odd">
+<td><strong>Penalty ↔︎ prior</strong></td>
+<td>A penalized likelihood equals a posterior mode with a matching prior.</td>
+<td>Ridge = normal prior; a spline penalty = a random-walk prior.</td>
+</tr>
+</tbody>
+</table>
 <div class="done" data-lesson="lesson-20"><button type="button"></button><span></span></div>
 <script src="assets/lesson-20.js"></script>
 
@@ -907,19 +1012,57 @@ Wood, Simon N. 2017. <em>Generalized Additive Models: An Introduction with <span
 <script src="assets/course.js"></script>
 <script src="assets/glossary-data.js"></script>
 <script src="assets/glossary-ui.js"></script>
+<script src="assets/purposes-data.js"></script>
+<script src="assets/methods-page.js"></script>
+<script src="assets/readit.js"></script>
 <script id="quarto-html-after-body" type="application/javascript">
   window.document.addEventListener("DOMContentLoaded", function (event) {
     // Ensure there is a toggle, if there isn't float one in the top right
     if (window.document.querySelector('.quarto-color-scheme-toggle') === null) {
-      const a = window.document.createElement('a');
-      a.classList.add('top-right');
-      a.classList.add('quarto-color-scheme-toggle');
-      a.href = "";
-      a.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
+      const toggle = window.document.createElement('button');
+      toggle.type = "button";
+      toggle.setAttribute("role", "switch");
+      toggle.setAttribute("aria-checked", "false");
+      toggle.classList.add('top-right');
+      toggle.classList.add('quarto-color-scheme-toggle');
+      toggle.setAttribute("aria-label", "Toggle dark mode");
+      toggle.onclick = function() { try { window.quartoToggleColorScheme(); } catch {} return false; };
       const i = window.document.createElement("i");
       i.classList.add('bi');
-      a.appendChild(i);
-      window.document.body.appendChild(a);
+      toggle.appendChild(i);
+      // Put the toggle in a landmark of its own, so that landmark navigation
+      // can reach it.
+      //
+      // The container is always a fresh direct child of body, and the toggle is
+      // never moved into page furniture that the theme or the author controls.
+      // The toggle is positioned against the page, so any ancestor that
+      // establishes a containing block captures it: a positioned element or a
+      // grid for position: absolute, and transform, filter, will-change or
+      // contain for position: fixed. A direct child of body has none of these
+      // to inherit, and the shift when one appears is silent and visual.
+      //
+      // ARIA says a document should have at most one banner, and axe reports a
+      // duplicate whether or not the banners carry distinct labels. So use a
+      // header when the page has no banner yet, and a named region otherwise.
+      //
+      // A header is a banner wherever it sits, unless it is inside sectioning
+      // content, so this cannot just look at the children of body: a custom
+      // page layout wraps the title block header in a plain div. An explicit
+      // role="banner" always counts.
+      const sectioning = 'article, aside, main, nav, section, [role="article"], [role="complementary"], [role="main"], [role="navigation"], [role="region"]';
+      const hasBanner = Array.from(
+        window.document.querySelectorAll('header:not([role]), [role="banner"]')
+      ).some(function(el) {
+        return el.hasAttribute("role") || el.closest(sectioning) === null;
+      });
+      const container = window.document.createElement(hasBanner ? "div" : "header");
+      if (hasBanner) {
+        container.setAttribute("role", "region");
+        container.setAttribute("aria-label", "Toggle dark mode");
+      }
+      container.classList.add('quarto-color-scheme-toggle-container');
+      container.appendChild(toggle);
+      window.document.body.appendChild(container);
     }
     setColorSchemeToggle(hasAlternateSentinel())
     const icon = "";
@@ -998,7 +1141,8 @@ Wood, Simon N. 2017. <em>Generalized Additive Models: An Introduction with <span
           return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
       }
       // Inspect non-navigation links and adorn them if external
-     var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+      window.quartoDecorateExternalLinks = function (root) {
+     var links = (root || window.document).querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
       for (var i=0; i<links.length; i++) {
         const link = links[i];
         if (!isInternal(link.href)) {
@@ -1007,8 +1151,69 @@ Wood, Simon N. 2017. <em>Generalized Additive Models: An Introduction with <span
           if (link.dataset.originalHref !== undefined) {
             link.href = link.dataset.originalHref;
           }
+          if (!link.classList.contains('no-external-icon')) {
+          }
         }
       }
+      };
+      window.quartoDecorateExternalLinks(window.document);
+    // Esc closes the popup (WCAG 1.4.13) and focus leaving both trigger and
+    // popup closes it (WCAG 2.4.11); tippy handles neither for interactive popups.
+    const hideOnEscAndFocusOut = {
+      name: 'hideOnEscAndFocusOut',
+      defaultValue: true,
+      fn(instance) {
+        const dismiss = () => {
+          // A show scheduled by the trigger delay would otherwise reopen it
+          instance.clearDelayTimeouts();
+          instance.hide();
+        };
+        const onKeyDown = (event) => {
+          if (event.key !== 'Escape') {
+            return;
+          }
+          // Keep Esc from also reaching page handlers (e.g. reveal.js overview),
+          // except an open reveal.js slide menu, which Esc should close too.
+          // The menu handles keys only when its keyboard option is on.
+          const menuHandlesEsc = window.Reveal?.getPlugin?.('menu')?.isOpen() &&
+            window.Reveal.getConfig().menu?.keyboard !== false;
+          if (!menuHandlesEsc) {
+            event.stopPropagation();
+          }
+          if (instance.popper.contains(window.document.activeElement)) {
+            // Disabled while refocusing so the focus trigger does not reopen it
+            instance.disable();
+            instance.reference.focus();
+            instance.enable();
+          }
+          dismiss();
+        };
+        const onFocusOut = (event) => {
+          const target = event.relatedTarget;
+          if (target && !instance.reference.contains(target) &&
+              !instance.popper.contains(target)) {
+            dismiss();
+          }
+        };
+        // On the trigger too: a click trigger (code-annotations: select) has no
+        // blur handling. Attached for the instance's lifetime so leaving the
+        // trigger also cancels a show still pending on the trigger delay.
+        instance.reference.addEventListener('focusout', onFocusOut);
+        return {
+          onShow() {
+            window.document.addEventListener('keydown', onKeyDown, true);
+            instance.popper.addEventListener('focusout', onFocusOut);
+          },
+          onHide() {
+            window.document.removeEventListener('keydown', onKeyDown, true);
+            instance.popper.removeEventListener('focusout', onFocusOut);
+          },
+          onDestroy() {
+            instance.reference.removeEventListener('focusout', onFocusOut);
+          },
+        };
+      },
+    };
     function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
       const config = {
         allowHTML: true,
@@ -1022,6 +1227,7 @@ Wood, Simon N. 2017. <em>Generalized Additive Models: An Introduction with <span
         interactiveBorder: 10,
         theme: 'quarto',
         placement: 'bottom-start',
+        plugins: [hideOnEscAndFocusOut],
       };
       if (contentFn) {
         config.content = contentFn;
@@ -1184,44 +1390,54 @@ Wood, Simon N. 2017. <em>Generalized Additive Models: An Introduction with <span
           const lineIds = lines.map((line) => {
             return targetCell + "-" + line;
           })
-          let top = null;
-          let height = null;
-          let parent = null;
+          // Each band is positioned against its own containing block, which is
+          // not the offsetParent of the lines, so place it from client rects.
+          const placeBand = (band, firstEl, lastEl, codeBlock) => {
+            const container = band.offsetParent;
+            if (container === null) {
+              return;
+            }
+            const containerRect = container.getBoundingClientRect();
+            // Reveal.js scales slides with a transform, so convert client
+            // pixels back to the CSS pixels of the container.
+            const scale = containerRect.height / container.offsetHeight || 1;
+            const firstRect = firstEl.getBoundingClientRect();
+            const lastRect = lastEl.getBoundingClientRect();
+            const top = (firstRect.top - containerRect.top) / scale - container.clientTop + container.scrollTop;
+            const height = (lastRect.bottom - firstRect.top) / scale;
+            band.style.top = top - 2 + "px";
+            band.style.height = height + 4 + "px";
+            if (codeBlock) {
+              // Without the copy button wrapper, the containing block is wider
+              // than the code block, so span the code block explicitly.
+              const blockRect = codeBlock.getBoundingClientRect();
+              band.style.left = (blockRect.left - containerRect.left) / scale - container.clientLeft + container.scrollLeft + "px";
+              band.style.width = blockRect.width / scale + "px";
+            }
+          };
           if (lineIds.length > 0) {
-              //compute the position of the single el (top and bottom and make a div)
-              const el = window.document.getElementById(lineIds[0]);
-              top = el.offsetTop;
-              height = el.offsetHeight;
-              parent = el.parentElement.parentElement;
-            if (lineIds.length > 1) {
-              const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
-              const bottom = lastEl.offsetTop + lastEl.offsetHeight;
-              height = bottom - top;
+            const el = window.document.getElementById(lineIds[0]);
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const parent = el.parentElement.parentElement;
+            // cook up a div (if necessary) and position it
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
             }
-            if (top !== null && height !== null && parent !== null) {
-              // cook up a div (if necessary) and position it 
-              let div = window.document.getElementById("code-annotation-line-highlight");
-              if (div === null) {
-                div = window.document.createElement("div");
-                div.setAttribute("id", "code-annotation-line-highlight");
-                div.style.position = 'absolute';
-                parent.appendChild(div);
-              }
-              div.style.top = top - 2 + "px";
-              div.style.height = height + 4 + "px";
-              div.style.left = 0;
-              let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
-              if (gutterDiv === null) {
-                gutterDiv = window.document.createElement("div");
-                gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
-                gutterDiv.style.position = 'absolute';
-                const codeCell = window.document.getElementById(targetCell);
-                const gutter = codeCell.querySelector('.code-annotation-gutter');
-                gutter.appendChild(gutterDiv);
-              }
-              gutterDiv.style.top = top - 2 + "px";
-              gutterDiv.style.height = height + 4 + "px";
+            placeBand(div, el, lastEl, parent.closest("div.sourceCode") || parent);
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
             }
+            placeBand(gutterDiv, el, lastEl);
             selectedAnnoteEl = annoteEl;
           }
         };
@@ -1320,15 +1536,18 @@ Wood, Simon N. 2017. <em>Generalized Additive Models: An Introduction with <span
     }
   });
   </script>
-<nav class="page-navigation">
+  <script type="application/javascript">
+  window.quartoScrollableRegionsLabels = {"code":"Scrollable code","output":"Scrollable output"};
+  </script>
+<nav class="page-navigation" aria-label="Page">
   <div class="nav-page nav-page-previous">
-      <a href="./lesson-19.html" class="pagination-link" aria-label="Lesson 19 · Bayesian thinking: from Bayes' rule to a model equation">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Lesson 19 · Bayesian thinking: from Bayes’ rule to a model equation</span>
+      <a href="./lesson-19.html" class="pagination-link" aria-label="19 · Bayesian thinking: from Bayes' rule to a model equation">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">19 · Bayesian thinking: from Bayes’ rule to a model equation</span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
-      <a href="./lesson-21.html" class="pagination-link" aria-label="Lesson 21 · Computing the posterior: Markov chain Monte Carlo">
-        <span class="nav-page-text">Lesson 21 · Computing the posterior: Markov chain Monte Carlo</span> <i class="bi bi-arrow-right-short"></i>
+      <a href="./lesson-21.html" class="pagination-link" aria-label="21 · Computing the posterior: Markov chain Monte Carlo">
+        <span class="nav-page-text">21 · Computing the posterior: Markov chain Monte Carlo</span> <i class="bi bi-arrow-right-short"></i>
       </a>
   </div>
 </nav>
