@@ -1,0 +1,192 @@
+---
+title: "Study design: before the method"
+subtitle: "Part I · Foundations"
+description: "Design and analysis are separate choices. What each design compares and controls, the same question answered by four designs, matching designs to purposes, and why no method rescues a weak design."
+---
+
+::: {.meta-pills}
+
+[About 1.5 hours]{} [Before this: Lesson 1]{} [Threads: bias · uncertainty]{} [Purpose: every purpose; see the [map](methods.qmd)]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- distinguish a study's design from the statistical method used to analyze it;
+- say what a design controls before any model is fitted, and what it leaves to the analysis;
+- explain why a case-control study can estimate an odds ratio but not a risk, and why it is efficient;
+- recognize an ecological design and its limits;
+- match designs to research purposes, and explain why no method rescues a design that can't answer the question.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Most of this course is about methods: models, estimators, priors. But the most important decisions in a study are made before any data are analyzed: who is compared with whom, how exposure is measured, and when. A clever method applied to a weak design gives a precise answer to the wrong question. "For objective causal inference, design trumps analysis" [@rubin2008objective].
+
+:::
+
+## D.1 Two separate choices {#d1}
+
+A **study design** decides which units are compared, how exposure is assigned or observed, and when outcomes and exposures are measured. A **method** extracts an estimate, with its uncertainty, from the data that design produced. They are chosen in that order.
+
+| | The design decides | The method decides |
+|---|---|---|
+| **Who is compared** | Exposed vs unexposed people, cases vs controls, days vs days, a person vs their own other days | How the comparison is summarized: a risk ratio, an odds ratio, a curve |
+| **Confounding** | What is controlled *by design*: randomization, self-matching, restriction, time-series structure | What is adjusted for *by modeling*, but only among variables that were measured |
+| **What can be estimated** | Risks or only odds ratios; individual or area-level effects | The functional form, the uncertainty, the reference value |
+| **Precision** | How many units, of which kind, are measured | How efficiently the information is used |
+
+The two choices are partly independent. **The same method serves different designs:** Poisson regression is used in cohorts, in daily time series and in ecological studies, and answers a different question in each. **And one design can be analyzed by different methods:** a case-crossover study by conditional logistic or conditional Poisson regression (Lesson 15), a cohort by g-computation or inverse probability weighting (Lesson 12), frequentist or Bayesian.
+
+## D.2 One question, four designs {#d2}
+
+Does NO₂ raise the risk of childhood asthma? Here the same 5,000 children are used to mimic four designs, each answering with its own data: the **full cohort**; a **case-control study**, taking every child with asthma and a random sample of children without; a **random sample** of the same size as the case-control study; and an **ecological study** of the 12 districts' asthma rates and mean NO₂. The analysis is the same kind of logistic model each time, adjusted for SES and green space, and uses the true NO₂ so that design is the only thing that differs. The true odds ratio is 1.15 per 10 µg/m³.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="ccK">Controls per case</label><input type="range" id="ccK" min="1" max="6" value="2"><output id="ccKO"></output></div>
+  <div class="btns"><button type="button" id="ccNew">Draw a new sample of controls</button></div>
+  <svg id="ddPlot" viewBox="0 0 520 270" role="img" aria-label="Odds ratios from four designs"></svg>
+</div>
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="ddTab"></table></div><div class="now" id="ddNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\text{case-control: } \mathrm{logit}\, P(Y = 1 \mid x, \text{sampled}) = \alpha^{*} + \beta x, \qquad \alpha^{*} = \alpha + \log\frac{s_1}{s_0}$$
+
+::: {.note}
+
+$s_1$, $s_0$: sampling fractions of cases and controls. Sampling by outcome shifts only the intercept, so the odds ratio $e^{\beta}$ is unchanged, but the risk is not estimable without the sampling fractions.
+
+:::
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\alpha^{*}$: the intercept in the case-control sample: shifted by the sampling.
+- $\beta$: the log odds ratio: unchanged by sampling on the outcome.
+- $s_1$: the sampling fraction of cases; $s_0$ of controls.
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+cases    <- filter(cohort, asthma == 1)
+controls <- filter(cohort, asthma == 0) |>
+  slice_sample(n = 2 * nrow(cases))
+cc <- bind_rows(cases, controls)
+glm(asthma ~ I(no2_true / 10) + ses + green,
+    family = binomial, data = cc)
+```
+
+::::
+
+:::::
+
+```{=html}
+<div class="pg-mount" data-pg="Ldesign.0"></div>
+```
+
+::: {.further}
+
+**Further reading:** @lash2021modern on cohort and case-control designs; @greenland1989ecological and @robinson1950ecological on ecological designs.
+
+:::
+
+## D.3 What each design controls {#d3}
+
+Each design removes some sources of bias by construction and leaves others to the analysis. Designs marked "not covered" are not taught in this course but are important in environmental epidemiology.
+
+```{=html}
+<div class="cw"><div class="tw"><table data-quarto-disable-processing="true" class="t pm-table" id="dsTable"></table></div></div>
+```
+
+::: {.further}
+
+**Further reading:** @maclure1991case on the case-crossover design; @gasparrini2021case on the case time series design; @petersen2016self on self-controlled case series; @bernal2017interrupted on interrupted time series for evaluating interventions; @hernan2016using on emulating a target trial.
+
+:::
+
+## D.4 Matching designs to purposes {#d4}
+
+A design is good or bad only relative to a question. The grid shows which designs are built for each purpose (●) and which can serve it with care (○). Click a design for its card.
+
+```{=html}
+<div class="cw grid2 pm-grid">
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="dgGrid"></table></div></div>
+<div class="cpanel pm-detail" id="dgCard"></div>
+</div>
+```
+
+## D.5 No method rescues a weak design {#d5}
+
+Some failures belong to the design and can't be undone by analysis:
+
+- **Comparing the wrong units.** An ecological association between district NO₂ and district asthma rates can't, by itself, say how a child's own exposure affects that child (Lesson 17).
+- **Selecting on a consequence.** Studying only children seen at a respiratory clinic conditions on a collider and creates bias that no adjustment removes (Lesson 9).
+- **Missing confounders.** Adjustment works only for what was measured; an E-value can say how strong unmeasured confounding would need to be, not remove it (Lesson 12).
+- **Measuring exposure badly.** Correcting for measurement error requires validation data, which must be designed into the study from the start (Lessons 13 and 24).
+- **Too little information.** A study too small to detect the effect of interest is uninformative whatever the method (Lesson 6).
+
+Good design also includes **designing the data**: a validation subsample, enough clusters rather than just enough people (Lesson 18), exposure histories at the resolution the lags require (Lesson 16), and a plan written before the data are seen.
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Design decides who is compared and what is controlled before any model is fitted; method extracts the estimate from those data.
+- The same method can serve different designs, and the same design can be analyzed by different methods.
+- Case-control studies estimate odds ratios efficiently, but not risks; ecological studies compare areas, not people.
+- Every design suits some purposes and not others: check the match before collecting data.
+- No method rescues a design that can't answer the question.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Design** | Who is compared, how exposure arises, and when things are measured. | Decided before data; controls some biases by construction. |
+| **Method** | How an estimate is extracted from the data. | Can only adjust for what the design measured. |
+| **Cohort** | People followed from exposure to outcome. | Estimates risks; a case-control study only odds ratios. |
+| **Case-control** | Cases and a sample of non-cases, compared on exposure. | Efficient for rare outcomes; risks not estimable without sampling fractions. |
+| **Cross-sectional** | Exposure and outcome measured at the same time. | Measures prevalence; can't establish which came first. |
+| **Ecological** | Areas or groups compared, not individuals. | Associations between areas need not hold for individuals (ecological fallacy). |
+| **Controlled by design vs by modeling** | Removed by how data are collected vs adjusted for in analysis. | Design can remove unmeasured confounders (e.g., self-matching); modeling can't. |
+
+```{=html}
+<div class="done" data-lesson="design"><button type="button"></button><span></span></div>
+<script src="assets/design-lesson.js"></script>
+```

@@ -1,0 +1,195 @@
+---
+title: "Frequentist and Bayesian, side by side"
+subtitle: "Part V · Bayesian modeling"
+description: "Two meanings of probability, what each kind of interval and probability claims, when the two approaches agree, six situations where they disagree, coverage, and how to choose and report."
+---
+
+::: {.meta-pills}
+
+[About 3 hours]{} [Before this: Parts I–IV]{} [Threads: frequentist ↔ Bayesian · uncertainty · shrinkage]{} [Purpose: every purpose; see the [map](methods.qmd)]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- state what a confidence interval, a credible interval, a p-value and a posterior probability each claim;
+- recognize the conditions under which frequentist and Bayesian analyses give nearly the same numbers;
+- explain six situations where they genuinely disagree, and which answer is more useful in each;
+- check the calibration of intervals by simulation, in the frequentist and the Bayesian sense;
+- choose an approach for a given study, and report it so readers of either school can follow.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Parts I–IV used mostly frequentist tools; Part V is Bayesian. Students often leave such courses believing either that the two are interchangeable, or that they are opposed camps. Both are wrong. They usually agree on the numbers and differ in what the numbers mean; and in a handful of important situations they disagree on the numbers too. Knowing which is which is what lets you use both well.
+
+:::
+
+## FB.1 Two meanings of probability {#fb1}
+
+**Frequentist** probability describes how often something happens over repeated samples: it belongs to procedures. The true risk is a fixed unknown number; the data are random. **Bayesian** probability describes how strongly a statement is supported given what is known: it belongs to propositions. The data are fixed once observed; uncertainty about the risk is expressed as a distribution. The same study then supports different kinds of statements:
+
+| | Frequentist | Bayesian |
+|---|---|---|
+| **Interval** | 95% confidence interval: produced by a method that captures the true value in 95% of repeated studies | 95% credible interval: given the model, prior and data, the true value lies in it with probability 0.95 |
+| **Evidence against "no effect"** | p-value: probability of data at least this extreme if there were no effect | Posterior probability of an effect, P(β > 0 \| data); or a Bayes factor comparing hypotheses |
+| **Estimate** | Maximum likelihood estimate, with a sampling distribution | Posterior distribution, summarized by median or mean |
+| **Prior knowledge** | Enters through design and model choice, not formally | Enters formally through the prior |
+| **What is random** | The data (and so the interval) | The unknown parameter, in the sense of uncertainty about it |
+| **Calibrated when** | Coverage holds for every possible true value | Coverage holds averaged over the prior |
+
+The most common misreading in published papers is reading a confidence interval as a credible interval: "there is a 95% probability that the true OR lies between 1.02 and 1.30". Strictly, only the Bayesian interval licenses that sentence, and only given its prior.
+
+::: {.further}
+
+**Further reading:** @bland1998bayesians contrast the two in a page; @efron1986isnt asks why not everyone is Bayesian; @greenland2006bayesian introduces the Bayesian perspective for epidemiologists.
+
+:::
+
+## FB.2 When they agree {#fb2}
+
+Estimate the risk of asthma from a sample of children, both ways. With enough data and a prior that isn't strongly informative, the confidence and credible intervals almost coincide: the likelihood dominates the posterior, and both summarize the same likelihood. Shrink the sample, or choose an informative or misleading prior, and they part.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="aN">Children in the sample</label><input type="range" id="aN" min="10" max="2000" step="10" value="200"><output id="aNO"></output></div>
+  <div class="ctrl"><label for="aP">Prior</label><select id="aP"><option value="1,1">flat, Beta(1, 1)</option><option value="0.5,0.5">Jeffreys, Beta(0.5, 0.5)</option><option value="14,86">informative: an earlier study of 100 children, 14% risk</option><option value="5,95">misleading: 'risk is about 5%', worth 100 children</option></select></div>
+  <svg id="aPlot" viewBox="0 0 520 220" role="img" aria-label="Confidence and credible intervals for the risk"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="aStats"></div><div class="now" id="aNow"></div></div>
+</div>
+```
+
+::: {.further}
+
+**Further reading:** @bayarri2004interplay on why the two approaches often coincide and when they don't; @brown2001interval on binomial confidence intervals, including those with Bayesian justifications.
+
+:::
+
+## FB.3 Six situations where they disagree {#fb3}
+
+Agreement is the rule only when data are plentiful and models are well behaved. Each scenario below is a situation epidemiologists meet regularly. For each, both analyses are computed on the same data.
+
+```{=html}
+<div class="cw">
+<div class="btns" role="group" aria-label="Scenario"><button type="button" data-sc="rare" aria-pressed="true">1 · Few events</button><button type="button" data-sc="sep" aria-pressed="false">2 · Separation</button><button type="button" data-sc="bound" aria-pressed="false">3 · A variance near zero</button><button type="button" data-sc="many" aria-pressed="false">4 · Many estimates</button><button type="button" data-sc="stop" aria-pressed="false">5 · Stopping early</button><button type="button" data-sc="prior" aria-pressed="false">6 · Prior knowledge</button></div>
+<div class="grid2" style="margin-top:10px">
+<div class="cpanel"><div id="dCtl"></div><svg id="dPlot" viewBox="0 0 520 280" role="img" aria-label="Frequentist and Bayesian answers"></svg></div>
+<div class="cpanel"><div class="statgrid" id="dStats"></div><div class="now" id="dNow"></div></div>
+</div></div>
+```
+
+::: {.further}
+
+**Further reading:** @heinze2002solution and @firth1993bias on separation in logistic regression; @gelman2012why on multiple comparisons and shrinkage; @berger1988likelihood on the likelihood principle and stopping rules; @wagenmakers2007practical on optional stopping and p-values.
+
+:::
+
+## FB.4 Calibration: is each interval honest? {#fb4}
+
+A frequentist 95% interval promises 95% coverage **for every true value**. A Bayesian 95% interval promises 95% coverage **on average over the prior**: if the true values really came from the prior. Simulate 2,000 studies and count. Fix the true risk far from the prior's center and the credible interval falls short; draw true risks from the prior and it hits 95%, while the confidence interval may be needlessly wide or, for small samples, miss.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="btns" role="group" aria-label="Truth"><button type="button" id="cFix" aria-pressed="true">Truth fixed</button><button type="button" id="cDraw" aria-pressed="false">Truth drawn from the prior</button></div>
+  <div class="ctrl" id="cTRow"><label for="cT">True risk</label><input type="range" id="cT" min="1" max="40" value="14"><output id="cTO"></output></div>
+  <div class="ctrl"><label for="cN">Children per study</label><input type="range" id="cN" min="10" max="500" step="10" value="40"><output id="cNO"></output></div>
+  <div class="ctrl"><label for="cS">Prior: mean 14%, worth</label><input type="range" id="cS" min="2" max="200" value="50"><output id="cSO"></output></div>
+  <svg id="cPlot" viewBox="0 0 520 200" role="img" aria-label="Coverage of the two intervals"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="cStats"></div><div class="now" id="cNow"></div></div>
+</div>
+```
+
+::: {.callout-tip icon="false" title="Calibrated Bayes"}
+
+A practical synthesis used by many applied statisticians: fit Bayesian models, because they handle complex structures and prior knowledge naturally, and check them with frequentist tools: coverage in simulations, posterior predictive checks, and out-of-sample prediction [@little2006calibrated]. Lessons 22–25 work in this spirit.
+
+:::
+
+::: {.further}
+
+**Further reading:** @little2006calibrated on calibrated Bayes; @gelman2013bayesian on frequency properties of Bayesian procedures.
+
+:::
+
+## FB.5 Choosing and reporting {#fb5}
+
+| Situation | Often the more convenient choice | Why |
+|---|---|---|
+| Large data, simple model, regulatory or conventional reporting | Frequentist | Fast, familiar, few choices to defend |
+| Small samples, rare events, separation | Bayesian with weakly informative priors (or penalized likelihood) | Finite, stable estimates; honest uncertainty |
+| Hierarchies with few groups (districts, schools) | Bayesian | Uncertainty about variance parameters propagates |
+| Many related estimates | Bayesian partial pooling | Shrinkage controls noise without blanket multiplicity corrections |
+| Real prior evidence (earlier studies) | Bayesian | Uses it explicitly and transparently |
+| Complex derived quantities (MMT, attributable numbers) | Either, by simulation; Bayesian draws are the most direct | Uncertainty propagates through any function |
+| Pre-registered confirmatory test with error-rate guarantees | Frequentist | Error rates are the design target |
+
+Whatever the choice, report so that both kinds of reader can follow: the estimate and its interval, what the interval means, the prior (and a sensitivity analysis) for Bayesian analyses, and the model checks. When both analyses are cheap, reporting both, and noting where they differ, is often the most informative choice.
+
+::: {.further}
+
+**Further reading:** @kruschke2021bayesian on reporting Bayesian analyses; @wasserstein2016asa on reporting p-values; @spiegelhalter2004bayesian on Bayesian methods in health research.
+
+:::
+
+## FB.6 Following the thread through the course {#fb6}
+
+Every place in the course where the two approaches meet:
+
+| Lesson | Frequentist | Bayesian | What to notice |
+|---|---|---|---|
+| [2](lesson-02.qmd) | Diagnostic accuracy | Bayes' theorem, likelihood ratios | Updating a probability is Bayes' theorem at work |
+| [5](lesson-05.qmd) | Likelihood, MLE, likelihood intervals | Posterior from the same likelihood | **Two ways panel:** flat prior, same curve |
+| [6](lesson-06.qmd) | Confidence intervals, p-values | Credible intervals, posterior probabilities | **Two ways panel:** same numbers, different meaning |
+| [8](lesson-08.qmd) | Logistic regression | Bayesian logistic regression | **Two ways panel:** they part with few cases |
+| [10](lesson-10.qmd) | AIC, cross-validation, stepwise | LOO (Lesson 23), shrinkage priors | Selection vs regularization |
+| [11](lesson-11.qmd) | Penalized splines | Smoothing priors (Lesson 20) | A penalty is a prior |
+| [12](lesson-12.qmd) | G-computation with bootstrap | G-computation on posterior draws | **Two ways panel:** two routes to the uncertainty |
+| [13](lesson-13.qmd) | Regression calibration, SIMEX | Measurement-error model (Lesson 24) | Calibration uncertainty is propagated |
+| [14](lesson-14.qmd) | Monte Carlo propagation | Burden on draws (Lesson 25) | Monte Carlo is a Bayesian idea in frequentist use |
+| [16](lesson-16.qmd) | MMT by simulation | MMT on posterior draws | **Two ways panel:** the same machinery |
+| [17](lesson-17.qmd) | SMRs, empirical Bayes | BYM2 (Lesson 25) | Empirical Bayes sits between the two |
+| [18](lesson-18.qmd) | DerSimonian–Laird meta-analysis | Hierarchical model with a prior on τ | **Two ways panel:** τ = 0 vs an uncertain τ |
+| [19](lesson-19.qmd)–[22](lesson-22.qmd) | Frequentist estimates alongside | Posteriors | Agreement with weak priors and enough data |
+| [23](lesson-23.qmd) | p-values, LRT | Bayes factors, ROPE, LOO | Lindley's paradox |
+| [24](lesson-24.qmd) | Empirical Bayes | Full Bayes | Uncertainty about τ |
+| [25](lesson-25.qmd) | Stage-1 GLMs | Stage-2 BYM2 pooling | A frequentist–Bayesian hybrid, standard in practice |
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- Frequentist probability belongs to procedures over repeated samples; Bayesian probability to statements given the data and prior.
+- With enough data and weakly informative priors, the two give nearly the same numbers, with different interpretations.
+- They disagree with few events, separation, variances near zero, many related estimates, data-dependent stopping, and real prior information.
+- Confidence intervals aim at coverage for every true value; credible intervals at coverage averaged over the prior. Simulation shows both.
+- Choose by the problem, not by camp; report so both kinds of reader can follow.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Confidence interval** | From a procedure capturing the truth in 95% of repeated samples. | A statement about the procedure; a credible interval is about the parameter. |
+| **Credible interval** | Contains the parameter with probability 0.95, given the prior and data. | Depends on the prior; calibrated on average over the prior. |
+| **p-value vs posterior probability** | P(data this extreme | null) vs P(hypothesis | data). | Can be numerically close for one-sided tests with flat priors; never the same quantity. |
+| **Likelihood principle** | All evidence from the data is in the likelihood. | Bayesian inference follows it; frequentist error rates depend on stopping rules too. |
+| **Shrinkage vs Bonferroni** | Pulling noisy estimates toward a common mean vs widening every interval. | Two answers to multiplicity: modeling vs penalizing. |
+| **Separation** | An exposure level where all, or none, have the outcome. | Makes the ML estimate infinite; a weak prior or penalization fixes it. |
+
+```{=html}
+<div class="done" data-lesson="freqbayes"><button type="button"></button><span></span></div>
+<script src="assets/bayes-engine.js"></script>
+<script src="assets/freqbayes.js"></script>
+```

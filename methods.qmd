@@ -1,0 +1,78 @@
+---
+title: "Choosing a method: purposes and tools"
+description: "Start with the question. A map of research purposes, where they sit in the research cycle, and the frequentist and Bayesian tools in this course that serve each one."
+---
+
+The most common mistake in applied statistics is choosing the model before the question. The same regression can describe, predict or estimate a causal effect, but what makes it a *good* model is different in each case. This page maps the purposes an epidemiological analysis can have, and the tools in this course that serve each one.
+
+## The map {#map}
+
+Two frames are combined. The **research cycle** (outside) describes how evidence moves from monitoring a problem to acting on it and checking the result. The **question ladder** (inside) describes the kind of question being asked: describing what is there, associating exposure with outcome, explaining what would happen under a different exposure, or predicting what isn't yet observed. Each purpose sits on one rung of the ladder and serves one or more stages of the cycle. Click a purpose, a rung or a stage.
+
+```{=html}
+<div class="cw grid2 pm-grid">
+<div class="cpanel"><svg id="pmSvg" viewBox="0 0 1000 600" role="img" aria-label="Research purposes: the research cycle with the question ladder inside"></svg></div>
+<div class="cpanel pm-detail" id="pmDetail"></div>
+</div>
+```
+
+**Reading the ladder.** Each rung asks more of the data and of the analyst. Describing needs good counts and denominators. Associating needs a model that fits and the right adjustment. Explaining, the causal rung, needs assumptions that the data alone can't verify: no unmeasured confounding, a well-defined intervention. Predicting and forecasting need validation on data the model hasn't seen. The rungs aren't a ranking of importance: a good description often matters more for public health than a weak causal claim.
+
+**Reading the cycle.** Surveillance spots a problem (describe, forecast). Etiology asks whether and how the exposure causes harm (associate, explain). Burden asks how much harm, and where (explain, through a counterfactual). Action targets interventions and warnings (heterogeneity, prediction, forecasting). Evaluation checks whether the action worked (explain again, now about the intervention), which feeds back into surveillance.
+
+## Design comes first {#design}
+
+A purpose is served first by a **study design**, which decides who is compared and what is controlled before any model is fitted, and only then by a **method**. The grid shows which designs are built for each purpose (●) and which can serve it with care (○); click a design for what it controls, its threats and its methods. The [study design lesson](design.qmd) explains the distinction with a worked example.
+
+```{=html}
+<div class="cw grid2 pm-grid">
+<div class="cpanel"><div class="tw"><table data-quarto-disable-processing="true" class="t" id="pmDGrid"></table></div></div>
+<div class="cpanel pm-detail" id="pmDCard"></div>
+</div>
+```
+
+## Purposes and tools {#table}
+
+The same information as a table, read up the ladder. Lesson numbers link to the lessons. Methods marked "not covered here" are established tools you may meet in the literature.
+
+```{=html}
+<div class="cw"><div class="tw"><table data-quarto-disable-processing="true" class="t pm-table" id="pmTable"></table></div></div>
+```
+
+## Find your path {#guide}
+
+Tell the guide what you want to know and what kind of data you have. It suggests the designs that fit, then the tools in this course designed for that combination, a reading path through the lessons, and the trap to avoid.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="pmQ">I want to know…</label><select id="pmQ"></select></div>
+  <fieldset id="pmD" class="pm-data"><legend>My data are…</legend>
+    <label><input type="radio" name="pmd" value="ind" checked> individuals (cohort, cross-sectional, case-control)</label>
+    <label><input type="radio" name="pmd" value="ts"> daily counts over time</label>
+    <label><input type="radio" name="pmd" value="area"> rates or counts for areas</label>
+    <label><input type="radio" name="pmd" value="clu"> people grouped in clusters</label>
+  </fieldset>
+</div>
+<div class="cpanel pm-detail" id="pmOut"></div>
+</div>
+```
+
+## Four rules of thumb {#rules}
+
+1. **Write the question down, then choose the design, then the model.** If you can't say whether you want to describe, associate, explain or predict, no model will tell you; and no model rescues a design that can't answer the question.
+2. **Causal questions need causal assumptions.** Draw the DAG, state the intervention, and check positivity, whatever the method, frequentist, Bayesian or machine learning (Lessons 9 and 12).
+3. **Predictive questions need out-of-sample checks.** In-sample fit always flatters; for forecasts, respect time order (Lessons 10 and 26).
+4. **Frequentist and Bayesian tools usually answer the same question.** The choice between them is about how uncertainty is expressed, what prior knowledge you can use, and computation, not about which purpose you have. The two columns of the table run side by side for that reason; the lesson [Frequentist and Bayesian, side by side](freqbayes.qmd) shows where they agree and where they don't.
+
+::: {.further}
+
+**Further reading:** @rubin2008objective on why design comes before analysis; @hernan2019second classify data science tasks into description, prediction and causal inference; @shmueli2010explain on explaining versus predicting; @hernan2020causal on causal questions; @hyndman2021forecasting on forecasting.
+
+:::
+
+```{=html}
+<script>
+document.addEventListener("DOMContentLoaded",function(){pmDiagram("pmSvg","pmDetail");pmDesignGrid("pmDGrid","pmDCard");pmTable("pmTable");pmGuide("pmQ","pmD","pmOut");});
+</script>
+```

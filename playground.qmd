@@ -1,0 +1,20 @@
+---
+title: "Model playground"
+description: "Every model in the course you can play with: move the inputs and the parameters, and see what the model predicts, and whether it makes sense."
+---
+
+A model is a machine that turns inputs into predictions. It will compute anything you give it, including predictions for impossible children and absurd days. Judging whether an input, a parameter or a prediction is plausible is the analyst's job. Choose a model, then move the sliders. Each one is colored by three zones:
+
+- **red: impossible**, because it breaks logic or physics (negative pollution, a temperature of 999°C, a risk above 100%);
+- **amber: possible, but beyond the data or the evidence**, where the model is extrapolating (no child in the cohort breathes zero NO₂);
+- **green: plausible**, supported by the data or the confidence interval.
+
+You can also type any value in the box beside a slider. The parameters start at the values fitted to the course data; the reset link returns to them. Each model also has a "Try it" button under its equation in the lesson.
+
+```{=html}
+<div class="cw">
+  <div class="ctrl"><label for="pgSelect">Model</label><select id="pgSelect"></select></div>
+  <p class="small" id="pgLink"></p>
+  <div id="pgHost"></div>
+</div>
+```

@@ -1,0 +1,637 @@
+---
+title: "Lesson 27 · Causal tools from econometrics: trials, regression, IV, RD and DiD"
+subtitle: "Part VII · Causal tools from econometrics"
+description: "The five tools of Mastering 'Metrics (randomized trials, regression, instrumental variables, regression discontinuity, differences-in-differences) applied to the course's city: an air-purifier trial, the omitted-variables-bias formula, traffic as an instrument for NO₂, a heat-warning threshold and a low-emission zone."
+---
+
+```{r}
+#| include: false
+source("R/course-data.R")
+```
+
+::: {.meta-pills}
+
+[About 5 hours]{} [Before this: Lessons 7–9, 12 and 15]{} [Threads: bias · uncertainty]{}
+
+:::
+
+::: {.objectives}
+
+By the end of this lesson you will be able to
+
+- write a naive comparison as a causal effect plus selection bias, and explain why randomization removes the bias;
+- distinguish intention-to-treat, as-treated and per-protocol estimates in a trial with imperfect adherence, and recover the effect among compliers with an instrument;
+- use the omitted-variables-bias formula to say how much a missing confounder would change a regression estimate;
+- estimate an effect with an instrumental variable, and judge its first stage and exclusion restriction;
+- estimate the effect of a threshold-based policy with a regression discontinuity design;
+- evaluate a policy with differences-in-differences, check for parallel pre-trends, and read an event study.
+
+:::
+
+::: {.why}
+
+**Why it matters.** Economists and epidemiologists ask the same causal questions with different vocabularies. *Mastering 'Metrics* [@angrist2015mastering] distills the econometric approach into five tools, "the Furious Five", and several of its own examples are public-health questions: health insurance, the minimum legal drinking age and mortality, and domestic violence. The tools that exploit natural experiments (instruments, thresholds and policy changes) are now standard in environmental and policy epidemiology, where randomizing an exposure is rarely possible.
+
+:::
+
+## 27.1 The selection problem and the Furious Five {#s1}
+
+Comparing children with and without an air purifier mixes two things: the effect of the purifier, and the differences between families who buy purifiers and families who don't. The book writes this as a single line, the same potential-outcomes logic as Lesson 12:
+
+$$\underbrace{E[Y_i \mid D_i = 1] - E[Y_i \mid D_i = 0]}_{\text{observed difference}} = \underbrace{E[Y_{1i} - Y_{0i} \mid D_i = 1]}_{\text{effect on the treated}} + \underbrace{E[Y_{0i} \mid D_i = 1] - E[Y_{0i} \mid D_i = 0]}_{\text{selection bias}}$$
+
+Each of the five tools is a strategy for making the selection-bias term vanish, or for finding a comparison in which it plausibly does.
+
+| Tool | How it removes selection bias | What the answer depends on | Epidemiological counterparts |
+|---|---|---|---|
+| **Randomized trial** | Treatment assigned by chance | Adherence, attrition | Clinical and community trials |
+| **Regression** | Compare people with the same values of the controls | All confounders measured and modeled well | Confounder adjustment (Lessons 7–9, 12) |
+| **Instrumental variables** | Use a variable that shifts treatment but affects the outcome in no other way | Exclusion restriction; a strong first stage | Mendelian randomization; physician preference; distance |
+| **Regression discontinuity** | Compare units just above and just below a threshold that decides treatment | Nothing else jumps at the threshold | Age eligibility; policy and alert thresholds |
+| **Differences-in-differences** | Compare changes over time in treated and untreated groups | Parallel trends without the policy | Policy evaluation; natural experiments |
+
+::: {.further}
+
+**Further reading:** @angrist2015mastering, chapters 1–5; @hernan2020causal for the same ideas in epidemiological language.
+
+:::
+
+## 27.2 Randomized trials, adherence and compliers {#s2}
+
+A community trial randomizes 20,000 families to receive a portable air purifier with activated-carbon filters ($Z_i = 1$) or not. In the simulation, using a purifier lowers a child's NO₂ exposure by 15 µg/m³, which lowers asthma risk according to the cohort's true model. But not every family does what it was assigned: some offered a purifier never use it, and some better-off families not offered one buy their own. The **intention-to-treat** comparison (by assignment) is protected by randomization; the **as-treated** comparison (by actual use) is not. Dividing the intention-to-treat effect by the difference in purifier use between arms, the **Wald estimator**, recovers the effect among **compliers**: families who use a purifier if, and only if, offered one.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="tC">Share of families who follow their assignment</label><input type="range" id="tC" min="0.3" max="1" step="0.05" value="0.7"><output id="tCO"></output></div>
+  <div class="btns"><button type="button" id="tNew">Run the trial again</button></div>
+  <svg id="tPlot" viewBox="0 0 520 250" role="img" aria-label="Trial estimates"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="tStats"></div><div class="now" id="tNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\text{ITT} = E[Y_i \mid Z_i = 1] - E[Y_i \mid Z_i = 0]$$
+$$\text{first stage} = E[D_i \mid Z_i = 1] - E[D_i \mid Z_i = 0]$$
+$$\text{LATE} = \frac{\text{ITT}}{\text{first stage}}$$
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $Z_i$: the random assignment: 1 if family $i$ was offered a purifier.
+- $D_i$: the treatment actually received: 1 if the family used a purifier, whatever its assignment.
+- $\text{ITT}$: intention-to-treat: the difference in outcomes by assignment. Protected by randomization; diluted by non-adherence.
+- $\text{first stage}$: how much more often the offered arm used a purifier: the share of compliers (minus always- and never-takers' influence).
+- $\text{LATE}$: the local average treatment effect: the effect among compliers, families who use a purifier only if offered one.
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+itt   <- mean(y[z == 1]) - mean(y[z == 0])
+first <- mean(d[z == 1]) - mean(d[z == 0])
+itt / first                      # Wald = LATE
+# with covariates and SEs:
+fixest::feols(y ~ ses | d ~ z, data = trial)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[D]{.k}How it's reported
+
+:::
+
+[ ]{#tReport}
+
+::::
+
+:::::
+
+```{=html}
+<div class="pg-mount" data-pg="L27.0"></div>
+```
+
+::: {.further}
+
+**Further reading:** @angrist2015mastering, chapter 1, and chapter 3 on compliers; @hernan2020causal on per-protocol effects in trials.
+
+:::
+
+## 27.3 Regression and the omitted-variables-bias formula {#s3}
+
+Regression compares children with the same values of the controls. If a confounder is left out, the **omitted-variables-bias (OVB) formula** says exactly how much the estimate moves: the coefficient in the short regression equals the coefficient in the long regression plus the effect of the omitted variable times its association with the exposure. The formula is exact for linear regression, used here on the asthma outcome (a linear probability model, so effects are in percentage points).
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="oW">Omitted variable</label><select id="oW"><option value="ses">SES</option><option value="green">green space</option><option value="smoke">parental smoking</option></select></div>
+  <svg id="oPlot" viewBox="0 0 520 230" role="img" aria-label="Omitted variables bias decomposition"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="oStats"></div><div class="now" id="oNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\text{long: } Y_i = \alpha + \rho\, x_i + \gamma\, w_i + e_i, \qquad \text{short: } Y_i = \alpha^s + \rho^s x_i + e^s_i$$
+$$\rho^s = \rho + \gamma\,\delta_{wx}$$
+
+::: {.note}
+
+$\delta_{wx}$: the slope from regressing the omitted variable $w$ on the exposure $x$.
+
+:::
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\rho$: the exposure coefficient in the long regression, which includes the variable $w$.
+- $\rho^s$: the exposure coefficient in the short regression, which leaves $w$ out.
+- $\gamma$: the effect of the omitted variable $w$ on the outcome.
+- $w_i$: the variable left out of the short regression, such as SES.
+- $\delta_{wx}$: the association of $w$ with the exposure: the slope from regressing $w$ on $x$. Bias needs both $\gamma$ and $\delta_{wx}$ to be non-zero.
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+short <- lm(asthma ~ x, data = d)
+long  <- lm(asthma ~ x + ses, data = d)
+aux   <- lm(ses ~ x, data = d)
+coef(long)["x"] + coef(long)["ses"] * coef(aux)["x"]
+# equals coef(short)["x"]
+```
+
+::::
+
+:::::
+
+```{=html}
+<div class="pg-mount" data-pg="L27.1"></div>
+```
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): checking the OVB formula"}
+
+```{r}
+d <- cohort |> mutate(x = no2_modeled / 10)
+short <- lm(asthma ~ x, data = d)
+long  <- lm(asthma ~ x + ses, data = d)
+aux   <- lm(ses ~ x, data = d)
+c(short = unname(coef(short)["x"]),
+  long_plus_bias = unname(coef(long)["x"] + coef(long)["ses"] * coef(aux)["x"]))
+```
+
+:::
+
+::: {.callout-tip icon="false" title="How this regression differs from the regressions elsewhere in the course"}
+
+The arithmetic is the same least squares; the job is different. In the book, regression is a device for "other things equal" comparisons: **one** causal coefficient matters, and the controls are there only to remove selection bias. Elsewhere in the course, regression also describes (Lesson 7), models counts and risks through link functions and likelihoods (Lessons 8 and 15), predicts (Lessons 10 and 26), and feeds g-computation (Lesson 12). Three differences matter in practice:
+
+- **Effect scale.** The book uses ordinary least squares even for 0/1 outcomes (the linear probability model), so effects are risk differences in percentage points, as in this section. Epidemiology usually reports odds or rate ratios from GLMs; the linear model avoids the non-collapsibility of odds ratios (Lesson 12), but can predict risks outside 0–1.
+- **What is estimated.** With heterogeneous effects, regression with controls gives a weighted average of within-group effects, weighting most heavily the groups where exposure varies most. G-computation and IPW (Lesson 12) target an explicitly defined average, such as the effect in the whole population.
+- **Assumptions and inference.** The book justifies regression as the best linear approximation to the conditional mean and relies on robust or clustered standard errors. The course more often treats the model as a description of how the data arose, checks it, and uses flexible forms (splines, DLNMs, BART) because the shape of the exposure–response is often the scientific question.
+
+:::
+
+::: {.callout-warning title="Bad controls"}
+
+The book's warning applies directly to epidemiology: adjusting for a variable that is itself affected by the exposure, such as a symptom or a medication taken because of exposure, is not adjustment for confounding. It blocks part of the effect or opens a collider path (Lesson 9).
+
+:::
+
+::: {.further}
+
+**Further reading:** @angrist2015mastering, chapter 2; @westreich2013table on the Table 2 fallacy.
+
+:::
+
+## 27.4 Instrumental variables {#s4}
+
+Modeled NO₂ is measured with error (Lesson 13), which attenuates its coefficient, and there may be confounders nobody measured. An **instrument** is a variable that shifts exposure but affects the outcome in no other way. Here, district traffic density: it raises NO₂ strongly, and in the simulation it affects asthma only through NO₂. **Two-stage least squares (2SLS)** first predicts NO₂ from traffic and the covariates, then regresses asthma on the predicted NO₂. Weaken the instrument, or let traffic affect asthma directly (through noise or stress), and watch what goes wrong.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="iS">Instrument strength</label><select id="iS"><option value="1">strong: district traffic</option><option value="0.15">weak: traffic blurred by noise</option><option value="0.04">very weak</option></select></div>
+  <div class="ctrl"><label class="small"><input type="checkbox" id="iX"> traffic also affects asthma directly (exclusion restriction violated)</label></div>
+  <svg id="iPlot" viewBox="0 0 520 250" role="img" aria-label="Estimates of the NO2 effect"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="iStats"></div><div class="now" id="iNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\text{first stage: } x_i = \pi_0 + \pi_1 z_i + \kappa^\top c_i + v_i$$
+$$\text{second stage: } Y_i = \alpha + \lambda\, \hat x_i + \theta^\top c_i + \varepsilon_i$$
+$$\lambda = \frac{\text{reduced form}}{\text{first stage}} = \frac{\rho_{zy}}{\pi_1}$$
+
+::: {.note}
+
+$z$: traffic (the instrument); $x$: modeled NO₂ per 10 µg/m³; $c$: covariates (SES, green space).
+
+:::
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $z_i$: the instrument: district traffic density.
+- $\pi_1$: the first-stage coefficient: how strongly the instrument moves the exposure. A weak first stage makes IV unstable.
+- $\hat x_i$: the exposure predicted from the instrument and covariates: the part of exposure driven by traffic only.
+- $\lambda$: the IV estimate of the exposure's effect.
+- $\rho_{zy}$: the reduced form: the instrument's association with the outcome. Divided by the first stage, it gives $\lambda$.
+- $c_i$: covariates included in both stages.
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+fixest::feols(asthma ~ ses + green |
+              x ~ traffic, data = iv)
+# or AER::ivreg(asthma ~ x + ses + green |
+#               traffic + ses + green, data = iv)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[D]{.k}How it's reported
+
+:::
+
+[ ]{#iReport}
+
+::::
+
+:::::
+
+```{=html}
+<div class="pg-mount" data-pg="L27.2"></div>
+```
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): two-stage least squares by hand"}
+
+```{r}
+iv <- cohort |>
+  left_join(select(districts, district_id, traffic), by = "district_id") |>
+  mutate(x = no2_modeled / 10)
+first  <- lm(x ~ traffic + ses + green, data = iv)
+iv$x_hat <- fitted(first)
+second <- lm(asthma ~ x_hat + ses + green, data = iv)
+c(first_stage_F = unname(summary(first)$coefficients["traffic", "t value"]^2),
+  iv_estimate   = unname(coef(second)["x_hat"]),
+  ols_estimate  = unname(coef(lm(asthma ~ x + ses + green, data = iv))["x"]))
+# Standard errors from this manual second stage are wrong; use fixest::feols or AER::ivreg,
+# clustered by district, since the instrument varies only between the 12 districts.
+```
+
+:::
+
+::: {.callout-tip icon="false" title="Instruments in epidemiology"}
+
+**Mendelian randomization** uses genetic variants as instruments for exposures such as alcohol or BMI [@lawlor2008mendelian]. Other common instruments are physician prescribing preference, distance to a facility, and policy changes. Each must pass the same three tests: it moves the exposure (testable), it is as good as randomly assigned (partly checkable), and it affects the outcome only through the exposure (not testable; it must be argued).
+
+:::
+
+::: {.further}
+
+**Further reading:** @angrist2015mastering, chapter 3; @hernan2006instruments and @greenland2000introduction for epidemiologists.
+
+:::
+
+## 27.5 Regression discontinuity: a heat-warning threshold {#s5}
+
+The city issues a heat–health warning whenever the day's mean temperature reaches **23°C**. In the simulation, warnings reduce emergency visits among residents aged 65+ by 8% (people stay inside, drink more, check on neighbors). Comparing warning days with other days is hopeless: warning days are hot, and heat raises visits. But days at 22.9°C and 23.1°C are nearly identical in everything except the warning. **Regression discontinuity** fits a line on each side of the threshold and estimates the jump at it.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label for="rH">Bandwidth: days within ± (°C)</label><input type="range" id="rH" min="1" max="6" step="0.5" value="3"><output id="rHO"></output></div>
+  <div class="ctrl"><label for="rE">True effect of a warning</label><select id="rE"><option value="0.08">8% fewer visits</option><option value="0">no effect</option></select></div>
+  <svg id="rPlot" viewBox="0 0 520 290" role="img" aria-label="Regression discontinuity plot"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="rStats"></div><div class="now" id="rNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$Y_t = \alpha + \rho\, D_t + \beta_1 (T_t - c) + \beta_2\, D_t (T_t - c) + e_t, \qquad |T_t - c| \le h$$
+$$D_t = 1\{T_t \ge c\}$$
+
+::: {.note}
+
+$Y_t$: log visits (65+) on day $t$, after removing season, trend and weekday; $c$ = 23°C.
+
+:::
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\rho$: the jump at the threshold: the effect of the warning, on the log scale.
+- $D_t$: 1 if a warning was issued on day $t$, which happens exactly when temperature reaches the threshold.
+- $(T_t - c)$: the running variable centered at the threshold: distance in °C from 23°C.
+- $\beta_2$: lets the slope differ above the threshold, so the jump isn't confused with a change of slope.
+- $h$: the bandwidth: only days within $h$ °C of the threshold are used. Narrower means less bias, more noise.
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+rd <- filter(days, abs(temp - 23) <= h) |>
+  mutate(D = temp >= 23, r = temp - 23)
+lm(y ~ D * r, data = rd)           # coefficient on D
+# robust bandwidth choice and inference:
+rdrobust::rdrobust(days$y, days$temp, c = 23)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[D]{.k}How it's reported
+
+:::
+
+[ ]{#rReport}
+
+::::
+
+:::::
+
+::: {.further}
+
+**Further reading:** @angrist2015mastering, chapter 4, including the minimum legal drinking age and mortality; @bor2014regression on RD designs in epidemiology.
+
+:::
+
+## 27.6 Differences-in-differences: a low-emission zone {#s6}
+
+In July 2022 the city introduced a low-emission zone in its two central districts, Old Town and Station. In the simulation, it reduced emergency visits there by 6%. Visits were rising citywide, so a before–after comparison in the zone mixes the policy with the trend. **Differences-in-differences** subtracts the change in the other ten districts, which assumes that, without the policy, the zone's visits would have followed the same trend (**parallel trends**). An **event study** checks that assumption before the policy started.
+
+```{=html}
+<div class="cw grid2">
+<div class="cpanel">
+  <div class="ctrl"><label class="small"><input type="checkbox" id="dV"> the zone's districts were already on a declining trend (parallel trends violated)</label></div>
+  <div class="ctrl"><label for="dE">True effect of the zone</label><select id="dE"><option value="0.06">6% fewer visits</option><option value="0">no effect</option></select></div>
+  <svg id="dPlot" viewBox="0 0 520 240" role="img" aria-label="Visits in the zone and elsewhere"></svg>
+  <svg id="dEv" viewBox="0 0 520 220" role="img" aria-label="Event study"></svg>
+</div>
+<div class="cpanel"><div class="statgrid" id="dStats"></div><div class="now" id="dNow"></div></div>
+</div>
+```
+
+::::: {.triad}
+
+:::: {.a}
+
+::: {.lab}
+
+[A]{.k}Standard notation
+
+:::
+
+$$\log Y_{jm} = \alpha_j + \tau_m + \delta\, (\text{LEZ}_j \times \text{post}_m) + e_{jm}$$
+$$\hat\delta_{2\times 2} = (\bar y_{\text{LEZ, post}} - \bar y_{\text{LEZ, pre}}) - (\bar y_{\text{other, post}} - \bar y_{\text{other, pre}})$$
+
+::: {.note}
+
+$j$: district; $m$: month; $\alpha_j$ and $\tau_m$: district and month fixed effects.
+
+:::
+
+::::
+
+:::: {.d}
+
+::: {.lab}
+
+[B]{.k}How to read it
+
+:::
+
+- $\alpha_j$: district fixed effects: absorb everything constant about each district.
+- $\tau_m$: month fixed effects: absorb everything affecting all districts in a month, such as season, epidemics and citywide trends.
+- $\hat\delta_{2\times 2}$: the simple difference-in-differences: the zone's before–after change minus the other districts' change.
+- $\delta$: the policy effect: the extra change in the zone's districts after the zone started.
+- $\text{LEZ}_j \times \text{post}_m$: 1 for zone districts in months after July 2022, 0 otherwise.
+
+::::
+
+:::: {.b}
+
+::: {.lab}
+
+[C]{.k}Model list and R
+
+:::
+
+```r
+fixest::feols(log(visits) ~ lez_post |
+              district + month,
+              cluster = ~district, data = monthly)
+# event study:
+fixest::feols(log(visits) ~
+  i(rel_half, lez, ref = -1) | district + month,
+  cluster = ~district, data = monthly)
+```
+
+::::
+
+:::: {.c}
+
+::: {.lab}
+
+[D]{.k}How it's reported
+
+:::
+
+[ ]{#dReport}
+
+::::
+
+:::::
+
+```{=html}
+<div class="pg-mount" data-pg="L27.4"></div>
+```
+
+::: {.callout-note collapse="true" appearance="simple" icon="false" title="R code (optional): a low-emission zone, simulated and evaluated"}
+
+```{r}
+set.seed(27)
+monthly <- visits |>
+  mutate(month = floor_date(date, "month")) |>
+  group_by(district, month) |>
+  summarise(visits = sum(visits), .groups = "drop") |>
+  mutate(lez  = district %in% c("Old Town", "Station"),
+         post = month >= as.Date("2022-07-01"),
+         visits = if_else(lez & post, rbinom(n(), visits, 0.94), as.integer(visits)))   # true effect: -6%
+
+did <- lm(log(visits) ~ I(lez & post) + factor(district) + factor(month), data = monthly)
+c(estimate_pct = unname(100 * (exp(coef(did)[2]) - 1)))
+```
+
+:::
+
+::: {.callout-warning title="Staggered adoption"}
+
+When policies start at different times in different places, the classic two-way fixed-effects regression can be badly biased, because already-treated units serve as controls. Newer estimators compare each cohort of adopters only with units not yet treated [@callaway2021difference].
+
+:::
+
+::: {.further}
+
+**Further reading:** @angrist2015mastering, chapter 5; @wing2018designing on DiD for public health policy; @bernal2017interrupted on the closely related interrupted time series.
+
+:::
+
+## 27.7 Choosing among the tools {#s7}
+
+| Question in the city | Natural tool | Why | Main threat to check |
+|---|---|---|---|
+| Do air purifiers prevent asthma? | Randomized trial | Assignment can be randomized | Non-adherence: report ITT and the complier effect |
+| How much would a missing confounder change our estimate? | OVB formula | Translates assumptions into numbers | The size of the omitted variable's effects is a guess |
+| What is the effect of NO₂ when exposure is mismeasured or confounded? | Instrumental variables | A source of variation unrelated to confounders | Exclusion restriction; weak first stage |
+| Do heat warnings work? | Regression discontinuity | Warnings switch on at a threshold | Other things changing at the threshold; few days near it |
+| Did the low-emission zone reduce visits? | Differences-in-differences | A policy started in some districts, not others | Non-parallel trends; other changes at the same time |
+
+The placebo thresholds of 27.5 and the pre-trend checks and placebo assignments of 27.6 are **negative controls** (Lesson 12.5): analyses where the true effect is known to be zero, so any "effect" exposes bias. These tools complement the methods of Lessons 9, 12, 13 and 15. Regression adjustment and g-computation rely on measuring every confounder. The three natural-experiment tools trade that assumption for another, about an instrument, a threshold or a trend, which is sometimes more credible and sometimes less. Matching the design to the question is the theme of the [study design lesson](design.qmd).
+
+## Check your understanding {#quiz}
+
+```{=html}
+<div class="cw" id="quizzes"></div>
+```
+
+## Key takeaways {#take}
+
+- A naive comparison equals a causal effect plus selection bias; each of the five tools is a strategy to remove the bias.
+- In trials with imperfect adherence, intention-to-treat is protected by randomization; dividing it by the first stage gives the effect among compliers.
+- The omitted-variables-bias formula turns "what if we missed a confounder?" into arithmetic.
+- An instrument must move the exposure, be as good as random, and affect the outcome only through the exposure. Weak or invalid instruments mislead.
+- Regression discontinuity compares just-above and just-below a threshold; differences-in-differences compares changes over time, assuming parallel trends.
+
+## Concepts at a glance {#concepts}
+
+Ideas from this lesson that are easily confused, side by side.
+
+| Concept | What it is | How it differs |
+|---|---|---|
+| **Selection bias (econometric sense)** | The part of a naive comparison due to pre-existing differences between groups. | Epidemiologists call much of this confounding; "selection bias" in epidemiology usually means selection into the study. |
+| **ITT vs as-treated vs per-protocol** | By assignment vs by treatment received vs among adherers only. | Only ITT is protected by randomization. |
+| **Compliers and LATE** | People treated only if assigned; the effect among them. | Not the average effect in everyone: always- and never-takers are excluded. |
+| **OVB formula** | Short coefficient = long coefficient + (effect of omitted variable × its association with exposure). | Exact for linear regression; a tool for sensitivity analysis. |
+| **Instrument** | A variable that moves the exposure and affects the outcome only through it. | Relevance can be checked; the exclusion restriction can't. |
+| **First stage vs reduced form** | Instrument → exposure vs instrument → outcome. | IV estimate = reduced form ÷ first stage. |
+| **Regression discontinuity** | Comparing units just above and below a threshold that decides treatment. | Sharp: treatment jumps from 0 to 1; fuzzy: the probability of treatment jumps. |
+| **Bandwidth** | How far from the threshold data are used. | Narrow: less bias, more noise; wide: the reverse. |
+| **Differences-in-differences** | The treated group's change minus the control group's change. | Removes stable differences between groups and shared trends; assumes parallel trends. |
+| **Event study** | DiD effects estimated period by period around the policy start. | Pre-period coefficients test parallel trends. |
+| **Randomization inference** | Comparing the estimate with those from placebo assignments. | Valid with few treated units, where cluster-robust SEs fail. |
+| **Regression in the book vs in the course** | One causal coefficient, controls only to remove bias, linear even for binary outcomes vs GLMs, likelihood and flexible shapes. | Same least squares; different goals, effect scales and inference conventions. |
+| **Placebo test** | An analysis where the true effect is known to be zero, such as a fake threshold or a fake policy. | A negative control for quasi-experiments (Lesson 12.5). |
+
+```{=html}
+<div class="done" data-lesson="lesson-27"><button type="button"></button><span></span></div>
+<script src="assets/lesson-27.js"></script>
+```
