@@ -1,0 +1,37 @@
+/* negcontrol.js — negative controls: an outcome NO2 can't cause (Lesson 12) and an exposure that can't cause today's visits (Lesson 15). */
+document.addEventListener("DOMContentLoaded",function(){
+const $=id=>document.getElementById(id);
+function forest(svgId,rows,lo,hi,xlab){const svg=clear($(svgId)),F=frame(svg,520,Math.max(170,60+rows.length*30),{l:230,r:14,t:16,b:40},[Math.log(lo),Math.log(hi)],[0,rows.length+1]);
+  xAxis(F,[0.9,1,1.1,1.2,1.3,1.5,1.7].filter(v=>v>=lo&&v<=hi).map(Math.log),xlab,v=>fmt(Math.exp(v),2));el("line",{x1:F.X(0),x2:F.X(0),y1:F.m.t,y2:F.Y(0),stroke:css("--c-ink"),"stroke-dasharray":"3 3"},svg);
+  rows.forEach((r,i)=>{const yy=F.Y(rows.length-i);txt(svg,F.m.l-8,yy+4,r.lab,{"text-anchor":"end",style:"fill:"+css("--c-ink")});if(r.truth)el("line",{x1:F.X(Math.log(r.truth)),x2:F.X(Math.log(r.truth)),y1:yy-11,y2:yy+11,stroke:css("--p4"),"stroke-width":2.5},svg);
+    el("line",{x1:F.X(Math.max(Math.log(lo),r.b-1.96*r.se)),x2:F.X(Math.min(Math.log(hi),r.b+1.96*r.se)),y1:yy,y2:yy,stroke:css(r.col),"stroke-width":4},svg);el("circle",{cx:F.X(Math.max(Math.log(lo),Math.min(Math.log(hi),r.b))),cy:yy,r:5.5,fill:css(r.col)},svg);});}
+const ci=r=>fmt(Math.exp(r.b),2)+" ("+fmt(Math.exp(r.b-1.96*r.se),2)+"–"+fmt(Math.exp(r.b+1.96*r.se),2)+")";
+
+/* ---------- Lesson 12: a negative control outcome ---------- */
+if($("ncCohPlot")){const GB=genB(),kids=GB.children,sch=GB.schools,T=TRUTH_B,ex=v=>1/(1+Math.exp(-v)),r=makeRng(1212);
+  const tr=kids.map(c=>DISTRICTS[c.district_id-1].traffic),tm=mean(tr),ts=sd(tr),Ur=kids.map((c,i)=>0.6*(tr[i]-tm)/ts-0.4*c.ses+0.8*gaussFrom(r)),um=mean(Ur),us=sd(Ur),U=Ur.map(v=>(v-um)/us),u1=kids.map(()=>r()),u2=kids.map(()=>r());
+  const lp0=kids.map(c=>T.int+T.ses*c.ses+T.smoke*c.parent_smoke+T.green*(c.green-0.5)+T.boy*(c.sex==="boy"?1:0)+sch[c.school-1].re);
+  const SETS={none:{n:"no adjustment",f:c=>[]},ses:{n:"SES only",f:c=>[c.ses]},all:{n:"all measured confounders",f:c=>[c.ses,c.green,c.parent_smoke,c.sex==="boy"?1:0]}};
+  function draw(){const withU=$("ncU").checked,set=SETS[$("ncA").value];
+    const yA=kids.map((c,i)=>u1[i]<ex(lp0[i]+Math.log(T.orPer10)*(c.no2_true-25)/10+(withU?0.5*U[i]:0))?1:0),yN=kids.map((c,i)=>u2[i]<ex(-1.3-0.5*c.ses+0.4*c.parent_smoke-0.5*(c.green-0.5)+(withU?0.5*U[i]:0))?1:0);
+    const X=kids.map(c=>[1,c.no2_true/10].concat(set.f(c))),fa=glmFit(X,yA,"binomial"),fn=glmFit(X,yN,"binomial"),A={b:fa.beta[1],se:fa.se[1]},Nn={b:fn.beta[1],se:fn.se[1]};
+    forest("ncCohPlot",[{lab:"asthma (main analysis)",b:A.b,se:A.se,col:"--p1",truth:T.orPer10},{lab:"dental caries (negative control)",b:Nn.b,se:Nn.se,col:"--p2",truth:1}],0.85,1.8,"odds ratio per 10 µg/m³ of NO₂ (green ticks: truth)");
+    const flag=Nn.b-1.96*Nn.se>0||Nn.b+1.96*Nn.se<0;
+    $("ncCohStats").innerHTML=[["adjustment",set.n],["NO₂ → asthma",ci(A)],["NO₂ → caries (should be 1)",ci(Nn)],["warning signal",flag?"yes: the negative control is associated":"no"]].map(x=>"<div><span>"+x[0]+"</span><b>"+x[1]+"</b></div>").join("");
+    setNow("ncCohNow","NO₂ cannot cause dental caries, but caries shares asthma's social determinants: deprivation, parental smoking, less green space. So if NO₂ appears to raise caries, whatever produces that association is probably biasing the asthma estimate too. "+(flag?"Here the negative control <b>is</b> associated with NO₂ (OR "+ci(Nn)+"): "+(withU?"the adjustment can't remove a confounder nobody measured, and the asthma OR ("+fmt(Math.exp(A.b),2)+") is biased above the truth (1.15).":"the adjustment set is incomplete. Add the measured confounders and the signal should disappear."):"Here the negative control is <b>not</b> associated with NO₂ beyond chance (OR "+ci(Nn)+"), which is reassuring, though not proof"+(withU?": an unmeasured confounder that affected asthma but not caries would slip through.":".")+"")+" "+(withU?"In this scenario, a household-deprivation factor not captured by the SES score raises NO₂ exposure (through where families can afford to live) and both outcomes.":"Tick the box to add an unmeasured confounder."));}
+  ["ncA","ncU"].forEach(id=>$(id).addEventListener("change",draw));draw();if(typeof onTheme==="function")onTheme(draw);}
+
+/* ---------- Lesson 15: a negative control exposure ---------- */
+if($("ncTsPlot")){const A=genA(),D=A.days,ND=D.length,y=new Array(ND).fill(0);A.rows.forEach(rw=>y[rw.t]+=rw.visits);const PM=D.map(d=>d.pm25),TT=D.map(d=>d.temp_city),idx=[];for(let t=1;t<ND-1;t++)idx.push(t);const tk=rcsKnots(TT,4);
+  function bsBasis(x,lo,hi,df){const nint=Math.max(0,df-3+1),h=(hi-lo)/(nint+1),kn=[];for(let i=-3;i<=nint+4;i++)kn.push(lo+i*h);return x.map(v=>{const nb=kn.length-4,B=new Array(nb).fill(0);let j=Math.min(nb-1+3,Math.max(3,Math.floor((v-lo)/h)+3));let N=[1];for(let d=1;d<=3;d++){const M=new Array(d+1).fill(0);for(let rr=0;rr<d;rr++){const left=kn[j-d+1+rr],right=kn[j+1+rr],w=(right-left)>0?(v-left)/(right-left):0;M[rr]+=(1-w)*N[rr];M[rr+1]+=w*N[rr];}N=M;}for(let rr=0;rr<=3;rr++){const ix=j-3+rr;if(ix>=0&&ix<nb)B[ix]=N[rr];}return B.slice(1);});}
+  const cache={};
+  function fit(dfy,withT){const key=dfy+"|"+withT;if(cache[key])return cache[key];const tb=dfy>0?bsBasis(idx,0.5,ND-1.5,Math.max(3,Math.round(5*dfy))):idx.map(()=>[]);
+    const X=idx.map((t,i)=>[1,(PM[t]+PM[t-1])/20,PM[t+1]/10].concat(tb[i],withT?rcsRow((TT[t]+TT[t-1])/2,tk).map((v,j)=>j===0?(v-15)/10:v/10):[],[1,2,3,4,5,6].map(j=>D[t].dow===j?1:0)));
+    const f=glmFit(X,idx.map(t=>y[t]),"poisson"),ph=Math.max(1,f.phi);return cache[key]={cur:{b:f.beta[1],se:f.se[1]*Math.sqrt(ph)},fut:{b:f.beta[2],se:f.se[2]*Math.sqrt(ph)}};}
+  function draw(){const dfy=+$("ncDf").value,withT=$("ncT").checked,r=fit(dfy,withT);
+    forest("ncTsPlot",[{lab:"today's PM₂.₅ (main analysis)",b:r.cur.b,se:r.cur.se,col:"--p1",truth:1.062},{lab:"tomorrow's PM₂.₅ (negative control)",b:r.fut.b,se:r.fut.se,col:"--p2",truth:1}],0.9,1.3,"rate ratio per 10 µg/m³ (green ticks: truth)");
+    const flag=r.fut.b-1.96*r.fut.se>0||r.fut.b+1.96*r.fut.se<0;
+    $("ncTsStats").innerHTML=[["control for time",dfy===0?"none":dfy+" df per year"],["temperature adjusted",withT?"yes":"no"],["today's PM₂.₅",ci(r.cur)],["tomorrow's PM₂.₅ (should be 1)",ci(r.fut)],["warning signal",flag?"yes":"no"]].map(x=>"<div><span>"+x[0]+"</span><b>"+x[1]+"</b></div>").join("");
+    setNow("ncTsNow","Tomorrow's pollution cannot cause today's visits. But it shares today's pollution's seasonal and weather pattern, so if the model leaves season or temperature confounding behind, tomorrow's PM₂.₅ will appear to \"affect\" visits too. "+(flag?"Here it does (RR "+ci(r.fut)+"): a clear sign of residual confounding, and today's estimate ("+fmt(Math.exp(r.cur.b),3)+") is indeed inflated above the truth (1.062). Increase the control for time"+(withT?"":" or adjust for temperature")+".":"Here it doesn't (RR "+ci(r.fut)+")"+(Math.exp(r.cur.b)>1.07?", yet today's estimate ("+fmt(Math.exp(r.cur.b),3)+") is still somewhat above the truth (1.062). A negative control only detects bias it shares with the main analysis: here the leftover confounding acts on the same day and barely reaches tomorrow's pollution. Silence is reassuring, not proof.":", and today's estimate ("+fmt(Math.exp(r.cur.b),3)+") is close to the truth (1.062): time and weather are adequately controlled.")));}
+  ["ncDf","ncT"].forEach(id=>$(id).addEventListener("change",draw));draw();if(typeof onTheme==="function")onTheme(draw);}
+});
